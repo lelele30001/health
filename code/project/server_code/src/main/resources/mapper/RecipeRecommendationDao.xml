@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cl.dao.RecipeRecommendationDao">
+    <resultMap id="recipeRecommendationResultMap" type="com.cl.entity.RecipeRecommendationEntity">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="recipe_id" property="recipeId"/>
+        <result column="score" property="score"/>
+        <result column="create_time" property="createTime"/>
+        <result column="update_time" property="updateTime"/>
+    </resultMap>
+
+    <select id="getRecommendationsByUserId" resultMap="recipeRecommendationResultMap">
+        SELECT * FROM recipe_recommendation 
+        WHERE user_id = #{userId} 
+        ORDER BY score DESC 
+        LIMIT #{limit}
+    </select>
+
+    <select id="getRecommendationsByScore" resultMap="recipeRecommendationResultMap">
+        SELECT * FROM recipe_recommendation 
+        WHERE user_id = #{userId} AND score >= #{minScore} 
+        ORDER BY score DESC 
+        LIMIT #{limit}
+    </select>
+
+    <delete id="deleteRecommendationsByUserId">
+        DELETE FROM recipe_recommendation 
+        WHERE user_id = #{userId}
+    </delete>
+
+    <select id="getRecommendation" resultMap="recipeRecommendationResultMap">
+        SELECT * FROM recipe_recommendation 
+        WHERE user_id = #{userId} AND recipe_id = #{recipeId}
+    </select>
+</mapper>

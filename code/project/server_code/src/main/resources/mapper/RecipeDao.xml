@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cl.dao.RecipeDao">
+    <resultMap id="recipeResultMap" type="com.cl.entity.RecipeEntity">
+        <id column="id" property="id"/>
+        <result column="title" property="title"/>
+        <result column="description" property="description"/>
+        <result column="cover_image" property="coverImage"/>
+        <result column="fitness_goal" property="fitnessGoal"/>
+        <result column="dietary_restrictions" property="dietaryRestrictions"/>
+        <result column="meal_scene" property="mealScene"/>
+        <result column="total_calories" property="totalCalories"/>
+        <result column="user_id" property="userId"/>
+        <result column="username" property="username"/>
+        <result column="status" property="status"/>
+        <result column="addtime" property="addtime"/>
+    </resultMap>
+
+    <resultMap id="recipeWithIngredientsResultMap" type="com.cl.entity.RecipeEntity" extends="recipeResultMap">
+        <collection property="ingredients" ofType="com.cl.entity.RecipeIngredientEntity">
+            <id column="ingredient_id" property="id"/>
+            <result column="recipe_id" property="recipeId"/>
+            <result column="ingredient_code" property="ingredientCode"/>
+            <result column="ingredient_name" property="ingredientName"/>
+            <result column="weight" property="weight"/>
+            <result column="unit" property="unit"/>
+            <result column="base_calories" property="baseCalories"/>
+            <result column="calories" property="calories"/>
+        </collection>
+    </resultMap>
+
+    <select id="getUserRecipes" resultMap="recipeResultMap">
+        SELECT * FROM recipe WHERE user_id = #{userId} ORDER BY addtime DESC
+    </select>
+
+    <select id="getAllPublicRecipes" resultMap="recipeResultMap">
+        SELECT * FROM recipe WHERE status = '已发布' ORDER BY addtime DESC
+    </select>
+
+    <select id="getRecipeWithIngredients" resultMap="recipeWithIngredientsResultMap">
+        SELECT 
+            r.*, 
+            ri.id as ingredient_id, 
+            ri.recipe_id, 
+            ri.ingredient_code, 
+            ri.ingredient_name, 
+            ri.weight, 
+            ri.unit, 
+            ri.base_calories, 
+            ri.calories
+        FROM recipe r
+        LEFT JOIN recipe_ingredient ri ON r.id = ri.recipe_id
+        WHERE r.id = #{id}
+    </select>
+    
+    <select id="getRecommendedRecipes" resultMap="recipeResultMap">
+        SELECT * FROM recipe 
+        WHERE status = '已发布' 
+        AND user_id != #{userId}
+        <if test="dietaryRestrictions != null and dietaryRestrictions != ''">
+            AND dietary_restrictions NOT LIKE CONCAT('%', #{dietaryRestrictions}, '%')
+        </if>
+        ORDER BY addtime DESC
+    </select>
+</mapper>

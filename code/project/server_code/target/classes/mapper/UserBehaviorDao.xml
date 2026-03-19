@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cl.dao.UserBehaviorDao">
+    <resultMap id="userBehaviorResultMap" type="com.cl.entity.UserBehaviorEntity">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="recipe_id" property="recipeId"/>
+        <result column="behavior_type" property="behaviorType"/>
+        <result column="behavior_time" property="behaviorTime"/>
+        <result column="comment_content" property="commentContent"/>
+    </resultMap>
+
+    <select id="getUserBehavior" resultMap="userBehaviorResultMap">
+        SELECT * FROM user_behavior 
+        WHERE user_id = #{userId} AND recipe_id = #{recipeId} AND behavior_type = #{behaviorType}
+    </select>
+
+    <select id="getUserBehaviors" resultMap="userBehaviorResultMap">
+        SELECT * FROM user_behavior 
+        WHERE user_id = #{userId} 
+        ORDER BY behavior_time DESC
+    </select>
+
+    <select id="getRecipeBehaviors" resultMap="userBehaviorResultMap">
+        SELECT * FROM user_behavior 
+        WHERE recipe_id = #{recipeId} 
+        ORDER BY behavior_time DESC
+    </select>
+
+    <select id="countUserBehaviorByType" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM user_behavior 
+        WHERE user_id = #{userId} AND behavior_type = #{behaviorType}
+    </select>
+
+    <select id="countRecipeBehaviorByType" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM user_behavior 
+        WHERE recipe_id = #{recipeId} AND behavior_type = #{behaviorType}
+    </select>
+
+    <select id="getUserBehaviorWeights" resultType="java.util.Map">
+        SELECT 
+            behavior_type, 
+            COUNT(*) as count 
+        FROM user_behavior 
+        WHERE user_id = #{userId} 
+        GROUP BY behavior_type
+    </select>
+</mapper>

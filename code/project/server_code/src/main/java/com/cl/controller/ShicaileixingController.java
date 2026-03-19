@@ -1,0 +1,153 @@
+package com.cl.controller;
+
+import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.cl.annotation.IgnoreAuth;
+import com.cl.entity.ShicaileixingEntity;
+import com.cl.entity.view.ShicaileixingView;
+import com.cl.service.ShicaileixingService;
+import com.cl.utils.MPUtil;
+import com.cl.utils.PageUtils;
+import com.cl.utils.R;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
+import java.util.Arrays;
+import java.util.Map;
+
+/**
+ * 食材类型
+ * 后端接口
+ *
+ * @author
+ * @email
+ * @date 2025-02-26 11:22:53
+ */
+@RestController
+@RequestMapping("/shicaileixing")
+public class ShicaileixingController {
+    @Autowired
+    private ShicaileixingService shicaileixingService;
+
+
+    /**
+     * 后台列表
+     */
+    @RequestMapping("/page")
+    public R page(@RequestParam Map<String, Object> params, ShicaileixingEntity shicaileixing,
+                  HttpServletRequest request) {
+        EntityWrapper<ShicaileixingEntity> ew = new EntityWrapper<ShicaileixingEntity>();
+
+
+        PageUtils page = shicaileixingService.queryPage(params, MPUtil.sort(MPUtil.between(MPUtil.likeOrEq(ew, shicaileixing), params), params));
+        return R.ok().put("data", page);
+    }
+
+
+    /**
+     * 前端列表
+     */
+    @IgnoreAuth
+    @RequestMapping("/list")
+    public R list(@RequestParam Map<String, Object> params, ShicaileixingEntity shicaileixing,
+                  HttpServletRequest request) {
+        EntityWrapper<ShicaileixingEntity> ew = new EntityWrapper<ShicaileixingEntity>();
+
+        PageUtils page = shicaileixingService.queryPage(params, MPUtil.sort(MPUtil.between(MPUtil.likeOrEq(ew, shicaileixing), params), params));
+        return R.ok().put("data", page);
+    }
+
+    /**
+     * 列表
+     */
+    @RequestMapping("/lists")
+    public R list(ShicaileixingEntity shicaileixing) {
+        EntityWrapper<ShicaileixingEntity> ew = new EntityWrapper<ShicaileixingEntity>();
+        ew.allEq(MPUtil.allEQMapPre(shicaileixing, "shicaileixing"));
+        return R.ok().put("data", shicaileixingService.selectListView(ew));
+    }
+
+    /**
+     * 查询
+     */
+    @RequestMapping("/query")
+    public R query(ShicaileixingEntity shicaileixing) {
+        EntityWrapper<ShicaileixingEntity> ew = new EntityWrapper<ShicaileixingEntity>();
+        ew.allEq(MPUtil.allEQMapPre(shicaileixing, "shicaileixing"));
+        ShicaileixingView shicaileixingView = shicaileixingService.selectView(ew);
+        return R.ok("查询食材类型成功").put("data", shicaileixingView);
+    }
+
+    /**
+     * 后端详情
+     */
+    @RequestMapping("/info/{id}")
+    public R info(@PathVariable("id") Long id) {
+        ShicaileixingEntity shicaileixing = shicaileixingService.selectById(id);
+        shicaileixing = shicaileixingService.selectView(new EntityWrapper<ShicaileixingEntity>().eq("id", id));
+        return R.ok().put("data", shicaileixing);
+    }
+
+    /**
+     * 前端详情
+     */
+    @IgnoreAuth
+    @RequestMapping("/detail/{id}")
+    public R detail(@PathVariable("id") Long id) {
+        ShicaileixingEntity shicaileixing = shicaileixingService.selectById(id);
+        shicaileixing = shicaileixingService.selectView(new EntityWrapper<ShicaileixingEntity>().eq("id", id));
+        return R.ok().put("data", shicaileixing);
+    }
+
+
+    /**
+     * 后端保存
+     */
+    @RequestMapping("/save")
+    public R save(@RequestBody ShicaileixingEntity shicaileixing, HttpServletRequest request) {
+        if (shicaileixingService.selectCount(new EntityWrapper<ShicaileixingEntity>().eq("shicaileixing", shicaileixing.getShicaileixing())) > 0) {
+            return R.error("食材类型已存在");
+        }
+        //ValidatorUtils.validateEntity(shicaileixing);
+        shicaileixingService.insert(shicaileixing);
+        return R.ok();
+    }
+
+    /**
+     * 前端保存
+     */
+    @RequestMapping("/add")
+    public R add(@RequestBody ShicaileixingEntity shicaileixing, HttpServletRequest request) {
+        if (shicaileixingService.selectCount(new EntityWrapper<ShicaileixingEntity>().eq("shicaileixing", shicaileixing.getShicaileixing())) > 0) {
+            return R.error("食材类型已存在");
+        }
+        //ValidatorUtils.validateEntity(shicaileixing);
+        shicaileixingService.insert(shicaileixing);
+        return R.ok();
+    }
+
+
+    /**
+     * 修改
+     */
+    @RequestMapping("/update")
+    @Transactional
+    public R update(@RequestBody ShicaileixingEntity shicaileixing, HttpServletRequest request) {
+        //ValidatorUtils.validateEntity(shicaileixing);
+        shicaileixingService.updateById(shicaileixing);//全部更新
+        return R.ok();
+    }
+
+
+    /**
+     * 删除
+     */
+    @RequestMapping("/delete")
+    public R delete(@RequestBody Long[] ids) {
+        shicaileixingService.deleteBatchIds(Arrays.asList(ids));
+        return R.ok();
+    }
+
+
+}

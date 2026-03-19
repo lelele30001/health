@@ -1,0 +1,1191 @@
+nvalid prop: type check failed for prop "userid". Expected Number with value 31, got String with value "31". null at <ForumDetail>
+at <List>
+at <RouterView>
+at <ElScrollbar>
+at <Index>
+at <RouterView>
+at <App> (7) [{…}, {…}, {…}, {…}, {…}, {…}, {…}]
+instance.appContext.config.warnHandler @ select2.js:54
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+warn$1 @ runtime-core.esm-bundler.js:27
+validateProp @ runtime-core.esm-bundler.js:4409
+validateProps @ runtime-core.esm-bundler.js:4381
+initProps @ runtime-core.esm-bundler.js:4082
+setupComponent @ runtime-core.esm-bundler.js:7924
+mountComponent @ runtime-core.esm-bundler.js:5247
+processComponent @ runtime-core.esm-bundler.js:5213
+patch @ runtime-core.esm-bundler.js:4729
+mountChildren @ runtime-core.esm-bundler.js:4963
+mountElement @ runtime-core.esm-bundler.js:4886
+processElement @ runtime-core.esm-bundler.js:4851
+patch @ runtime-core.esm-bundler.js:4717
+componentUpdateFn @ runtime-core.esm-bundler.js:5358
+run @ reactivity.esm-bundler.js:237
+setupRenderEffect @ runtime-core.esm-bundler.js:5486
+mountComponent @ runtime-core.esm-bundler.js:5260
+processComponent @ runtime-core.esm-bundler.js:5213
+patch @ runtime-core.esm-bundler.js:4729
+componentUpdateFn @ runtime-core.esm-bundler.js:5438
+run @ reactivity.esm-bundler.js:237
+runIfDirty @ reactivity.esm-bundler.js:275
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+flushJobs @ runtime-core.esm-bundler.js:408
+Promise.then
+queueFlush @ runtime-core.esm-bundler.js:322
+queuePostFlushCb @ runtime-core.esm-bundler.js:336
+queueEffectWithSuspense @ runtime-core.esm-bundler.js:7379
+baseWatchOptions.scheduler @ runtime-core.esm-bundler.js:6255
+effect.scheduler @ reactivity.esm-bundler.js:1847
+trigger @ reactivity.esm-bundler.js:265
+endBatch @ reactivity.esm-bundler.js:323
+notify @ reactivity.esm-bundler.js:614
+trigger @ reactivity.esm-bundler.js:588
+set value @ reactivity.esm-bundler.js:1465
+finalizeNavigation @ vue-router.cjs:3488
+eval @ vue-router.cjs:3353
+Promise.then
+pushWithRedirect @ vue-router.cjs:3321
+push @ vue-router.cjs:3247
+menuHandler @ index.vue:270
+onClick @ index.vue:117
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+emit @ runtime-core.esm-bundler.js:6444
+eval @ runtime-core.esm-bundler.js:8157
+handleClick @ menu-item2.js:49
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+invoker @ runtime-dom.esm-bundler.js:729
+ForumDetail.vue:146  Failed to resolve component: Thumb
+If this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. Proxy(Object) {…} at <ForumDetail>
+at <List>
+at <RouterView>
+at <ElScrollbar>
+at <Index>
+at <RouterView>
+at <App> (7) [{…}, {…}, {…}, {…}, {…}, {…}, {…}]
+instance.appContext.config.warnHandler @ select2.js:54
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+warn$1 @ runtime-core.esm-bundler.js:27
+resolveAsset @ runtime-core.esm-bundler.js:2899
+resolveComponent @ runtime-core.esm-bundler.js:2861
+render @ ForumDetail.vue:146
+renderComponentRoot @ runtime-core.esm-bundler.js:6560
+componentUpdateFn @ runtime-core.esm-bundler.js:5351
+run @ reactivity.esm-bundler.js:237
+setupRenderEffect @ runtime-core.esm-bundler.js:5486
+mountComponent @ runtime-core.esm-bundler.js:5260
+processComponent @ runtime-core.esm-bundler.js:5213
+patch @ runtime-core.esm-bundler.js:4729
+mountChildren @ runtime-core.esm-bundler.js:4963
+mountElement @ runtime-core.esm-bundler.js:4886
+processElement @ runtime-core.esm-bundler.js:4851
+patch @ runtime-core.esm-bundler.js:4717
+componentUpdateFn @ runtime-core.esm-bundler.js:5358
+run @ reactivity.esm-bundler.js:237
+setupRenderEffect @ runtime-core.esm-bundler.js:5486
+mountComponent @ runtime-core.esm-bundler.js:5260
+processComponent @ runtime-core.esm-bundler.js:5213
+patch @ runtime-core.esm-bundler.js:4729
+componentUpdateFn @ runtime-core.esm-bundler.js:5438
+run @ reactivity.esm-bundler.js:237
+runIfDirty @ reactivity.esm-bundler.js:275
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+flushJobs @ runtime-core.esm-bundler.js:408
+Promise.then
+queueFlush @ runtime-core.esm-bundler.js:322
+queuePostFlushCb @ runtime-core.esm-bundler.js:336
+queueEffectWithSuspense @ runtime-core.esm-bundler.js:7379
+baseWatchOptions.scheduler @ runtime-core.esm-bundler.js:6255
+effect.scheduler @ reactivity.esm-bundler.js:1847
+trigger @ reactivity.esm-bundler.js:265
+endBatch @ reactivity.esm-bundler.js:323
+notify @ reactivity.esm-bundler.js:614
+trigger @ reactivity.esm-bundler.js:588
+set value @ reactivity.esm-bundler.js:1465
+finalizeNavigation @ vue-router.cjs:3488
+eval @ vue-router.cjs:3353
+Promise.then
+pushWithRedirect @ vue-router.cjs:3321
+push @ vue-router.cjs:3247
+menuHandler @ index.vue:270
+onClick @ index.vue:117
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+emit @ runtime-core.esm-bundler.js:6444
+eval @ runtime-core.esm-bundler.js:8157
+handleClick @ menu-item2.js:49
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+invoker @ runtime-dom.esm-bundler.js:729
+[新] 使用 Edge 中的 Copilot 来解释控制台错误: 单击
+         
+         以说明错误。
+        了解更多信息
+        不再显示
+list.vue:413  Invalid prop: type check failed for prop "userid". Expected Number with value 31, got String with value "31". null at <ForumItem>
+at <List>
+at <RouterView>
+at <ElScrollbar>
+at <Index>
+at <RouterView>
+at <App> (7) [{…}, {…}, {…}, {…}, {…}, {…}, {…}]
+instance.appContext.config.warnHandler @ select2.js:54
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+warn$1 @ runtime-core.esm-bundler.js:27
+validateProp @ runtime-core.esm-bundler.js:4409
+validateProps @ runtime-core.esm-bundler.js:4381
+initProps @ runtime-core.esm-bundler.js:4082
+setupComponent @ runtime-core.esm-bundler.js:7924
+mountComponent @ runtime-core.esm-bundler.js:5247
+processComponent @ runtime-core.esm-bundler.js:5213
+patch @ runtime-core.esm-bundler.js:4729
+patchKeyedChildren @ runtime-core.esm-bundler.js:5671
+patchChildren @ runtime-core.esm-bundler.js:5506
+processFragment @ runtime-core.esm-bundler.js:5187
+patch @ runtime-core.esm-bundler.js:4703
+patchBlockChildren @ runtime-core.esm-bundler.js:5085
+patchElement @ runtime-core.esm-bundler.js:5003
+processElement @ runtime-core.esm-bundler.js:4862
+patch @ runtime-core.esm-bundler.js:4717
+componentUpdateFn @ runtime-core.esm-bundler.js:5438
+run @ reactivity.esm-bundler.js:237
+runIfDirty @ reactivity.esm-bundler.js:275
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+flushJobs @ runtime-core.esm-bundler.js:408
+Promise.then
+queueFlush @ runtime-core.esm-bundler.js:322
+queueJob @ runtime-core.esm-bundler.js:317
+effect.scheduler @ runtime-core.esm-bundler.js:5480
+trigger @ reactivity.esm-bundler.js:265
+endBatch @ reactivity.esm-bundler.js:323
+notify @ reactivity.esm-bundler.js:614
+trigger @ reactivity.esm-bundler.js:588
+set value @ reactivity.esm-bundler.js:1465
+eval @ list.vue:413
+Promise.then
+getList @ list.vue:406
+init @ list.vue:688
+setup @ list.vue:1022
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+setupStatefulComponent @ runtime-core.esm-bundler.js:7965
+setupComponent @ runtime-core.esm-bundler.js:7926
+mountComponent @ runtime-core.esm-bundler.js:5247
+processComponent @ runtime-core.esm-bundler.js:5213
+patch @ runtime-core.esm-bundler.js:4729
+componentUpdateFn @ runtime-core.esm-bundler.js:5438
+run @ reactivity.esm-bundler.js:237
+runIfDirty @ reactivity.esm-bundler.js:275
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+flushJobs @ runtime-core.esm-bundler.js:408
+Promise.then
+queueFlush @ runtime-core.esm-bundler.js:322
+queuePostFlushCb @ runtime-core.esm-bundler.js:336
+queueEffectWithSuspense @ runtime-core.esm-bundler.js:7379
+baseWatchOptions.scheduler @ runtime-core.esm-bundler.js:6255
+effect.scheduler @ reactivity.esm-bundler.js:1847
+trigger @ reactivity.esm-bundler.js:265
+endBatch @ reactivity.esm-bundler.js:323
+notify @ reactivity.esm-bundler.js:614
+trigger @ reactivity.esm-bundler.js:588
+set value @ reactivity.esm-bundler.js:1465
+finalizeNavigation @ vue-router.cjs:3488
+eval @ vue-router.cjs:3353
+Promise.then
+pushWithRedirect @ vue-router.cjs:3321
+push @ vue-router.cjs:3247
+menuHandler @ index.vue:270
+onClick @ index.vue:117
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+emit @ runtime-core.esm-bundler.js:6444
+eval @ runtime-core.esm-bundler.js:8157
+handleClick @ menu-item2.js:49
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+invoker @ runtime-dom.esm-bundler.js:729
+list.vue:413  Invalid prop: type check failed for prop "userid". Expected Number with value 31, got String with value "31". null at <ForumItem>
+at <List>
+at <RouterView>
+at <ElScrollbar>
+at <Index>
+at <RouterView>
+at <App> (7) [{…}, {…}, {…}, {…}, {…}, {…}, {…}]
+instance.appContext.config.warnHandler @ select2.js:54
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+warn$1 @ runtime-core.esm-bundler.js:27
+validateProp @ runtime-core.esm-bundler.js:4409
+validateProps @ runtime-core.esm-bundler.js:4381
+initProps @ runtime-core.esm-bundler.js:4082
+setupComponent @ runtime-core.esm-bundler.js:7924
+mountComponent @ runtime-core.esm-bundler.js:5247
+processComponent @ runtime-core.esm-bundler.js:5213
+patch @ runtime-core.esm-bundler.js:4729
+patchKeyedChildren @ runtime-core.esm-bundler.js:5671
+patchChildren @ runtime-core.esm-bundler.js:5506
+processFragment @ runtime-core.esm-bundler.js:5187
+patch @ runtime-core.esm-bundler.js:4703
+patchBlockChildren @ runtime-core.esm-bundler.js:5085
+patchElement @ runtime-core.esm-bundler.js:5003
+processElement @ runtime-core.esm-bundler.js:4862
+patch @ runtime-core.esm-bundler.js:4717
+componentUpdateFn @ runtime-core.esm-bundler.js:5438
+run @ reactivity.esm-bundler.js:237
+runIfDirty @ reactivity.esm-bundler.js:275
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+flushJobs @ runtime-core.esm-bundler.js:408
+Promise.then
+queueFlush @ runtime-core.esm-bundler.js:322
+queueJob @ runtime-core.esm-bundler.js:317
+effect.scheduler @ runtime-core.esm-bundler.js:5480
+trigger @ reactivity.esm-bundler.js:265
+endBatch @ reactivity.esm-bundler.js:323
+notify @ reactivity.esm-bundler.js:614
+trigger @ reactivity.esm-bundler.js:588
+set value @ reactivity.esm-bundler.js:1465
+eval @ list.vue:413
+Promise.then
+getList @ list.vue:406
+init @ list.vue:688
+setup @ list.vue:1022
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+setupStatefulComponent @ runtime-core.esm-bundler.js:7965
+setupComponent @ runtime-core.esm-bundler.js:7926
+mountComponent @ runtime-core.esm-bundler.js:5247
+processComponent @ runtime-core.esm-bundler.js:5213
+patch @ runtime-core.esm-bundler.js:4729
+componentUpdateFn @ runtime-core.esm-bundler.js:5438
+run @ reactivity.esm-bundler.js:237
+runIfDirty @ reactivity.esm-bundler.js:275
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+flushJobs @ runtime-core.esm-bundler.js:408
+Promise.then
+queueFlush @ runtime-core.esm-bundler.js:322
+queuePostFlushCb @ runtime-core.esm-bundler.js:336
+queueEffectWithSuspense @ runtime-core.esm-bundler.js:7379
+baseWatchOptions.scheduler @ runtime-core.esm-bundler.js:6255
+effect.scheduler @ reactivity.esm-bundler.js:1847
+trigger @ reactivity.esm-bundler.js:265
+endBatch @ reactivity.esm-bundler.js:323
+notify @ reactivity.esm-bundler.js:614
+trigger @ reactivity.esm-bundler.js:588
+set value @ reactivity.esm-bundler.js:1465
+finalizeNavigation @ vue-router.cjs:3488
+eval @ vue-router.cjs:3353
+Promise.then
+pushWithRedirect @ vue-router.cjs:3321
+push @ vue-router.cjs:3247
+menuHandler @ index.vue:270
+onClick @ index.vue:117
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+emit @ runtime-core.esm-bundler.js:6444
+eval @ runtime-core.esm-bundler.js:8157
+handleClick @ menu-item2.js:49
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+invoker @ runtime-dom.esm-bundler.js:729
+list.vue:494  Invalid prop: type check failed for prop "userid". Expected Number with value 31, got String with value "31". Proxy(Object) {…} at <ForumItem>
+at <List>
+at <RouterView>
+at <ElScrollbar>
+at <Index>
+at <RouterView>
+at <App> (7) [{…}, {…}, {…}, {…}, {…}, {…}, {…}]
+instance.appContext.config.warnHandler @ select2.js:54
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+warn$1 @ runtime-core.esm-bundler.js:27
+validateProp @ runtime-core.esm-bundler.js:4409
+validateProps @ runtime-core.esm-bundler.js:4381
+updateProps @ runtime-core.esm-bundler.js:4190
+updateComponentPreRender @ runtime-core.esm-bundler.js:5493
+componentUpdateFn @ runtime-core.esm-bundler.js:5415
+run @ reactivity.esm-bundler.js:237
+updateComponent @ runtime-core.esm-bundler.js:5289
+processComponent @ runtime-core.esm-bundler.js:5224
+patch @ runtime-core.esm-bundler.js:4729
+patchKeyedChildren @ runtime-core.esm-bundler.js:5629
+patchChildren @ runtime-core.esm-bundler.js:5506
+processFragment @ runtime-core.esm-bundler.js:5187
+patch @ runtime-core.esm-bundler.js:4703
+patchBlockChildren @ runtime-core.esm-bundler.js:5085
+patchElement @ runtime-core.esm-bundler.js:5003
+processElement @ runtime-core.esm-bundler.js:4862
+patch @ runtime-core.esm-bundler.js:4717
+componentUpdateFn @ runtime-core.esm-bundler.js:5438
+run @ reactivity.esm-bundler.js:237
+runIfDirty @ reactivity.esm-bundler.js:275
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+flushJobs @ runtime-core.esm-bundler.js:408
+Promise.then
+queueFlush @ runtime-core.esm-bundler.js:322
+queueJob @ runtime-core.esm-bundler.js:317
+effect.scheduler @ runtime-core.esm-bundler.js:5480
+trigger @ reactivity.esm-bundler.js:265
+endBatch @ reactivity.esm-bundler.js:323
+notify @ reactivity.esm-bundler.js:614
+trigger @ reactivity.esm-bundler.js:588
+set value @ reactivity.esm-bundler.js:1465
+forumEnter @ list.vue:494
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+emit @ runtime-core.esm-bundler.js:6444
+onMouseenter._cache.<computed>._cache.<computed> @ ForumItem.vue:4
+eval @ runtime-dom.esm-bundler.js:758
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:217
+invoker @ runtime-dom.esm-bundler.js:729
+list.vue:494  Invalid prop: type check failed for prop "forumShowIndex". Expected Number with value NaN, got MouseEvent  Proxy(Object) {…} at <ForumItem>
+at <List>
+at <RouterView>
+at <ElScrollbar>
+at <Index>
+at <RouterView>
+at <App> (7) [{…}, {…}, {…}, {…}, {…}, {…}, {…}]
+instance.appContext.config.warnHandler @ select2.js:54
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+warn$1 @ runtime-core.esm-bundler.js:27
+validateProp @ runtime-core.esm-bundler.js:4409
+validateProps @ runtime-core.esm-bundler.js:4381
+updateProps @ runtime-core.esm-bundler.js:4190
+updateComponentPreRender @ runtime-core.esm-bundler.js:5493
+componentUpdateFn @ runtime-core.esm-bundler.js:5415
+run @ reactivity.esm-bundler.js:237
+updateComponent @ runtime-core.esm-bundler.js:5289
+processComponent @ runtime-core.esm-bundler.js:5224
+patch @ runtime-core.esm-bundler.js:4729
+patchKeyedChildren @ runtime-core.esm-bundler.js:5629
+patchChildren @ runtime-core.esm-bundler.js:5506
+processFragment @ runtime-core.esm-bundler.js:5187
+patch @ runtime-core.esm-bundler.js:4703
+patchBlockChildren @ runtime-core.esm-bundler.js:5085
+patchElement @ runtime-core.esm-bundler.js:5003
+processElement @ runtime-core.esm-bundler.js:4862
+patch @ runtime-core.esm-bundler.js:4717
+componentUpdateFn @ runtime-core.esm-bundler.js:5438
+run @ reactivity.esm-bundler.js:237
+runIfDirty @ reactivity.esm-bundler.js:275
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+flushJobs @ runtime-core.esm-bundler.js:408
+Promise.then
+queueFlush @ runtime-core.esm-bundler.js:322
+queueJob @ runtime-core.esm-bundler.js:317
+effect.scheduler @ runtime-core.esm-bundler.js:5480
+trigger @ reactivity.esm-bundler.js:265
+endBatch @ reactivity.esm-bundler.js:323
+notify @ reactivity.esm-bundler.js:614
+trigger @ reactivity.esm-bundler.js:588
+set value @ reactivity.esm-bundler.js:1465
+forumEnter @ list.vue:494
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+emit @ runtime-core.esm-bundler.js:6444
+onMouseenter._cache.<computed>._cache.<computed> @ ForumItem.vue:4
+eval @ runtime-dom.esm-bundler.js:758
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:217
+invoker @ runtime-dom.esm-bundler.js:729
+list.vue:494  Invalid prop: type check failed for prop "userid". Expected Number with value 31, got String with value "31". Proxy(Object) {…} at <ForumItem>
+at <List>
+at <RouterView>
+at <ElScrollbar>
+at <Index>
+at <RouterView>
+at <App> (7) [{…}, {…}, {…}, {…}, {…}, {…}, {…}]
+instance.appContext.config.warnHandler @ select2.js:54
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+warn$1 @ runtime-core.esm-bundler.js:27
+validateProp @ runtime-core.esm-bundler.js:4409
+validateProps @ runtime-core.esm-bundler.js:4381
+updateProps @ runtime-core.esm-bundler.js:4190
+updateComponentPreRender @ runtime-core.esm-bundler.js:5493
+componentUpdateFn @ runtime-core.esm-bundler.js:5415
+run @ reactivity.esm-bundler.js:237
+updateComponent @ runtime-core.esm-bundler.js:5289
+processComponent @ runtime-core.esm-bundler.js:5224
+patch @ runtime-core.esm-bundler.js:4729
+patchKeyedChildren @ runtime-core.esm-bundler.js:5629
+patchChildren @ runtime-core.esm-bundler.js:5506
+processFragment @ runtime-core.esm-bundler.js:5187
+patch @ runtime-core.esm-bundler.js:4703
+patchBlockChildren @ runtime-core.esm-bundler.js:5085
+patchElement @ runtime-core.esm-bundler.js:5003
+processElement @ runtime-core.esm-bundler.js:4862
+patch @ runtime-core.esm-bundler.js:4717
+componentUpdateFn @ runtime-core.esm-bundler.js:5438
+run @ reactivity.esm-bundler.js:237
+runIfDirty @ reactivity.esm-bundler.js:275
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+flushJobs @ runtime-core.esm-bundler.js:408
+Promise.then
+queueFlush @ runtime-core.esm-bundler.js:322
+queueJob @ runtime-core.esm-bundler.js:317
+effect.scheduler @ runtime-core.esm-bundler.js:5480
+trigger @ reactivity.esm-bundler.js:265
+endBatch @ reactivity.esm-bundler.js:323
+notify @ reactivity.esm-bundler.js:614
+trigger @ reactivity.esm-bundler.js:588
+set value @ reactivity.esm-bundler.js:1465
+forumEnter @ list.vue:494
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+emit @ runtime-core.esm-bundler.js:6444
+onMouseenter._cache.<computed>._cache.<computed> @ ForumItem.vue:4
+eval @ runtime-dom.esm-bundler.js:758
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:217
+invoker @ runtime-dom.esm-bundler.js:729
+list.vue:494  Invalid prop: type check failed for prop "forumShowIndex". Expected Number with value NaN, got MouseEvent  Proxy(Object) {…} at <ForumItem>
+at <List>
+at <RouterView>
+at <ElScrollbar>
+at <Index>
+at <RouterView>
+at <App> (7) [{…}, {…}, {…}, {…}, {…}, {…}, {…}]
+instance.appContext.config.warnHandler @ select2.js:54
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+warn$1 @ runtime-core.esm-bundler.js:27
+validateProp @ runtime-core.esm-bundler.js:4409
+validateProps @ runtime-core.esm-bundler.js:4381
+updateProps @ runtime-core.esm-bundler.js:4190
+updateComponentPreRender @ runtime-core.esm-bundler.js:5493
+componentUpdateFn @ runtime-core.esm-bundler.js:5415
+run @ reactivity.esm-bundler.js:237
+updateComponent @ runtime-core.esm-bundler.js:5289
+processComponent @ runtime-core.esm-bundler.js:5224
+patch @ runtime-core.esm-bundler.js:4729
+patchKeyedChildren @ runtime-core.esm-bundler.js:5629
+patchChildren @ runtime-core.esm-bundler.js:5506
+processFragment @ runtime-core.esm-bundler.js:5187
+patch @ runtime-core.esm-bundler.js:4703
+patchBlockChildren @ runtime-core.esm-bundler.js:5085
+patchElement @ runtime-core.esm-bundler.js:5003
+processElement @ runtime-core.esm-bundler.js:4862
+patch @ runtime-core.esm-bundler.js:4717
+componentUpdateFn @ runtime-core.esm-bundler.js:5438
+run @ reactivity.esm-bundler.js:237
+runIfDirty @ reactivity.esm-bundler.js:275
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+flushJobs @ runtime-core.esm-bundler.js:408
+Promise.then
+queueFlush @ runtime-core.esm-bundler.js:322
+queueJob @ runtime-core.esm-bundler.js:317
+effect.scheduler @ runtime-core.esm-bundler.js:5480
+trigger @ reactivity.esm-bundler.js:265
+endBatch @ reactivity.esm-bundler.js:323
+notify @ reactivity.esm-bundler.js:614
+trigger @ reactivity.esm-bundler.js:588
+set value @ reactivity.esm-bundler.js:1465
+forumEnter @ list.vue:494
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+emit @ runtime-core.esm-bundler.js:6444
+onMouseenter._cache.<computed>._cache.<computed> @ ForumItem.vue:4
+eval @ runtime-dom.esm-bundler.js:758
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:217
+invoker @ runtime-dom.esm-bundler.js:729
+list.vue:497  Invalid prop: type check failed for prop "userid". Expected Number with value 31, got String with value "31". Proxy(Object) {…} at <ForumItem>
+at <List>
+at <RouterView>
+at <ElScrollbar>
+at <Index>
+at <RouterView>
+at <App> (7) [{…}, {…}, {…}, {…}, {…}, {…}, {…}]
+instance.appContext.config.warnHandler @ select2.js:54
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+warn$1 @ runtime-core.esm-bundler.js:27
+validateProp @ runtime-core.esm-bundler.js:4409
+validateProps @ runtime-core.esm-bundler.js:4381
+updateProps @ runtime-core.esm-bundler.js:4190
+updateComponentPreRender @ runtime-core.esm-bundler.js:5493
+componentUpdateFn @ runtime-core.esm-bundler.js:5415
+run @ reactivity.esm-bundler.js:237
+updateComponent @ runtime-core.esm-bundler.js:5289
+processComponent @ runtime-core.esm-bundler.js:5224
+patch @ runtime-core.esm-bundler.js:4729
+patchKeyedChildren @ runtime-core.esm-bundler.js:5629
+patchChildren @ runtime-core.esm-bundler.js:5506
+processFragment @ runtime-core.esm-bundler.js:5187
+patch @ runtime-core.esm-bundler.js:4703
+patchBlockChildren @ runtime-core.esm-bundler.js:5085
+patchElement @ runtime-core.esm-bundler.js:5003
+processElement @ runtime-core.esm-bundler.js:4862
+patch @ runtime-core.esm-bundler.js:4717
+componentUpdateFn @ runtime-core.esm-bundler.js:5438
+run @ reactivity.esm-bundler.js:237
+runIfDirty @ reactivity.esm-bundler.js:275
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+flushJobs @ runtime-core.esm-bundler.js:408
+Promise.then
+queueFlush @ runtime-core.esm-bundler.js:322
+queueJob @ runtime-core.esm-bundler.js:317
+effect.scheduler @ runtime-core.esm-bundler.js:5480
+trigger @ reactivity.esm-bundler.js:265
+endBatch @ reactivity.esm-bundler.js:323
+notify @ reactivity.esm-bundler.js:614
+trigger @ reactivity.esm-bundler.js:588
+set value @ reactivity.esm-bundler.js:1465
+forumLeave @ list.vue:497
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+emit @ runtime-core.esm-bundler.js:6444
+onMouseleave._cache.<computed>._cache.<computed> @ ForumItem.vue:5
+eval @ runtime-dom.esm-bundler.js:758
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:217
+invoker @ runtime-dom.esm-bundler.js:729
+list.vue:497  Invalid prop: type check failed for prop "userid". Expected Number with value 31, got String with value "31". Proxy(Object) {…} at <ForumItem>
+at <List>
+at <RouterView>
+at <ElScrollbar>
+at <Index>
+at <RouterView>
+at <App> (7) [{…}, {…}, {…}, {…}, {…}, {…}, {…}]
+instance.appContext.config.warnHandler @ select2.js:54
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+warn$1 @ runtime-core.esm-bundler.js:27
+validateProp @ runtime-core.esm-bundler.js:4409
+validateProps @ runtime-core.esm-bundler.js:4381
+updateProps @ runtime-core.esm-bundler.js:4190
+updateComponentPreRender @ runtime-core.esm-bundler.js:5493
+componentUpdateFn @ runtime-core.esm-bundler.js:5415
+run @ reactivity.esm-bundler.js:237
+updateComponent @ runtime-core.esm-bundler.js:5289
+processComponent @ runtime-core.esm-bundler.js:5224
+patch @ runtime-core.esm-bundler.js:4729
+patchKeyedChildren @ runtime-core.esm-bundler.js:5629
+patchChildren @ runtime-core.esm-bundler.js:5506
+processFragment @ runtime-core.esm-bundler.js:5187
+patch @ runtime-core.esm-bundler.js:4703
+patchBlockChildren @ runtime-core.esm-bundler.js:5085
+patchElement @ runtime-core.esm-bundler.js:5003
+processElement @ runtime-core.esm-bundler.js:4862
+patch @ runtime-core.esm-bundler.js:4717
+componentUpdateFn @ runtime-core.esm-bundler.js:5438
+run @ reactivity.esm-bundler.js:237
+runIfDirty @ reactivity.esm-bundler.js:275
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+flushJobs @ runtime-core.esm-bundler.js:408
+Promise.then
+queueFlush @ runtime-core.esm-bundler.js:322
+queueJob @ runtime-core.esm-bundler.js:317
+effect.scheduler @ runtime-core.esm-bundler.js:5480
+trigger @ reactivity.esm-bundler.js:265
+endBatch @ reactivity.esm-bundler.js:323
+notify @ reactivity.esm-bundler.js:614
+trigger @ reactivity.esm-bundler.js:588
+set value @ reactivity.esm-bundler.js:1465
+forumLeave @ list.vue:497
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+emit @ runtime-core.esm-bundler.js:6444
+onMouseleave._cache.<computed>._cache.<computed> @ ForumItem.vue:5
+eval @ runtime-dom.esm-bundler.js:758
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:217
+invoker @ runtime-dom.esm-bundler.js:729
+list.vue:494  Invalid prop: type check failed for prop "userid". Expected Number with value 31, got String with value "31". Proxy(Object) {…} at <ForumItem>
+at <List>
+at <RouterView>
+at <ElScrollbar>
+at <Index>
+at <RouterView>
+at <App> (7) [{…}, {…}, {…}, {…}, {…}, {…}, {…}]
+instance.appContext.config.warnHandler @ select2.js:54
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+warn$1 @ runtime-core.esm-bundler.js:27
+validateProp @ runtime-core.esm-bundler.js:4409
+validateProps @ runtime-core.esm-bundler.js:4381
+updateProps @ runtime-core.esm-bundler.js:4190
+updateComponentPreRender @ runtime-core.esm-bundler.js:5493
+componentUpdateFn @ runtime-core.esm-bundler.js:5415
+run @ reactivity.esm-bundler.js:237
+updateComponent @ runtime-core.esm-bundler.js:5289
+processComponent @ runtime-core.esm-bundler.js:5224
+patch @ runtime-core.esm-bundler.js:4729
+patchKeyedChildren @ runtime-core.esm-bundler.js:5629
+patchChildren @ runtime-core.esm-bundler.js:5506
+processFragment @ runtime-core.esm-bundler.js:5187
+patch @ runtime-core.esm-bundler.js:4703
+patchBlockChildren @ runtime-core.esm-bundler.js:5085
+patchElement @ runtime-core.esm-bundler.js:5003
+processElement @ runtime-core.esm-bundler.js:4862
+patch @ runtime-core.esm-bundler.js:4717
+componentUpdateFn @ runtime-core.esm-bundler.js:5438
+run @ reactivity.esm-bundler.js:237
+runIfDirty @ reactivity.esm-bundler.js:275
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+flushJobs @ runtime-core.esm-bundler.js:408
+Promise.then
+queueFlush @ runtime-core.esm-bundler.js:322
+queueJob @ runtime-core.esm-bundler.js:317
+effect.scheduler @ runtime-core.esm-bundler.js:5480
+trigger @ reactivity.esm-bundler.js:265
+endBatch @ reactivity.esm-bundler.js:323
+notify @ reactivity.esm-bundler.js:614
+trigger @ reactivity.esm-bundler.js:588
+set value @ reactivity.esm-bundler.js:1465
+forumEnter @ list.vue:494
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+emit @ runtime-core.esm-bundler.js:6444
+onMouseenter._cache.<computed>._cache.<computed> @ ForumItem.vue:4
+eval @ runtime-dom.esm-bundler.js:758
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:217
+invoker @ runtime-dom.esm-bundler.js:729
+list.vue:494  Invalid prop: type check failed for prop "forumShowIndex". Expected Number with value NaN, got MouseEvent  Proxy(Object) {…} at <ForumItem>
+at <List>
+at <RouterView>
+at <ElScrollbar>
+at <Index>
+at <RouterView>
+at <App> (7) [{…}, {…}, {…}, {…}, {…}, {…}, {…}]
+instance.appContext.config.warnHandler @ select2.js:54
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+warn$1 @ runtime-core.esm-bundler.js:27
+validateProp @ runtime-core.esm-bundler.js:4409
+validateProps @ runtime-core.esm-bundler.js:4381
+updateProps @ runtime-core.esm-bundler.js:4190
+updateComponentPreRender @ runtime-core.esm-bundler.js:5493
+componentUpdateFn @ runtime-core.esm-bundler.js:5415
+run @ reactivity.esm-bundler.js:237
+updateComponent @ runtime-core.esm-bundler.js:5289
+processComponent @ runtime-core.esm-bundler.js:5224
+patch @ runtime-core.esm-bundler.js:4729
+patchKeyedChildren @ runtime-core.esm-bundler.js:5629
+patchChildren @ runtime-core.esm-bundler.js:5506
+processFragment @ runtime-core.esm-bundler.js:5187
+patch @ runtime-core.esm-bundler.js:4703
+patchBlockChildren @ runtime-core.esm-bundler.js:5085
+patchElement @ runtime-core.esm-bundler.js:5003
+processElement @ runtime-core.esm-bundler.js:4862
+patch @ runtime-core.esm-bundler.js:4717
+componentUpdateFn @ runtime-core.esm-bundler.js:5438
+run @ reactivity.esm-bundler.js:237
+runIfDirty @ reactivity.esm-bundler.js:275
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+flushJobs @ runtime-core.esm-bundler.js:408
+Promise.then
+queueFlush @ runtime-core.esm-bundler.js:322
+queueJob @ runtime-core.esm-bundler.js:317
+effect.scheduler @ runtime-core.esm-bundler.js:5480
+trigger @ reactivity.esm-bundler.js:265
+endBatch @ reactivity.esm-bundler.js:323
+notify @ reactivity.esm-bundler.js:614
+trigger @ reactivity.esm-bundler.js:588
+set value @ reactivity.esm-bundler.js:1465
+forumEnter @ list.vue:494
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+emit @ runtime-core.esm-bundler.js:6444
+onMouseenter._cache.<computed>._cache.<computed> @ ForumItem.vue:4
+eval @ runtime-dom.esm-bundler.js:758
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:217
+invoker @ runtime-dom.esm-bundler.js:729
+list.vue:494  Invalid prop: type check failed for prop "userid". Expected Number with value 31, got String with value "31". Proxy(Object) {…} at <ForumItem>
+at <List>
+at <RouterView>
+at <ElScrollbar>
+at <Index>
+at <RouterView>
+at <App> (7) [{…}, {…}, {…}, {…}, {…}, {…}, {…}]
+instance.appContext.config.warnHandler @ select2.js:54
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+warn$1 @ runtime-core.esm-bundler.js:27
+validateProp @ runtime-core.esm-bundler.js:4409
+validateProps @ runtime-core.esm-bundler.js:4381
+updateProps @ runtime-core.esm-bundler.js:4190
+updateComponentPreRender @ runtime-core.esm-bundler.js:5493
+componentUpdateFn @ runtime-core.esm-bundler.js:5415
+run @ reactivity.esm-bundler.js:237
+updateComponent @ runtime-core.esm-bundler.js:5289
+processComponent @ runtime-core.esm-bundler.js:5224
+patch @ runtime-core.esm-bundler.js:4729
+patchKeyedChildren @ runtime-core.esm-bundler.js:5629
+patchChildren @ runtime-core.esm-bundler.js:5506
+processFragment @ runtime-core.esm-bundler.js:5187
+patch @ runtime-core.esm-bundler.js:4703
+patchBlockChildren @ runtime-core.esm-bundler.js:5085
+patchElement @ runtime-core.esm-bundler.js:5003
+processElement @ runtime-core.esm-bundler.js:4862
+patch @ runtime-core.esm-bundler.js:4717
+componentUpdateFn @ runtime-core.esm-bundler.js:5438
+run @ reactivity.esm-bundler.js:237
+runIfDirty @ reactivity.esm-bundler.js:275
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+flushJobs @ runtime-core.esm-bundler.js:408
+Promise.then
+queueFlush @ runtime-core.esm-bundler.js:322
+queueJob @ runtime-core.esm-bundler.js:317
+effect.scheduler @ runtime-core.esm-bundler.js:5480
+trigger @ reactivity.esm-bundler.js:265
+endBatch @ reactivity.esm-bundler.js:323
+notify @ reactivity.esm-bundler.js:614
+trigger @ reactivity.esm-bundler.js:588
+set value @ reactivity.esm-bundler.js:1465
+forumEnter @ list.vue:494
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+emit @ runtime-core.esm-bundler.js:6444
+onMouseenter._cache.<computed>._cache.<computed> @ ForumItem.vue:4
+eval @ runtime-dom.esm-bundler.js:758
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:217
+invoker @ runtime-dom.esm-bundler.js:729
+list.vue:494  Invalid prop: type check failed for prop "forumShowIndex". Expected Number with value NaN, got MouseEvent  Proxy(Object) {…} at <ForumItem>
+at <List>
+at <RouterView>
+at <ElScrollbar>
+at <Index>
+at <RouterView>
+at <App> (7) [{…}, {…}, {…}, {…}, {…}, {…}, {…}]
+instance.appContext.config.warnHandler @ select2.js:54
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+warn$1 @ runtime-core.esm-bundler.js:27
+validateProp @ runtime-core.esm-bundler.js:4409
+validateProps @ runtime-core.esm-bundler.js:4381
+updateProps @ runtime-core.esm-bundler.js:4190
+updateComponentPreRender @ runtime-core.esm-bundler.js:5493
+componentUpdateFn @ runtime-core.esm-bundler.js:5415
+run @ reactivity.esm-bundler.js:237
+updateComponent @ runtime-core.esm-bundler.js:5289
+processComponent @ runtime-core.esm-bundler.js:5224
+patch @ runtime-core.esm-bundler.js:4729
+patchKeyedChildren @ runtime-core.esm-bundler.js:5629
+patchChildren @ runtime-core.esm-bundler.js:5506
+processFragment @ runtime-core.esm-bundler.js:5187
+patch @ runtime-core.esm-bundler.js:4703
+patchBlockChildren @ runtime-core.esm-bundler.js:5085
+patchElement @ runtime-core.esm-bundler.js:5003
+processElement @ runtime-core.esm-bundler.js:4862
+patch @ runtime-core.esm-bundler.js:4717
+componentUpdateFn @ runtime-core.esm-bundler.js:5438
+run @ reactivity.esm-bundler.js:237
+runIfDirty @ reactivity.esm-bundler.js:275
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+flushJobs @ runtime-core.esm-bundler.js:408
+Promise.then
+queueFlush @ runtime-core.esm-bundler.js:322
+queueJob @ runtime-core.esm-bundler.js:317
+effect.scheduler @ runtime-core.esm-bundler.js:5480
+trigger @ reactivity.esm-bundler.js:265
+endBatch @ reactivity.esm-bundler.js:323
+notify @ reactivity.esm-bundler.js:614
+trigger @ reactivity.esm-bundler.js:588
+set value @ reactivity.esm-bundler.js:1465
+forumEnter @ list.vue:494
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+emit @ runtime-core.esm-bundler.js:6444
+onMouseenter._cache.<computed>._cache.<computed> @ ForumItem.vue:4
+eval @ runtime-dom.esm-bundler.js:758
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:217
+invoker @ runtime-dom.esm-bundler.js:729
+list.vue:708   GET http://10.130.181.44:8083/project/recipe/info/[object%20PointerEvent] 400 (Bad Request)
+dispatchXhrRequest @ axios.cjs:2592
+xhr @ axios.cjs:2412
+dispatchRequest @ axios.cjs:3061
+Promise.then
+_request @ axios.cjs:3339
+request @ axios.cjs:3218
+wrap @ axios.cjs:6
+detailClick @ list.vue:708
+eval @ runtime-dom.esm-bundler.js:758
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:217
+invoker @ runtime-dom.esm-bundler.js:729
+list.vue:740  请求失败: AxiosError {message: 'Request failed with status code 400', name: 'AxiosError', code: 'ERR_BAD_REQUEST', config: {…}, request: XMLHttpRequest, …}
+eval @ list.vue:740
+Promise.catch
+detailClick @ list.vue:738
+eval @ runtime-dom.esm-bundler.js:758
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:217
+invoker @ runtime-dom.esm-bundler.js:729
+list.vue:718  Invalid prop: type check failed for prop "userid". Expected Number with value 31, got String with value "31". Proxy(Object) {…} at <ForumDetail>
+at <List>
+at <RouterView>
+at <ElScrollbar>
+at <Index>
+at <RouterView>
+at <App> (7) [{…}, {…}, {…}, {…}, {…}, {…}, {…}]
+instance.appContext.config.warnHandler @ select2.js:54
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+warn$1 @ runtime-core.esm-bundler.js:27
+validateProp @ runtime-core.esm-bundler.js:4409
+validateProps @ runtime-core.esm-bundler.js:4381
+updateProps @ runtime-core.esm-bundler.js:4190
+updateComponentPreRender @ runtime-core.esm-bundler.js:5493
+componentUpdateFn @ runtime-core.esm-bundler.js:5415
+run @ reactivity.esm-bundler.js:237
+updateComponent @ runtime-core.esm-bundler.js:5289
+processComponent @ runtime-core.esm-bundler.js:5224
+patch @ runtime-core.esm-bundler.js:4729
+patchBlockChildren @ runtime-core.esm-bundler.js:5085
+patchElement @ runtime-core.esm-bundler.js:5003
+processElement @ runtime-core.esm-bundler.js:4862
+patch @ runtime-core.esm-bundler.js:4717
+componentUpdateFn @ runtime-core.esm-bundler.js:5438
+run @ reactivity.esm-bundler.js:237
+runIfDirty @ reactivity.esm-bundler.js:275
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+flushJobs @ runtime-core.esm-bundler.js:408
+Promise.then
+queueFlush @ runtime-core.esm-bundler.js:322
+queueJob @ runtime-core.esm-bundler.js:317
+effect.scheduler @ runtime-core.esm-bundler.js:5480
+trigger @ reactivity.esm-bundler.js:265
+endBatch @ reactivity.esm-bundler.js:323
+notify @ reactivity.esm-bundler.js:614
+trigger @ reactivity.esm-bundler.js:588
+set value @ reactivity.esm-bundler.js:1465
+eval @ list.vue:718
+Promise.then
+detailClick @ list.vue:712
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+emit @ runtime-core.esm-bundler.js:6444
+eval @ ForumItem.vue:6
+cache.<computed>.cache.<computed> @ runtime-dom.esm-bundler.js:1713
+eval @ runtime-dom.esm-bundler.js:758
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:217
+invoker @ runtime-dom.esm-bundler.js:729
+ForumDetail.vue:146  Failed to resolve component: Thumb
+If this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. Proxy(Object) {…} at <ForumDetail>
+at <List>
+at <RouterView>
+at <ElScrollbar>
+at <Index>
+at <RouterView>
+at <App> (7) [{…}, {…}, {…}, {…}, {…}, {…}, {…}]
+instance.appContext.config.warnHandler @ select2.js:54
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+warn$1 @ runtime-core.esm-bundler.js:27
+resolveAsset @ runtime-core.esm-bundler.js:2899
+resolveComponent @ runtime-core.esm-bundler.js:2861
+render @ ForumDetail.vue:146
+renderComponentRoot @ runtime-core.esm-bundler.js:6560
+componentUpdateFn @ runtime-core.esm-bundler.js:5429
+run @ reactivity.esm-bundler.js:237
+updateComponent @ runtime-core.esm-bundler.js:5289
+processComponent @ runtime-core.esm-bundler.js:5224
+patch @ runtime-core.esm-bundler.js:4729
+patchBlockChildren @ runtime-core.esm-bundler.js:5085
+patchElement @ runtime-core.esm-bundler.js:5003
+processElement @ runtime-core.esm-bundler.js:4862
+patch @ runtime-core.esm-bundler.js:4717
+componentUpdateFn @ runtime-core.esm-bundler.js:5438
+run @ reactivity.esm-bundler.js:237
+runIfDirty @ reactivity.esm-bundler.js:275
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+flushJobs @ runtime-core.esm-bundler.js:408
+Promise.then
+queueFlush @ runtime-core.esm-bundler.js:322
+queueJob @ runtime-core.esm-bundler.js:317
+effect.scheduler @ runtime-core.esm-bundler.js:5480
+trigger @ reactivity.esm-bundler.js:265
+endBatch @ reactivity.esm-bundler.js:323
+notify @ reactivity.esm-bundler.js:614
+trigger @ reactivity.esm-bundler.js:588
+set value @ reactivity.esm-bundler.js:1465
+eval @ list.vue:718
+Promise.then
+detailClick @ list.vue:712
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+emit @ runtime-core.esm-bundler.js:6444
+eval @ ForumItem.vue:6
+cache.<computed>.cache.<computed> @ runtime-dom.esm-bundler.js:1713
+eval @ runtime-dom.esm-bundler.js:758
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:217
+invoker @ runtime-dom.esm-bundler.js:729
+list.vue:497  Invalid prop: type check failed for prop "userid". Expected Number with value 31, got String with value "31". Proxy(Object) {…} at <ForumItem>
+at <List>
+at <RouterView>
+at <ElScrollbar>
+at <Index>
+at <RouterView>
+at <App> (7) [{…}, {…}, {…}, {…}, {…}, {…}, {…}]
+instance.appContext.config.warnHandler @ select2.js:54
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+warn$1 @ runtime-core.esm-bundler.js:27
+validateProp @ runtime-core.esm-bundler.js:4409
+validateProps @ runtime-core.esm-bundler.js:4381
+updateProps @ runtime-core.esm-bundler.js:4190
+updateComponentPreRender @ runtime-core.esm-bundler.js:5493
+componentUpdateFn @ runtime-core.esm-bundler.js:5415
+run @ reactivity.esm-bundler.js:237
+updateComponent @ runtime-core.esm-bundler.js:5289
+processComponent @ runtime-core.esm-bundler.js:5224
+patch @ runtime-core.esm-bundler.js:4729
+patchKeyedChildren @ runtime-core.esm-bundler.js:5629
+patchChildren @ runtime-core.esm-bundler.js:5506
+processFragment @ runtime-core.esm-bundler.js:5187
+patch @ runtime-core.esm-bundler.js:4703
+patchBlockChildren @ runtime-core.esm-bundler.js:5085
+patchElement @ runtime-core.esm-bundler.js:5003
+processElement @ runtime-core.esm-bundler.js:4862
+patch @ runtime-core.esm-bundler.js:4717
+componentUpdateFn @ runtime-core.esm-bundler.js:5438
+run @ reactivity.esm-bundler.js:237
+runIfDirty @ reactivity.esm-bundler.js:275
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+flushJobs @ runtime-core.esm-bundler.js:408
+Promise.then
+queueFlush @ runtime-core.esm-bundler.js:322
+queueJob @ runtime-core.esm-bundler.js:317
+effect.scheduler @ runtime-core.esm-bundler.js:5480
+trigger @ reactivity.esm-bundler.js:265
+endBatch @ reactivity.esm-bundler.js:323
+notify @ reactivity.esm-bundler.js:614
+trigger @ reactivity.esm-bundler.js:588
+set value @ reactivity.esm-bundler.js:1465
+forumLeave @ list.vue:497
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+emit @ runtime-core.esm-bundler.js:6444
+onMouseleave._cache.<computed>._cache.<computed> @ ForumItem.vue:5
+eval @ runtime-dom.esm-bundler.js:758
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:217
+invoker @ runtime-dom.esm-bundler.js:729
+list.vue:497  Invalid prop: type check failed for prop "userid". Expected Number with value 31, got String with value "31". Proxy(Object) {…} at <ForumItem>
+at <List>
+at <RouterView>
+at <ElScrollbar>
+at <Index>
+at <RouterView>
+at <App> (7) [{…}, {…}, {…}, {…}, {…}, {…}, {…}]
+instance.appContext.config.warnHandler @ select2.js:54
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+warn$1 @ runtime-core.esm-bundler.js:27
+validateProp @ runtime-core.esm-bundler.js:4409
+validateProps @ runtime-core.esm-bundler.js:4381
+updateProps @ runtime-core.esm-bundler.js:4190
+updateComponentPreRender @ runtime-core.esm-bundler.js:5493
+componentUpdateFn @ runtime-core.esm-bundler.js:5415
+run @ reactivity.esm-bundler.js:237
+updateComponent @ runtime-core.esm-bundler.js:5289
+processComponent @ runtime-core.esm-bundler.js:5224
+patch @ runtime-core.esm-bundler.js:4729
+patchKeyedChildren @ runtime-core.esm-bundler.js:5629
+patchChildren @ runtime-core.esm-bundler.js:5506
+processFragment @ runtime-core.esm-bundler.js:5187
+patch @ runtime-core.esm-bundler.js:4703
+patchBlockChildren @ runtime-core.esm-bundler.js:5085
+patchElement @ runtime-core.esm-bundler.js:5003
+processElement @ runtime-core.esm-bundler.js:4862
+patch @ runtime-core.esm-bundler.js:4717
+componentUpdateFn @ runtime-core.esm-bundler.js:5438
+run @ reactivity.esm-bundler.js:237
+runIfDirty @ reactivity.esm-bundler.js:275
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+flushJobs @ runtime-core.esm-bundler.js:408
+Promise.then
+queueFlush @ runtime-core.esm-bundler.js:322
+queueJob @ runtime-core.esm-bundler.js:317
+effect.scheduler @ runtime-core.esm-bundler.js:5480
+trigger @ reactivity.esm-bundler.js:265
+endBatch @ reactivity.esm-bundler.js:323
+notify @ reactivity.esm-bundler.js:614
+trigger @ reactivity.esm-bundler.js:588
+set value @ reactivity.esm-bundler.js:1465
+forumLeave @ list.vue:497
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+emit @ runtime-core.esm-bundler.js:6444
+onMouseleave._cache.<computed>._cache.<computed> @ ForumItem.vue:5
+eval @ runtime-dom.esm-bundler.js:758
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:217
+invoker @ runtime-dom.esm-bundler.js:729
+list.vue:757  Invalid prop: type check failed for prop "userid". Expected Number with value 31, got String with value "31". Proxy(Object) {…} at <ForumDetail>
+at <List>
+at <RouterView>
+at <ElScrollbar>
+at <Index>
+at <RouterView>
+at <App> (7) [{…}, {…}, {…}, {…}, {…}, {…}, {…}]
+instance.appContext.config.warnHandler @ select2.js:54
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+warn$1 @ runtime-core.esm-bundler.js:27
+validateProp @ runtime-core.esm-bundler.js:4409
+validateProps @ runtime-core.esm-bundler.js:4381
+updateProps @ runtime-core.esm-bundler.js:4190
+updateComponentPreRender @ runtime-core.esm-bundler.js:5493
+componentUpdateFn @ runtime-core.esm-bundler.js:5415
+run @ reactivity.esm-bundler.js:237
+updateComponent @ runtime-core.esm-bundler.js:5289
+processComponent @ runtime-core.esm-bundler.js:5224
+patch @ runtime-core.esm-bundler.js:4729
+patchBlockChildren @ runtime-core.esm-bundler.js:5085
+patchElement @ runtime-core.esm-bundler.js:5003
+processElement @ runtime-core.esm-bundler.js:4862
+patch @ runtime-core.esm-bundler.js:4717
+componentUpdateFn @ runtime-core.esm-bundler.js:5438
+run @ reactivity.esm-bundler.js:237
+runIfDirty @ reactivity.esm-bundler.js:275
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+flushJobs @ runtime-core.esm-bundler.js:408
+Promise.then
+queueFlush @ runtime-core.esm-bundler.js:322
+queueJob @ runtime-core.esm-bundler.js:317
+effect.scheduler @ runtime-core.esm-bundler.js:5480
+trigger @ reactivity.esm-bundler.js:265
+endBatch @ reactivity.esm-bundler.js:323
+notify @ reactivity.esm-bundler.js:614
+trigger @ reactivity.esm-bundler.js:588
+set value @ reactivity.esm-bundler.js:1465
+eval @ list.vue:757
+Promise.then
+getBehaviorCounts @ list.vue:753
+eval @ list.vue:721
+Promise.then
+detailClick @ list.vue:712
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+emit @ runtime-core.esm-bundler.js:6444
+eval @ ForumItem.vue:6
+cache.<computed>.cache.<computed> @ runtime-dom.esm-bundler.js:1713
+eval @ runtime-dom.esm-bundler.js:758
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:217
+invoker @ runtime-dom.esm-bundler.js:729
+ForumDetail.vue:146  Failed to resolve component: Thumb
+If this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. Proxy(Object) {…} at <ForumDetail>
+at <List>
+at <RouterView>
+at <ElScrollbar>
+at <Index>
+at <RouterView>
+at <App> (7) [{…}, {…}, {…}, {…}, {…}, {…}, {…}]
+instance.appContext.config.warnHandler @ select2.js:54
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+warn$1 @ runtime-core.esm-bundler.js:27
+resolveAsset @ runtime-core.esm-bundler.js:2899
+resolveComponent @ runtime-core.esm-bundler.js:2861
+render @ ForumDetail.vue:146
+renderComponentRoot @ runtime-core.esm-bundler.js:6560
+componentUpdateFn @ runtime-core.esm-bundler.js:5429
+run @ reactivity.esm-bundler.js:237
+updateComponent @ runtime-core.esm-bundler.js:5289
+processComponent @ runtime-core.esm-bundler.js:5224
+patch @ runtime-core.esm-bundler.js:4729
+patchBlockChildren @ runtime-core.esm-bundler.js:5085
+patchElement @ runtime-core.esm-bundler.js:5003
+processElement @ runtime-core.esm-bundler.js:4862
+patch @ runtime-core.esm-bundler.js:4717
+componentUpdateFn @ runtime-core.esm-bundler.js:5438
+run @ reactivity.esm-bundler.js:237
+runIfDirty @ reactivity.esm-bundler.js:275
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+flushJobs @ runtime-core.esm-bundler.js:408
+Promise.then
+queueFlush @ runtime-core.esm-bundler.js:322
+queueJob @ runtime-core.esm-bundler.js:317
+effect.scheduler @ runtime-core.esm-bundler.js:5480
+trigger @ reactivity.esm-bundler.js:265
+endBatch @ reactivity.esm-bundler.js:323
+notify @ reactivity.esm-bundler.js:614
+trigger @ reactivity.esm-bundler.js:588
+set value @ reactivity.esm-bundler.js:1465
+eval @ list.vue:757
+Promise.then
+getBehaviorCounts @ list.vue:753
+eval @ list.vue:721
+Promise.then
+detailClick @ list.vue:712
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+emit @ runtime-core.esm-bundler.js:6444
+eval @ ForumItem.vue:6
+cache.<computed>.cache.<computed> @ runtime-dom.esm-bundler.js:1713
+eval @ runtime-dom.esm-bundler.js:758
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:217
+invoker @ runtime-dom.esm-bundler.js:729
+list.vue:806  Invalid prop: type check failed for prop "userid". Expected Number with value 31, got String with value "31". Proxy(Object) {…} at <ForumDetail>
+at <List>
+at <RouterView>
+at <ElScrollbar>
+at <Index>
+at <RouterView>
+at <App> (7) [{…}, {…}, {…}, {…}, {…}, {…}, {…}]
+instance.appContext.config.warnHandler @ select2.js:54
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+warn$1 @ runtime-core.esm-bundler.js:27
+validateProp @ runtime-core.esm-bundler.js:4409
+validateProps @ runtime-core.esm-bundler.js:4381
+updateProps @ runtime-core.esm-bundler.js:4190
+updateComponentPreRender @ runtime-core.esm-bundler.js:5493
+componentUpdateFn @ runtime-core.esm-bundler.js:5415
+run @ reactivity.esm-bundler.js:237
+updateComponent @ runtime-core.esm-bundler.js:5289
+processComponent @ runtime-core.esm-bundler.js:5224
+patch @ runtime-core.esm-bundler.js:4729
+patchBlockChildren @ runtime-core.esm-bundler.js:5085
+patchElement @ runtime-core.esm-bundler.js:5003
+processElement @ runtime-core.esm-bundler.js:4862
+patch @ runtime-core.esm-bundler.js:4717
+componentUpdateFn @ runtime-core.esm-bundler.js:5438
+run @ reactivity.esm-bundler.js:237
+runIfDirty @ reactivity.esm-bundler.js:275
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+flushJobs @ runtime-core.esm-bundler.js:408
+Promise.then
+queueFlush @ runtime-core.esm-bundler.js:322
+queueJob @ runtime-core.esm-bundler.js:317
+effect.scheduler @ runtime-core.esm-bundler.js:5480
+trigger @ reactivity.esm-bundler.js:265
+endBatch @ reactivity.esm-bundler.js:323
+notify @ reactivity.esm-bundler.js:614
+trigger @ reactivity.esm-bundler.js:588
+set value @ reactivity.esm-bundler.js:1465
+eval @ list.vue:806
+Promise.then
+checkUserBehavior @ list.vue:803
+eval @ list.vue:722
+Promise.then
+detailClick @ list.vue:712
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+emit @ runtime-core.esm-bundler.js:6444
+eval @ ForumItem.vue:6
+cache.<computed>.cache.<computed> @ runtime-dom.esm-bundler.js:1713
+eval @ runtime-dom.esm-bundler.js:758
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:217
+invoker @ runtime-dom.esm-bundler.js:729
+ForumDetail.vue:146  Failed to resolve component: Thumb
+If this is a native custom element, make sure to exclude it from component resolution via compilerOptions.isCustomElement. Proxy(Object) {…} at <ForumDetail>
+at <List>
+at <RouterView>
+at <ElScrollbar>
+at <Index>
+at <RouterView>
+at <App> (7) [{…}, {…}, {…}, {…}, {…}, {…}, {…}]
