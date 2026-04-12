@@ -1,5 +1,23 @@
 <template>
   <div class="forum_view" :style="{}">
+    <!-- AI聊天窗口 - 固定在右侧 -->
+    <div class="fixed_ai_chat" v-if="!myType && showAIChat">
+      <div class="ai_chat_wrapper">
+        <AIChat @close="showAIChat = false" />
+      </div>
+    </div>
+
+    <!-- 显示AI助手按钮 -->
+    <div
+      class="show_ai_chat_btn"
+      v-if="!myType && !showAIChat"
+      @click="showAIChat = true"
+    >
+      <el-button type="primary" circle>
+        <el-icon><ChatDotRound /></el-icon>
+      </el-button>
+    </div>
+
     <div class="back_view" v-if="centerType">
       <el-button class="back_btn" @click="backClick" type="primary"
         >返回</el-button
@@ -35,36 +53,43 @@
         >
       </div>
     </el-form>
-    <div class="forum_list_container">
-      <forum-item
-        v-for="(item, index) in list"
-        :key="index"
-        :item="item"
-        :index="index"
-        :userid="Number(userid)"
-        :forum-show-index="forumShowIndex"
-        :btn-auth="btnAuth"
-        @mouseenter="(event) => forumEnter(index)"
-        @mouseleave="forumLeave"
-        @click="(id) => detailClick(id)"
-        @edit="(id) => editClick(id)"
-        @del="(id) => delClick(id)"
-      />
-    </div>
-    <div class="pagination_container">
-      <el-pagination
-        background
-        :layout="layouts.join(',')"
-        :total="total"
-        :page-size="listQuery.limit"
-        v-model:current-page="listQuery.page"
-        prev-text="上一页"
-        next-text="下一页"
-        :hide-on-single-page="false"
-        :style="{}"
-        @size-change="sizeChange"
-        @current-change="currentChange"
-      />
+
+    <!-- 主内容区域：帖子列表 -->
+    <div class="main_content_area">
+      <!-- 左侧帖子列表 -->
+      <div class="left_content">
+        <div class="forum_list_container">
+          <forum-item
+            v-for="(item, index) in list"
+            :key="index"
+            :item="item"
+            :index="index"
+            :userid="Number(userid)"
+            :forum-show-index="forumShowIndex"
+            :btn-auth="btnAuth"
+            @mouseenter="(event) => forumEnter(index)"
+            @mouseleave="forumLeave"
+            @click="(id) => detailClick(id)"
+            @edit="(id) => editClick(id)"
+            @del="(id) => delClick(id)"
+          />
+        </div>
+        <div class="pagination_container">
+          <el-pagination
+            background
+            :layout="layouts.join(',')"
+            :total="total"
+            :page-size="listQuery.limit"
+            v-model:current-page="listQuery.page"
+            prev-text="上一页"
+            next-text="下一页"
+            :hide-on-single-page="false"
+            :style="{}"
+            @size-change="sizeChange"
+            @current-change="currentChange"
+          />
+        </div>
+      </div>
     </div>
 
     <el-dialog
@@ -187,7 +212,7 @@
                       @input="
                         searchFoodsByInput(
                           scope.row.ingredientName,
-                          scope.$index
+                          scope.$index,
                         )
                       "
                       @focus="showFoodSearch(scope.$index)"
@@ -353,10 +378,11 @@
 import { ref, nextTick, getCurrentInstance } from "vue";
 import { ElMessageBox } from "element-plus";
 import { useRoute, useRouter } from "vue-router";
-import { Thumb, Star, Close } from "@element-plus/icons-vue";
+import { Thumb, Star, Close, ChatDotRound } from "@element-plus/icons-vue";
 import upload from "@/components/upload.vue";
 import ForumItem from "@/components/ForumItem.vue";
 import ForumDetail from "@/components/ForumDetail.vue";
+import AIChat from "@/components/AIChat.vue";
 const context = getCurrentInstance()?.appContext.config.globalProperties;
 //基础信息
 const tableName = "forum";
@@ -370,6 +396,7 @@ const btnAuth = (e, a) => {
 };
 const list = ref([]);
 const listLoading = ref(false);
+const showAIChat = ref(true); // 控制AI助手显示/隐藏
 const listQuery = ref({
   page: 1,
   limit: 15,
@@ -401,11 +428,12 @@ const searchClick = () => {
 };
 const getList = () => {
   listLoading.value = true;
-  let url = myType.value ? `recipe/user/${userid.value}` : "recipe/public";
+  // 调用个性化推荐接口
+  let url = "postRecommendation/list";
   // 构建搜索参数
   let params = {
-    ...listQuery.value,
-    ...searchQuery.value,
+    limit: listQuery.value.limit,
+    page: listQuery.value.page,
   };
   context
     ?.$http({
@@ -417,39 +445,15 @@ const getList = () => {
       listLoading.value = false;
       // 检查响应数据结构
       if (res && res.data) {
-        let recipes = [];
-        if (res.data.recipes) {
-          // 后端直接返回recipes
-          recipes = res.data.recipes;
-        } else if (res.data.data && res.data.data.recipes) {
-          // 后端返回data.recipes
-          recipes = res.data.data.recipes;
+        if (res.data.data && res.data.data.length > 0) {
+          list.value = res.data.data;
+          total.value = res.data.total || res.data.data.length;
         } else {
           // 处理数据结构不符合预期的情况
           list.value = [];
           total.value = 0;
           console.error("响应数据结构不符合预期:", res);
-          return;
         }
-
-        // 前端搜索过滤
-        if (searchQuery.value.title) {
-          const searchTerm = searchQuery.value.title.toLowerCase();
-          recipes = recipes.filter((recipe) =>
-            recipe.title.toLowerCase().includes(searchTerm)
-          );
-        }
-
-        // 前端分页处理
-        const totalItems = recipes.length;
-        const page = listQuery.value.page;
-        const limit = listQuery.value.limit;
-        const startIndex = (page - 1) * limit;
-        const endIndex = startIndex + limit;
-        const paginatedRecipes = recipes.slice(startIndex, endIndex);
-
-        list.value = paginatedRecipes;
-        total.value = totalItems;
       } else {
         // 处理数据结构不符合预期的情况
         list.value = [];
@@ -574,7 +578,7 @@ const calculateCalories = () => {
     if (ingredient.weight && ingredient.baseCalories) {
       // 计算实际热量：(基础热量 / 100) * 重量
       ingredient.calories = parseFloat(
-        ((ingredient.baseCalories / 100) * ingredient.weight).toFixed(2)
+        ((ingredient.baseCalories / 100) * ingredient.weight).toFixed(2),
       );
       total += ingredient.calories;
     }
@@ -614,14 +618,14 @@ const showFoodSearch = (index) => {
 const searchFoods = () => {
   if (foodSearchKeyword.value) {
     const filteredFoods = mockFoods.filter((item) =>
-      item.name.includes(foodSearchKeyword.value)
+      item.name.includes(foodSearchKeyword.value),
     );
     foodList.value = filteredFoods;
     // 如果搜索结果为空，给出提示
     if (filteredFoods.length === 0) {
       context?.$toolUtil.message(
         `未找到包含"${foodSearchKeyword.value}"的食材`,
-        "warning"
+        "warning",
       );
     }
   } else {
@@ -649,7 +653,7 @@ const selectFood = (food) => {
 const searchFoodsByInput = (keyword, index) => {
   if (keyword) {
     filteredFoods.value = mockFoods.filter((item) =>
-      item.name.includes(keyword)
+      item.name.includes(keyword),
     );
     // 显示搜索结果弹窗
     foodSearchPopover.value[index] = true;
@@ -725,7 +729,7 @@ const centerType = ref(false);
 //返回
 const backClick = () => {
   router.push(
-    `/index/${context?.$toolUtil.storageGet("frontSessionTable")}Center`
+    `/index/${context?.$toolUtil.storageGet("frontSessionTable")}Center`,
   );
 };
 //初始化
@@ -1059,13 +1063,13 @@ const save = () => {
               () => {
                 getList();
                 formVisible.value = false;
-              }
+              },
             );
           } else {
             console.error("响应数据结构不符合预期:", res);
             context?.$toolUtil.message(
               `${form.value.id ? "修改" : "发布"}失败`,
-              "error"
+              "error",
             );
           }
         })
@@ -1073,7 +1077,7 @@ const save = () => {
           console.error("请求失败:", error);
           context?.$toolUtil.message(
             `${form.value.id ? "修改" : "发布"}失败`,
-            "error"
+            "error",
           );
         });
     }
@@ -1411,6 +1415,89 @@ init();
   cursor: pointer;
   &:hover {
     background-color: #f5f7fa;
+  }
+}
+
+/* 固定AI聊天窗口 */
+.fixed_ai_chat {
+  position: fixed;
+  right: 20px;
+  top: 100px;
+  width: 380px;
+  z-index: 1000;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+
+/* 显示AI助手按钮 */
+.show_ai_chat_btn {
+  position: fixed;
+  right: 20px;
+  bottom: 30px;
+  z-index: 999;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.show_ai_chat_btn .el-button {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  transition: all 0.3s;
+}
+
+.show_ai_chat_btn .el-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.ai_chat_wrapper {
+  height: calc(100vh - 200px);
+  min-height: 500px;
+  width: 100%;
+}
+
+/* 主内容区域布局 */
+.main_content_area {
+  flex: 1;
+  min-height: 600px;
+}
+
+.left_content {
+  flex: 1;
+  min-width: 0;
+}
+
+/* 响应式布局 */
+@media screen and (max-width: 1400px) {
+  .fixed_ai_chat {
+    width: 320px;
+    right: 10px;
+  }
+}
+
+@media screen and (max-width: 1200px) {
+  .fixed_ai_chat {
+    position: relative;
+    right: auto;
+    top: auto;
+    width: 100%;
+    margin: 20px 0;
+    box-shadow: none;
+    border: 1px solid #e4e7ed;
+  }
+
+  .ai_chat_wrapper {
+    height: 500px;
   }
 }
 </style>

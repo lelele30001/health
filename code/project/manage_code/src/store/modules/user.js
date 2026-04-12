@@ -41,9 +41,8 @@ export default {
   },
   actions: {
     async getSession({ commit }) {
-      let res = await http.get(
-        `${toolUtil.storageGet("sessionTable")}/session`
-      );
+      let sessionTable = toolUtil.storageGet("sessionTable") || "users";
+      let res = await http.get(`${sessionTable}/session`);
       if (res.data.code == 0) {
         commit("set_session", res.data.data);
       }
@@ -52,7 +51,7 @@ export default {
     async update({ commit }, data) {
       let res = await http.post(
         `${toolUtil.storageGet("sessionTable")}/update`,
-        data
+        data,
       );
       if (res.data.code == 0) {
         commit("assign_session", data);

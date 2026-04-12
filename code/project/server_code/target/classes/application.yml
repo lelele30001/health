@@ -45,3 +45,8 @@ mybatis-plus:
     call-setters-on-nulls: true
     #springboot 项目mybatis plus 设置 jdbcTypeForNull (oracle数据库需配置JdbcType.NULL, 默认是Other)
     jdbc-type-for-null: "null"
+
+# 智谱AI配置
+zhipu:
+  api:
+    key: 758c1bc9a7274649aa96d488de7f2b72.Hamgh0E3Y2ESHXUI

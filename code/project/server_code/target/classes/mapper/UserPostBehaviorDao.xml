@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cl.dao.UserPostBehaviorDao">
+    <resultMap id="userPostBehaviorResultMap" type="com.cl.entity.UserPostBehaviorEntity">
+        <id column="id" property="id"/>
+        <result column="user_id" property="userId"/>
+        <result column="post_id" property="postId"/>
+        <result column="behavior_type" property="behaviorType"/>
+        <result column="behavior_time" property="behaviorTime"/>
+    </resultMap>
+
+    <select id="getUserBehavior" resultMap="userPostBehaviorResultMap">
+        SELECT * FROM user_post_behavior 
+        WHERE user_id = #{userId} AND post_id = #{postId} AND behavior_type = #{behaviorType}
+    </select>
+
+    <select id="getUserBehaviors" resultMap="userPostBehaviorResultMap">
+        SELECT * FROM user_post_behavior 
+        WHERE user_id = #{userId} 
+        ORDER BY behavior_time DESC
+    </select>
+
+    <select id="getPostBehaviors" resultMap="userPostBehaviorResultMap">
+        SELECT * FROM user_post_behavior 
+        WHERE post_id = #{postId} 
+        ORDER BY behavior_time DESC
+    </select>
+
+    <select id="countUserBehaviorByType" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM user_post_behavior 
+        WHERE user_id = #{userId} AND behavior_type = #{behaviorType}
+    </select>
+
+    <select id="countPostBehaviorByType" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM user_post_behavior 
+        WHERE post_id = #{postId} AND behavior_type = #{behaviorType}
+    </select>
+
+    <select id="getUserBehaviorWeights" resultType="java.util.Map">
+        SELECT 
+            behavior_type, 
+            COUNT(*) as count 
+        FROM user_post_behavior 
+        WHERE user_id = #{userId} 
+        GROUP BY behavior_type
+    </select>
+
+    <select id="getActiveUserIds" resultType="java.lang.Long">
+        SELECT DISTINCT user_id FROM user_post_behavior
+    </select>
+
+    <select id="getSimilarUserBehaviors" resultMap="userPostBehaviorResultMap">
+        SELECT upb.* FROM user_post_behavior upb
+        WHERE upb.post_id IN (
+            SELECT post_id FROM user_post_behavior 
+            WHERE user_id = #{userId} AND behavior_type = #{behaviorType}
+        )
+        AND upb.user_id != #{userId}
+        AND upb.behavior_type = #{behaviorType}
+    </select>
+</mapper>

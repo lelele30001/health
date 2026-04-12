@@ -1,5 +1,78 @@
 <template>
   <div class="container">
+    <!-- 个性化推荐食谱 -->
+    <section class="section" v-if="recommendedRecipes.length > 0">
+      <div class="section-header">
+        <h2 class="section-title">
+          <span class="recommend-icon">✨</span>
+          为你推荐
+          <span class="recommend-tag">{{
+            recommendType === "personalized" ? "个性化" : "热门"
+          }}</span>
+        </h2>
+        <el-button
+          type="primary"
+          size="small"
+          @click="refreshRecommendations"
+          :loading="refreshLoading"
+          class="refresh-btn"
+        >
+          <el-icon><Refresh /></el-icon>
+          换一批
+        </el-button>
+      </div>
+      <div class="grid">
+        <div
+          v-for="(item, index) in recommendedRecipes"
+          :key="index"
+          class="card recipe-card recommend-card"
+          @click="openRecipeDetail(item.id)"
+        >
+          <div class="recommend-badge" v-if="item.recommendScore > 0">
+            推荐度: {{ (item.recommendScore * 100).toFixed(0) }}%
+          </div>
+          <div class="card-image">
+            <img
+              v-if="item.coverImage && isHttp(item.coverImage)"
+              :src="item.coverImage"
+              :alt="item.title"
+              class="card-img"
+            />
+            <img
+              v-else-if="item.coverImage"
+              :src="context.$config.url + item.coverImage"
+              :alt="item.title"
+              class="card-img"
+            />
+            <div v-else class="card-image-placeholder">
+              <span class="placeholder-text">{{ item.title }}</span>
+            </div>
+          </div>
+          <div class="card-content">
+            <h3 class="card-title">{{ item.title }}</h3>
+            <div class="card-meta">
+              <span class="meta-item" v-if="item.fitnessGoal">{{
+                item.fitnessGoal
+              }}</span>
+              <span class="meta-item" v-if="item.mealScene">{{
+                item.mealScene
+              }}</span>
+            </div>
+            <div class="card-stats">
+              <div class="stat-item">
+                <span class="stat-icon">❤️</span>
+                <span class="stat-value">{{ item.likeCount || 0 }}</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-icon">⭐</span>
+                <span class="stat-value">{{ item.storeupNumber || 0 }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- 用户发布的食谱帖子 -->
     <section class="section">
       <h2 class="section-title">我的食谱帖子</h2>
@@ -125,8 +198,94 @@
 <script setup>
 import { ref, getCurrentInstance } from "vue";
 import { useRouter } from "vue-router";
+import { Refresh } from "@element-plus/icons-vue";
 const context = getCurrentInstance()?.appContext.config.globalProperties;
 const router = useRouter();
+
+// 个性化推荐食谱
+const recommendedRecipes = ref([]);
+const recommendType = ref("hot");
+const refreshLoading = ref(false);
+
+// 获取个性化推荐
+const getRecommendations = () => {
+  context
+    ?.$http({
+      url: "postRecommendation/list",
+      method: "get",
+      params: {
+        limit: 6,
+      },
+    })
+    .then((res) => {
+      if (res?.data?.code === 0) {
+        recommendType.value = res.data.type || "hot";
+        if (res.data.data && res.data.data.length > 0) {
+          recommendedRecipes.value = res.data.data.map((item) => ({
+            ...item,
+            recommendScore: item.score || 0,
+          }));
+        } else {
+          // 如果没有推荐数据，获取热门食谱
+          getHotRecipes();
+        }
+      }
+    })
+    .catch(() => {
+      // 获取失败时，获取热门食谱
+      getHotRecipes();
+    });
+};
+
+// 获取热门食谱（冷启动）
+const getHotRecipes = () => {
+  context
+    ?.$http({
+      url: "postRecommendation/hot",
+      method: "get",
+      params: {
+        limit: 6,
+      },
+    })
+    .then((res) => {
+      if (res?.data?.code === 0 && res.data.data) {
+        recommendType.value = "hot";
+        recommendedRecipes.value = res.data.data.map((item) => ({
+          ...item,
+          recommendScore: 0,
+        }));
+      }
+    });
+};
+
+// 刷新推荐
+const refreshRecommendations = () => {
+  refreshLoading.value = true;
+  context
+    ?.$http({
+      url: "postRecommendation/refresh",
+      method: "post",
+      params: {
+        limit: 6,
+      },
+    })
+    .then((res) => {
+      refreshLoading.value = false;
+      if (res?.data?.code === 0) {
+        recommendType.value = res.data.type || "hot";
+        if (res.data.data && res.data.data.length > 0) {
+          recommendedRecipes.value = res.data.data.map((item) => ({
+            ...item,
+            recommendScore: item.score || 0,
+          }));
+          context?.$toolUtil.message("推荐已更新", "success");
+        }
+      }
+    })
+    .catch(() => {
+      refreshLoading.value = false;
+    });
+};
 
 // 用户发布的食谱帖子
 const userRecipes = ref([]);
@@ -207,6 +366,8 @@ const moreClick = (table) => {
 };
 
 const init = () => {
+  // 获取个性化推荐
+  getRecommendations();
   // 获取用户食谱帖子
   getuserRecipes();
 };
@@ -389,6 +550,66 @@ init();
     &:hover {
       transform: translateX(5px);
     }
+  }
+}
+
+// 个性化推荐区域样式
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+
+  .section-title {
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+
+    .recommend-icon {
+      font-size: var(--font-size-xl);
+    }
+
+    .recommend-tag {
+      font-size: var(--font-size-xs);
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #fff;
+      padding: 2px 8px;
+      border-radius: var(--border-radius-full);
+      font-weight: 500;
+    }
+  }
+
+  .refresh-btn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    transition: var(--transition);
+
+    &:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+  }
+}
+
+.recommend-card {
+  position: relative;
+  border: 2px solid transparent;
+  background: linear-gradient(white, white) padding-box,
+    linear-gradient(135deg, #667eea 0%, #764ba2 100%) border-box;
+
+  .recommend-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    padding: 4px 12px;
+    border-radius: var(--border-radius-full);
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    z-index: 10;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   }
 }
 

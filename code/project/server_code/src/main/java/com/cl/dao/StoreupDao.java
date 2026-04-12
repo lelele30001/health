@@ -6,17 +6,11 @@ import com.baomidou.mybatisplus.plugins.pagination.Pagination;
 import com.cl.entity.StoreupEntity;
 import com.cl.entity.view.StoreupView;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
 
-
-/**
- * 我的收藏
- *
- * @author
- * @email
- * @date 2025-02-26 11:22:53
- */
+@Mapper
 public interface StoreupDao extends BaseMapper<StoreupEntity> {
 
     List<StoreupView> selectListView(@Param("ew") Wrapper<StoreupEntity> wrapper);
@@ -24,6 +18,5 @@ public interface StoreupDao extends BaseMapper<StoreupEntity> {
     List<StoreupView> selectListView(Pagination page, @Param("ew") Wrapper<StoreupEntity> wrapper);
 
     StoreupView selectView(@Param("ew") Wrapper<StoreupEntity> wrapper);
-
 
 }

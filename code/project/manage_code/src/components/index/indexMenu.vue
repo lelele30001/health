@@ -54,7 +54,7 @@
             @click="
               menuHandler(
                 item.child[0].classname || item.child[0].tableName,
-                item.child[0].menuJump
+                item.child[0].menuJump,
               )
             "
           >

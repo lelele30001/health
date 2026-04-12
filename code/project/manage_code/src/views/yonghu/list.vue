@@ -266,162 +266,272 @@
 	init()
 </script>
 <style lang="scss" scoped>
+.center_view {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-xl) var(--spacing-lg);
+}
 
-	// 操作盒子
-	.list_search_view {
-		// 搜索盒子
-		.search_form {
-			// 子盒子
-			.search_view {
-				// 搜索label
-				.search_label {
-				}
-				// 搜索item
-				.search_box {
-					// 输入框
-					:deep(.search_inp) {
-					}
-				}
-			}
-			// 搜索按钮盒子
-			.search_btn_view {
-				// 搜索按钮
-				.search_btn {
-				}
-				// 搜索按钮-悬浮
-				.search_btn:hover {
-				}
-			}
-		}
-		//头部按钮盒子
-		.btn_view {
-			// 其他
-			:deep(.el-button--default){
-			}
-			// 其他-悬浮
-			:deep(.el-button--default:hover){
-			}
-			// 新增
-			:deep(.el-button--success){
-			}
-			// 新增-悬浮
-			:deep(.el-button--success:hover){
-			}
-			// 删除
-			:deep(.el-button--danger){
-			}
-			// 删除-悬浮
-			:deep(.el-button--danger:hover){
-			}
-			// 统计
-			:deep(.el-button--warning){
-			}
-			// 统计-悬浮
-			:deep(.el-button--warning:hover){
-			}
-		}
-	}
-	// 表格样式
-	.el-table {
-		:deep(.el-table__header-wrapper) {
-			thead {
-				tr {
-					th {
-						.cell {
-						}
-					}
-				}
-			}
-		}
-		:deep(.el-table__body-wrapper) {
-			tbody {
-				tr {
-					td {
-						.cell {
-							// 编辑
-							.el-button--primary {
-							}
-							// 编辑-悬浮
-							.el-button--primary:hover {
-							}
-							// 详情
-							.el-button--info {
-							}
-							// 详情-悬浮
-							.el-button--info:hover {
-							}
-							// 删除
-							.el-button--danger {
-							}
-							// 删除-悬浮
-							.el-button--danger:hover {
-							}
-							// 跨表
-							.el-button--success {
-							}
-							// 跨表-悬浮
-							.el-button--success:hover {
-							}
-							// 操作
-							.el-button--warning {
-							}
-							// 操作-悬浮
-							.el-button--warning:hover {
-							}
-						}
-					}
-				}
-				tr:hover {
-					td {
-					}
-				}
-			}
-		}
-	}
-	// 分页器
-	.el-pagination {
-		// 总页码
-		:deep(.el-pagination__total) {
-		}
-		// 上一页
-		:deep(.btn-prev) {
-		}
-		// 下一页
-		:deep(.btn-next) {
-		}
-		// 上一页禁用
-		:deep(.btn-prev:disabled) {
-		}
-		// 下一页禁用
-		:deep(.btn-next:disabled) {
-		}
-		// 页码
-		:deep(.el-pager) {
-			// 数字
-			.number {
-			}
-			// 数字悬浮
-			.number:hover {
-			}
-			// 选中
-			.number.is-active {
-			}
-		}
-		// sizes
-		:deep(.el-pagination__sizes) {
-			display: inline-block;
-			vertical-align: top;
-			font-size: 13px;
-			line-height: 28px;
-			height: 28px;
-			.el-select {
-			}
-		}
-		// 跳页
-		:deep(.el-pagination__jump) {
-			// 输入框
-			.el-input {
-			}
-		}
-	}
+// 操作盒子
+.list_search_view {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--spacing-lg);
+  padding: var(--spacing-lg);
+  background-color: var(--card-bg);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-sm);
+
+  // 搜索盒子
+  .search_form {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+
+    // 子盒子
+    .search_view {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-sm);
+
+      // 搜索label
+      .search_label {
+        font-size: var(--font-size-md);
+        color: var(--text-secondary);
+        font-weight: 500;
+      }
+
+      // 搜索item
+      .search_box {
+        // 输入框
+        :deep(.search_inp) {
+          width: 200px;
+
+          .el-input__inner {
+            border-radius: var(--border-radius-md);
+            border-color: var(--border-color);
+            transition: all var(--transition-normal);
+
+            &:focus {
+              border-color: var(--primary-color);
+              box-shadow: 0 0 0 2px rgba(3, 204, 136, 0.1);
+            }
+          }
+        }
+      }
+    }
+
+    // 搜索按钮盒子
+    .search_btn_view {
+      // 搜索按钮
+      .search_btn {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        border-radius: var(--border-radius-md);
+        font-size: var(--font-size-sm);
+        padding: 8px 16px;
+        transition: all var(--transition-normal);
+
+        &:hover {
+          background-color: #02b37a;
+          border-color: #02b37a;
+          transform: translateY(-1px);
+          box-shadow: var(--shadow-sm);
+        }
+      }
+    }
+  }
+
+  //头部按钮盒子
+  .btn_view {
+    display: flex;
+    gap: var(--spacing-md);
+
+    // 新增
+    :deep(.el-button--success) {
+      background-color: var(--primary-color);
+      border-color: var(--primary-color);
+      border-radius: var(--border-radius-md);
+      font-size: var(--font-size-sm);
+      padding: 8px 16px;
+      transition: all var(--transition-normal);
+
+      &:hover {
+        background-color: #02b37a;
+        border-color: #02b37a;
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-sm);
+      }
+    }
+
+    // 删除
+    :deep(.el-button--danger) {
+      background-color: #f5222d;
+      border-color: #f5222d;
+      border-radius: var(--border-radius-md);
+      font-size: var(--font-size-sm);
+      padding: 8px 16px;
+      transition: all var(--transition-normal);
+
+      &:hover {
+        background-color: #cf1322;
+        border-color: #cf1322;
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-sm);
+      }
+    }
+  }
+}
+
+// 用户列表
+.dataList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+
+  .item {
+    background-color: var(--card-bg);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-sm);
+    padding: var(--spacing-lg);
+    transition: all var(--transition-normal);
+
+    &:hover {
+      box-shadow: var(--shadow-md);
+      transform: translateY(-4px);
+    }
+
+    el-image {
+      width: 100%;
+      height: 200px;
+      border-radius: var(--border-radius-md);
+      margin-bottom: var(--spacing-md);
+
+      img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+    }
+
+    .btns {
+      display: flex;
+      gap: var(--spacing-sm);
+      justify-content: flex-end;
+
+      .el-button {
+        border-radius: var(--border-radius-md);
+        font-size: var(--font-size-sm);
+        padding: 6px 12px;
+        transition: all var(--transition-normal);
+
+        &:hover {
+          transform: translateY(-1px);
+          box-shadow: var(--shadow-sm);
+        }
+      }
+
+      .view_btn {
+        background-color: #1890ff;
+        border-color: #1890ff;
+
+        &:hover {
+          background-color: #40a9ff;
+          border-color: #40a9ff;
+        }
+      }
+
+      .edit_btn {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+
+        &:hover {
+          background-color: #02b37a;
+          border-color: #02b37a;
+        }
+      }
+
+      .del_btn {
+        background-color: #f5222d;
+        border-color: #f5222d;
+
+        &:hover {
+          background-color: #cf1322;
+          border-color: #cf1322;
+        }
+      }
+    }
+  }
+}
+
+// 分页器
+.el-pagination {
+  margin-top: var(--spacing-lg);
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+
+  // 总页码
+  :deep(.el-pagination__total) {
+    color: var(--text-secondary);
+    margin-right: var(--spacing-md);
+  }
+
+  // 页码
+  :deep(.el-pager) {
+    // 数字
+    .number {
+      border-radius: var(--border-radius-sm);
+      margin: 0 4px;
+
+      &:hover {
+        color: var(--primary-color);
+      }
+
+      &.is-active {
+        background-color: var(--primary-color);
+        color: white;
+      }
+    }
+  }
+
+  // 上一页/下一页
+  :deep(.btn-prev),
+  :deep(.btn-next) {
+    border-radius: var(--border-radius-sm);
+    margin: 0 4px;
+
+    &:hover {
+      color: var(--primary-color);
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .center_view {
+    padding: var(--spacing-lg) var(--spacing-md);
+  }
+
+  .list_search_view {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+
+    .search_form {
+      flex-wrap: wrap;
+      width: 100%;
+    }
+
+    .btn_view {
+      width: 100%;
+      justify-content: flex-start;
+    }
+  }
+
+  .dataList {
+    grid-template-columns: 1fr;
+  }
+}
 </style>
