@@ -307,11 +307,27 @@ const toolUtil = {
 	 */
 	getCurDate() {
 		let currentTime = new Date(),
-			year = currentTime.getFullYear(),
-			month = currentTime.getMonth() + 1 < 10 ? '0' + (currentTime.getMonth() + 1) : currentTime.getMonth() +
-			1,
-			day = currentTime.getDate() < 10 ? '0' + currentTime.getDate() : currentTime.getDate();
+		year = currentTime.getFullYear(),
+		month = currentTime.getMonth() + 1 < 10 ? '0' + (currentTime.getMonth() + 1) : currentTime.getMonth() +
+		1,
+		day = currentTime.getDate() < 10 ? '0' + currentTime.getDate() : currentTime.getDate();
 		return year + "-" + month + "-" + day;
+	},
+	/**
+	 * 格式化日期时间（yyyy-MM-dd hh:mm:ss）
+	 * @param {Date|String|Number} date 日期时间对象、字符串或时间戳
+	 * @returns {String} 格式化后的日期时间字符串
+	 */
+	formatDateTime(date) {
+		if (!date) return '';
+		let currentTime = new Date(date),
+		year = currentTime.getFullYear(),
+		month = currentTime.getMonth() + 1 < 10 ? '0' + (currentTime.getMonth() + 1) : currentTime.getMonth() + 1,
+		day = currentTime.getDate() < 10 ? '0' + currentTime.getDate() : currentTime.getDate(),
+		hour = currentTime.getHours() < 10 ? '0' + currentTime.getHours() : currentTime.getHours(),
+		minute = currentTime.getMinutes() < 10 ? '0' + currentTime.getMinutes() : currentTime.getMinutes(),
+		second = currentTime.getSeconds() < 10 ? '0' + currentTime.getSeconds() : currentTime.getSeconds();
+		return year + "-" + month + "-" + day + " " + hour + ":" + minute + ":" + second;
 	},
 	encryptDes(message) {
 		const keyHex = CryptoJS.enc.Utf8.parse(KEY);

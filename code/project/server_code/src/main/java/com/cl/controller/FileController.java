@@ -79,7 +79,7 @@ public class FileController {
             }
             configService.insertOrUpdate(configEntity);
         }
-        return R.ok().put("file", fileName);
+        return R.ok().put("file", "file/" + fileName);
     }
 
     /**

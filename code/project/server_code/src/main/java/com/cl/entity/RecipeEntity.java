@@ -29,6 +29,8 @@ public class RecipeEntity implements Serializable {
 
     private String dietaryRestrictions;
 
+    private String nutritionTag;
+
     private String mealScene;
 
     private Double totalCalories;
@@ -93,6 +95,14 @@ public class RecipeEntity implements Serializable {
 
     public void setDietaryRestrictions(String dietaryRestrictions) {
         this.dietaryRestrictions = dietaryRestrictions;
+    }
+
+    public String getNutritionTag() {
+        return nutritionTag;
+    }
+
+    public void setNutritionTag(String nutritionTag) {
+        this.nutritionTag = nutritionTag;
     }
 
     public String getMealScene() {

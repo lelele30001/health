@@ -13,7 +13,7 @@
       v-if="!myType && !showAIChat"
       @click="showAIChat = true"
     >
-      <el-button type="primary" circle>
+      <el-button type="warning" circle>
         <el-icon><ChatDotRound /></el-icon>
       </el-button>
     </div>
@@ -26,7 +26,9 @@
     <div class="section_title">
       <span>{{ myType ? "我的发布" : formName }}</span>
     </div>
-    <el-form :model="searchQuery" class="list_search">
+
+    <!-- 搜索框 -->
+    <el-form :model="searchQuery" class="list_search" v-if="!myType">
       <div class="search_view">
         <div class="search_label">标题：</div>
         <div class="search_box">
@@ -54,10 +56,32 @@
       </div>
     </el-form>
 
-    <!-- 主内容区域：帖子列表 -->
+    <!-- 主内容区域 -->
     <div class="main_content_area">
-      <!-- 左侧帖子列表 -->
-      <div class="left_content">
+      <!-- 为你推荐模块（固定在顶部） -->
+      <div class="recommendation_section" v-if="!myType">
+        <h3 class="recommendation_title">为你推荐</h3>
+        <div class="recommendation_container">
+          <forum-item
+            v-for="(item, index) in recommendedList"
+            :key="index"
+            :item="item"
+            :index="index"
+            :userid="Number(userid)"
+            :forum-show-index="forumShowIndex"
+            :btn-auth="btnAuth"
+            @mouseenter="(event) => forumEnter(index)"
+            @mouseleave="forumLeave"
+            @click="(id) => detailClick(id)"
+            @edit="(id) => editClick(id)"
+            @del="(id) => delClick(id)"
+          />
+        </div>
+        <div class="divider">—— 以下为全部膳食帖子 ——</div>
+      </div>
+
+      <!-- 全部帖子模块 -->
+      <div class="all_posts_section">
         <div class="forum_list_container">
           <forum-item
             v-for="(item, index) in list"
@@ -142,7 +166,7 @@
 
         <!-- 核心匹配区 -->
         <el-row>
-          <el-col :span="8">
+          <el-col :span="6">
             <el-form-item label="健身目标" prop="fitnessGoal">
               <el-select
                 v-model="form.fitnessGoal"
@@ -154,7 +178,20 @@
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :span="6">
+            <el-form-item label="营养标签">
+              <el-select
+                v-model="form.nutritionTag"
+                placeholder="请选择营养标签"
+              >
+                <el-option label="高蛋白" value="高蛋白"></el-option>
+                <el-option label="低卡" value="低卡"></el-option>
+                <el-option label="均衡" value="均衡"></el-option>
+                <el-option label="高脂" value="高脂"></el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="6">
             <el-form-item label="用餐场景" prop="mealScene">
               <el-select v-model="form.mealScene" placeholder="请选择用餐场景">
                 <el-option label="早餐" value="早餐"></el-option>
@@ -164,7 +201,7 @@
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="8">
+          <el-col :span="6">
             <el-form-item label="饮食禁忌">
               <el-select
                 v-model="form.dietaryRestrictions"
@@ -395,6 +432,7 @@ const btnAuth = (e, a) => {
   return context?.$toolUtil.isAuth(e, a);
 };
 const list = ref([]);
+const recommendedList = ref([]);
 const listLoading = ref(false);
 const showAIChat = ref(true); // 控制AI助手显示/隐藏
 const listQuery = ref({
@@ -426,15 +464,67 @@ const searchClick = () => {
   listQuery.value.page = 1;
   getList();
 };
+
+// 获取推荐帖子
+const getRecommendations = () => {
+  context
+    ?.$http({
+      url: "postRecommendation/list",
+      method: "get",
+      params: {
+        limit: 15,
+        page: 1,
+      },
+    })
+    .then((res) => {
+      console.log("推荐系统响应:", res);
+      if (res && res.data && res.data.data) {
+        recommendedList.value = res.data.data;
+        console.log("推荐结果数量:", res.data.data.length);
+        console.log("前3个推荐的帖子（按最终得分降序）:");
+        res.data.data.slice(0, 3).forEach((item, index) => {
+          console.log(
+            `${index + 1}. 排名: ${index + 1}, 帖子ID: ${item.id}, 标题: ${
+              item.title
+            }`,
+          );
+          console.log(`   最终得分: ${item.score || 0}`);
+          console.log(`   协同相似度分数: ${item.collaborativeScore || 0}`);
+          console.log(`   健身目标匹配分数: ${item.fitnessGoalScore || 0}`);
+          console.log(`   营养标签匹配分数: ${item.nutritionTagScore || 0}`);
+        });
+      } else {
+        recommendedList.value = [];
+        console.error("响应数据结构不符合预期:", res);
+      }
+      console.log("=== 推荐系统调用结束 ===");
+    })
+    .catch((error) => {
+      recommendedList.value = [];
+      console.error("获取推荐失败:", error);
+    });
+};
+
 const getList = () => {
   listLoading.value = true;
-  // 调用个性化推荐接口
-  let url = "postRecommendation/list";
   // 构建搜索参数
   let params = {
     limit: listQuery.value.limit,
     page: listQuery.value.page,
   };
+
+  // 根据是否是"我的发布"选择不同的接口
+  let url = myType.value
+    ? `recipe/user/${userid.value}`
+    : searchQuery.value.title
+    ? `postRecommendation/search`
+    : `postRecommendation/all`;
+
+  // 如果是搜索，添加关键词参数
+  if (searchQuery.value.title) {
+    params.keyword = searchQuery.value.title;
+  }
+
   context
     ?.$http({
       url: url,
@@ -443,16 +533,31 @@ const getList = () => {
     })
     .then((res) => {
       listLoading.value = false;
+      console.log("帖子列表响应:", res);
       // 检查响应数据结构
       if (res && res.data) {
-        if (res.data.data && res.data.data.length > 0) {
-          list.value = res.data.data;
-          total.value = res.data.total || res.data.data.length;
+        if (myType.value) {
+          // 我的发布页面，从recipes字段获取数据
+          if (res.data.recipes && res.data.recipes.length > 0) {
+            list.value = res.data.recipes;
+            total.value = res.data.recipes.length;
+          } else {
+            // 处理数据结构不符合预期的情况
+            list.value = [];
+            total.value = 0;
+            console.error("响应数据结构不符合预期:", res);
+          }
         } else {
-          // 处理数据结构不符合预期的情况
-          list.value = [];
-          total.value = 0;
-          console.error("响应数据结构不符合预期:", res);
+          // 普通页面，从data字段获取数据
+          if (res.data.data && res.data.data.length > 0) {
+            list.value = res.data.data;
+            total.value = res.data.total || res.data.data.length;
+          } else {
+            // 处理数据结构不符合预期的情况
+            list.value = [];
+            total.value = 0;
+            console.error("响应数据结构不符合预期:", res);
+          }
         }
       } else {
         // 处理数据结构不符合预期的情况
@@ -460,6 +565,7 @@ const getList = () => {
         total.value = 0;
         console.error("响应数据结构不符合预期:", res);
       }
+      console.log("=== 获取帖子列表结束 ===");
     })
     .catch((error) => {
       listLoading.value = false;
@@ -475,6 +581,7 @@ const form = ref({
   coverImage: "",
   fitnessGoal: "",
   dietaryRestrictions: "",
+  nutritionTag: "",
   mealScene: "",
   totalCalories: 0,
   userId: userid.value,
@@ -535,6 +642,7 @@ const resetForm = () => {
     coverImage: "",
     fitnessGoal: "",
     dietaryRestrictions: "",
+    nutritionTag: "",
     mealScene: "",
     totalCalories: 0,
     userId: userid.value,
@@ -542,7 +650,7 @@ const resetForm = () => {
   };
 };
 //添加食材
-const addIngredient = () => {
+const addIngredient = async () => {
   form.value.ingredients.push({
     ingredientCode: "",
     ingredientName: "",
@@ -553,8 +661,13 @@ const addIngredient = () => {
   });
   // 清空搜索关键词
   foodSearchKeyword.value = "";
+  // 确保食材数据已加载
+  if (mockFoods.value.length === 0) {
+    await initFoods();
+  }
   // 重置食材列表为完整列表
-  foodList.value = mockFoods;
+  foodList.value = mockFoods.value;
+  console.log("添加食材时的食材列表数量:", foodList.value.length);
   // 触发食材选择弹窗
   currentIngredientIndex.value = form.value.ingredients.length - 1;
   foodSearchVisible.value = true;
@@ -593,21 +706,49 @@ const currentIngredientIndex = ref(-1);
 const foodSearchPopover = ref({});
 const filteredFoods = ref([]);
 
-// 模拟食材数据
-const mockFoods = [
-  { name: "红烧肉(瘦肉)", calories: 164, unit: "g" },
-  { name: "鸭肉(家养，含皮和肉)", calories: 404, unit: "g" },
-  { name: "猪肉(瘦)", calories: 143, unit: "g" },
-  { name: "肉包", calories: 205, unit: "g" },
-  { name: "猪肉(肋条肉)", calories: 568, unit: "g" },
-  { name: "鸡肉", calories: 167, unit: "g" },
-  { name: "牛肉(精瘦)", calories: 113, unit: "g" },
-  { name: "猪肉(肥瘦)", calories: 395, unit: "g" },
-  { name: "鸡胸肉", calories: 118, unit: "g" },
-  { name: "卤肉", calories: 386, unit: "g" },
-  { name: "粉蒸肉(瘦肉)", calories: 178, unit: "g" },
-  { name: "咸肉", calories: 390, unit: "g" },
-];
+// 从后端获取食材数据
+const fetchFoods = async () => {
+  try {
+    const res = await context?.$http({
+      url: "foods/list",
+      method: "get",
+      params: {
+        limit: 1000,
+        page: 1,
+      },
+    });
+    console.log("食材数据响应:", res);
+    if (res && res.data && res.data.data && res.data.data.list) {
+      const foods = res.data.data.list.map((item) => ({
+        name: item.name,
+        calories: item.calory || 0,
+        unit: item.unit || "g",
+      }));
+      console.log("处理后的食材数据:", foods);
+      console.log("食材数据数量:", foods.length);
+      return foods;
+    }
+    console.log("未获取到食材数据");
+    return [];
+  } catch (error) {
+    console.error("获取食材失败:", error);
+    // 出错时返回模拟数据，确保界面正常显示
+    return [
+      { name: "红烧肉(瘦肉)", calories: 164, unit: "g" },
+      { name: "鸭肉(家养，含皮和肉)", calories: 404, unit: "g" },
+      { name: "猪肉(瘦)", calories: 143, unit: "g" },
+      { name: "肉包", calories: 205, unit: "g" },
+    ];
+  }
+};
+
+// 存储食材数据
+const mockFoods = ref([]);
+
+// 初始化获取食材数据
+const initFoods = async () => {
+  mockFoods.value = await fetchFoods();
+};
 
 //显示食材搜索
 const showFoodSearch = (index) => {
@@ -615,22 +756,59 @@ const showFoodSearch = (index) => {
   foodSearchVisible.value = true;
 };
 //搜索食材
-const searchFoods = () => {
+const searchFoods = async () => {
   if (foodSearchKeyword.value) {
-    const filteredFoods = mockFoods.filter((item) =>
-      item.name.includes(foodSearchKeyword.value),
-    );
-    foodList.value = filteredFoods;
-    // 如果搜索结果为空，给出提示
-    if (filteredFoods.length === 0) {
-      context?.$toolUtil.message(
-        `未找到包含"${foodSearchKeyword.value}"的食材`,
-        "warning",
+    try {
+      const res = await context?.$http({
+        url: "foods/search",
+        method: "get",
+        params: {
+          keyword: foodSearchKeyword.value,
+          limit: 1000,
+          page: 1,
+        },
+      });
+      console.log("搜索食材响应:", res);
+      if (res && res.data && res.data.data && res.data.data.list) {
+        const filteredFoods = res.data.data.list.map((item) => ({
+          name: item.name,
+          calories: item.calory || 0,
+          unit: item.unit || "g",
+        }));
+        foodList.value = filteredFoods;
+        console.log("搜索结果数量:", filteredFoods.length);
+        // 如果搜索结果为空，给出提示
+        if (filteredFoods.length === 0) {
+          context?.$toolUtil.message(
+            `未找到包含"${foodSearchKeyword.value}"的食材`,
+            "warning",
+          );
+        }
+      } else {
+        foodList.value = [];
+        context?.$toolUtil.message(
+          `未找到包含"${foodSearchKeyword.value}"的食材`,
+          "warning",
+        );
+      }
+    } catch (error) {
+      console.error("搜索食材失败:", error);
+      // 出错时使用本地过滤
+      const filteredFoods = mockFoods.value.filter((item) =>
+        item.name.includes(foodSearchKeyword.value),
       );
+      foodList.value = filteredFoods;
+      console.log("本地过滤结果数量:", filteredFoods.length);
+      if (filteredFoods.length === 0) {
+        context?.$toolUtil.message(
+          `未找到包含"${foodSearchKeyword.value}"的食材`,
+          "warning",
+        );
+      }
     }
   } else {
-    // 搜索框为空时不展示任何食材
-    foodList.value = [];
+    // 搜索框为空时展示所有食材
+    foodList.value = mockFoods.value;
   }
 };
 //选择食材
@@ -652,7 +830,7 @@ const selectFood = (food) => {
 // 实时搜索食材
 const searchFoodsByInput = (keyword, index) => {
   if (keyword) {
-    filteredFoods.value = mockFoods.filter((item) =>
+    filteredFoods.value = mockFoods.value.filter((item) =>
       item.name.includes(keyword),
     );
     // 显示搜索结果弹窗
@@ -733,7 +911,7 @@ const backClick = () => {
   );
 };
 //初始化
-const init = () => {
+const init = async () => {
   if (route.query.centerType) {
     centerType.value = true;
   }
@@ -741,11 +919,25 @@ const init = () => {
     myType.value = true;
   }
   userid.value = Number(context?.$toolUtil.storageGet("userid")) || 0;
+
+  // 初始化获取食材数据
+  await initFoods();
+
   getList();
+
+  // 如果不是"我的发布"页面，获取推荐帖子
+  if (!myType.value) {
+    getRecommendations();
+  }
 
   // 检查URL中是否有id参数，如果有，自动打开详情
   if (route.query.id) {
     detailClick(route.query.id);
+  }
+
+  // 检查URL中是否有publish参数，如果有，自动打开发布食谱弹窗
+  if (route.query.publish === "true") {
+    addClick();
   }
 };
 const detailVisible = ref(false);
@@ -1087,6 +1279,58 @@ init();
 </script>
 
 <style lang="scss" scoped>
+// 推荐模块样式
+.recommendation_section {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+  .recommendation_title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #333;
+  }
+
+  .recommendation_container {
+    margin-bottom: 15px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+  }
+
+  .divider {
+    text-align: center;
+    color: #999;
+    margin: 15px 0;
+    font-size: 14px;
+  }
+}
+
+// 全部帖子模块样式
+.all_posts_section {
+  margin-top: 20px;
+
+  .forum_list_container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+  }
+}
+
+// 搜索框样式
+.list_search {
+  margin-bottom: 20px;
+}
+
+// 分页样式
+.pagination_container {
+  margin-top: 20px;
+  text-align: right;
+}
+
 // 返回盒子
 .back_view {
   border-radius: 4px;
@@ -1450,7 +1694,7 @@ init();
   align-items: center;
   justify-content: center;
   font-size: 24px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
   border: none;
   transition: all 0.3s;
 }
@@ -1569,32 +1813,48 @@ init();
 .forum_view .list_search .search_view .search_box {
 }
 .forum_view .list_search .search_view .search_box .search_inp {
-  padding: 0 10px;
+  padding: 0 15px;
   border: 1px solid #ddd;
   font-size: 15px;
   height: 38px;
+  border-radius: 20px;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.forum_view .list_search .search_view .search_box .search_inp:focus {
+  border-color: #fa7301;
+  box-shadow: 0 0 0 2px rgba(250, 115, 1, 0.2);
 }
 .forum_view .list_search .search_btn_view .search_btn {
   background: var(--theme);
   color: rgb(255, 255, 255);
   border: 0;
-  border-radius: 0;
+  border-radius: 20px;
   height: 38px;
   font-size: 15px;
+  padding: 0 20px;
 }
 .forum_view .list_search .search_btn_view .search_btn:hover {
   opacity: 0.8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(3, 204, 136, 0.3);
+  transition: all 0.3s ease;
 }
 .forum_view .list_search .search_btn_view .add_btn {
-  background: #666;
+  background: #fa7301;
   color: rgb(255, 255, 255);
   border: 0;
-  border-radius: 0;
+  border-radius: 20px;
   height: 38px;
   font-size: 15px;
+  padding: 0 20px;
 }
 .forum_view .list_search .search_btn_view .add_btn:hover {
   opacity: 0.8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(250, 115, 1, 0.3);
+  transition: all 0.3s ease;
 }
 
 /*详情盒子*/

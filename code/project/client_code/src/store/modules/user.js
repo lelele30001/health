@@ -22,6 +22,10 @@ export default {
         key = "touxiang";
       }
       let avatar = state.session[key];
+      // 处理逗号分隔的字符串，取第一个头像
+      if (avatar && typeof avatar === "string" && avatar.includes(",")) {
+        avatar = avatar.split(",")[0];
+      }
       // 检查是否已经是完整的 URL（如 SVG 头像）
       if (
         avatar &&
@@ -35,7 +39,7 @@ export default {
   actions: {
     async getSession({ commit }) {
       let res = await http.get(
-        `${toolUtil.storageGet("frontSessionTable")}/session`
+        `${toolUtil.storageGet("frontSessionTable")}/session`,
       );
       if (res.data.code == 0) {
         commit("set_session", res.data.data);
@@ -45,7 +49,7 @@ export default {
     async update({ commit }, data) {
       let res = await http.post(
         `${toolUtil.storageGet("frontSessionTable")}/update`,
-        data
+        data,
       );
       if (res.data.code == 0) {
         commit("assign_session", data);

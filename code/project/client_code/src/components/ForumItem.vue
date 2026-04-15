@@ -1,41 +1,27 @@
 <template>
-  <div
-    class="forum_item"
-    @mouseenter="$emit('mouseenter', index)"
-    @mouseleave="$emit('mouseleave')"
-    @click.stop="$emit('click', item.refid || item.id)"
-  >
-    <div class="forum_item_left">
-      <span class="forum_item_title">{{ item.title }}</span>
-      <span class="forum_item_name"> (发布人：{{ item.username }}) </span>
-      <span class="forum_item_calories">
-        (热量：{{ item.totalCalories }}kcal)
-      </span>
+  <div class="forum_item" @click.stop="$emit('click', item.refid || item.id)">
+    <div class="forum_item_content">
+      <div class="forum_item_left">
+        <span class="forum_item_title">{{ item.title }}</span>
+        <span class="forum_item_name"> (发布人：{{ item.username }}) </span>
+        <span class="forum_item_calories">
+          (热量：{{ item.totalCalories }}kcal)
+        </span>
+        <span class="forum_item_nutrition" v-if="item.nutritionTag">
+          (营养标签：{{ item.nutritionTag }})
+        </span>
+        <div class="forum_time">{{ formatDate(item.addtime) }}</div>
+      </div>
+      <div class="forum_item_right">
+        <img
+          v-if="item.cover_image"
+          :src="getImageUrl(item.cover_image)"
+          class="forum_item_image"
+          alt="封面图片"
+        />
+        <div v-else class="forum_item_image_placeholder">无封面图片</div>
+      </div>
     </div>
-    <div
-      class="forum_item_btn_box"
-      v-if="
-        item.userid == userid &&
-        forumShowIndex == index &&
-        (btnAuth('forum', '修改') || btnAuth('forum', '删除'))
-      "
-    >
-      <el-button
-        class="forum_edit_btn"
-        v-if="btnAuth('forum', '修改')"
-        type="primary"
-        @click.stop="$emit('edit', item.id)"
-        >修改</el-button
-      >
-      <el-button
-        class="forum_del_btn"
-        v-if="btnAuth('forum', '删除')"
-        type="danger"
-        @click.stop="$emit('del', item.id)"
-        >删除</el-button
-      >
-    </div>
-    <div class="forum_time" v-else>{{ item.addtime }}</div>
   </div>
 </template>
 
@@ -64,13 +50,56 @@ export default {
       required: true,
     },
   },
+  methods: {
+    getImageUrl(coverImage) {
+      if (!coverImage) return "";
+      // 如果是完整的URL，直接使用
+      if (coverImage.startsWith("http")) {
+        return coverImage;
+      }
+      // 处理不同类型的路径
+      if (coverImage.startsWith("/recipe_pic")) {
+        // 对于recipe_pic路径，直接使用相对路径
+        return coverImage;
+      } else {
+        // 对于file路径，使用完整的后端服务器路径
+        return `http://localhost:8080/project/${coverImage}`;
+      }
+    },
+    formatDate(timestamp) {
+      if (!timestamp) return "";
+      // 处理时间戳格式
+      if (typeof timestamp === "number") {
+        const date = new Date(timestamp);
+        return this.formatDateObj(date);
+      }
+      // 处理字符串格式
+      if (typeof timestamp === "string") {
+        // 如果是纯数字字符串，按时间戳处理
+        if (/^\d+$/.test(timestamp)) {
+          const date = new Date(parseInt(timestamp));
+          return this.formatDateObj(date);
+        }
+        // 如果是日期字符串，直接返回
+        return timestamp;
+      }
+      return "";
+    },
+    formatDateObj(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      const hours = String(date.getHours()).padStart(2, "0");
+      const minutes = String(date.getMinutes()).padStart(2, "0");
+      const seconds = String(date.getSeconds()).padStart(2, "0");
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    },
+  },
 };
 </script>
 
 <style scoped>
 .forum_item {
-  display: flex;
-  flex-direction: column; /* 从横向改成竖向卡片 */
   padding: 20px;
   border-radius: 10px;
   background: #fff;
@@ -85,11 +114,17 @@ export default {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
+.forum_item_content {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
 .forum_item_left {
+  flex: 1;
   display: flex;
   flex-direction: column; /* 改成竖排 */
   align-items: flex-start;
-  margin-bottom: 10px;
 }
 
 .forum_item_title {
@@ -110,10 +145,41 @@ export default {
   color: #ff6666;
 }
 
+.forum_item_nutrition {
+  font-size: 14px;
+  color: #4caf50;
+  margin-bottom: 4px;
+}
+
 .forum_time {
   font-size: 13px;
   color: #999;
-  margin-top: auto; /* 时间靠下 */
+  margin-top: 10px;
+}
+
+.forum_item_right {
+  width: 120px;
+  height: 90px;
+  flex-shrink: 0;
+}
+
+.forum_item_image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.forum_item_image_placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f5f5;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #999;
 }
 
 .forum_item_btn_box {

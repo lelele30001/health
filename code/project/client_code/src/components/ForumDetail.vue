@@ -10,7 +10,13 @@
     <div class="forum_detail">
       <!-- 标题区 -->
       <div class="forum_title">
-        <h1>{{ detailForm.title }}</h1>
+        <h1 v-if="!isEditMode">{{ detailForm.title }}</h1>
+        <el-input
+          v-else
+          v-model="editForm.title"
+          placeholder="请输入标题"
+          class="edit-title-input"
+        ></el-input>
         <div class="title-divider"></div>
       </div>
 
@@ -29,6 +35,22 @@
           v-if="detailForm.userId == userid && btnAuth('forum', '删除')"
           class="forum_delete"
         >
+          <el-button
+            type="primary"
+            size="small"
+            @click="enterEditMode"
+            class="edit-btn"
+            v-if="!isEditMode"
+            >修改</el-button
+          >
+          <el-button
+            type="success"
+            size="small"
+            @click="saveEdit"
+            class="save-btn"
+            v-if="isEditMode"
+            >保存</el-button
+          >
           <el-button
             type="danger"
             size="small"
@@ -97,23 +119,62 @@
       <div class="forum_meta">
         <div class="meta-item">
           <span class="meta-label">健身目标</span>
-          <span class="meta-value">{{ detailForm.fitnessGoal }}</span>
+          <span v-if="!isEditMode" class="meta-value">{{
+            detailForm.fitnessGoal
+          }}</span>
+          <el-select
+            v-else
+            v-model="editForm.fitnessGoal"
+            placeholder="请选择健身目标"
+            class="meta-select"
+          >
+            <el-option label="增肌" value="增肌"></el-option>
+            <el-option label="减脂" value="减脂"></el-option>
+            <el-option label="维持" value="维持"></el-option>
+          </el-select>
         </div>
         <div class="meta-item">
           <span class="meta-label">用餐场景</span>
-          <span class="meta-value">{{ detailForm.mealScene }}</span>
+          <span v-if="!isEditMode" class="meta-value">{{
+            detailForm.mealScene
+          }}</span>
+          <el-select
+            v-else
+            v-model="editForm.mealScene"
+            placeholder="请选择用餐场景"
+            class="meta-select"
+          >
+            <el-option label="早餐" value="早餐"></el-option>
+            <el-option label="午餐" value="午餐"></el-option>
+            <el-option label="晚餐" value="晚餐"></el-option>
+            <el-option label="加餐" value="加餐"></el-option>
+          </el-select>
         </div>
         <div class="meta-item">
           <span class="meta-label">饮食禁忌</span>
-          <span class="meta-value">{{
+          <span v-if="!isEditMode" class="meta-value">{{
             detailForm.dietaryRestrictions || "无"
           }}</span>
+          <el-input
+            v-else
+            v-model="editForm.dietaryRestrictions"
+            placeholder="请输入饮食禁忌"
+            class="meta-input"
+          ></el-input>
         </div>
       </div>
 
       <!-- 正文内容 -->
       <div class="forum_content">
-        {{ detailForm.description }}
+        <span v-if="!isEditMode">{{ detailForm.description }}</span>
+        <el-input
+          v-else
+          v-model="editForm.description"
+          type="textarea"
+          :rows="4"
+          placeholder="请输入正文内容"
+          class="content-textarea"
+        ></el-input>
       </div>
 
       <!-- 食材表格 -->
@@ -121,6 +182,7 @@
         <h3>食材明细</h3>
         <div class="ingredients-card">
           <el-table
+            v-if="!isEditMode"
             :data="detailForm.ingredients"
             style="width: 100%"
             class="modern-table"
@@ -139,6 +201,44 @@
               prop="calories"
               label="热量(kcal)"
             ></el-table-column>
+          </el-table>
+          <el-table
+            v-else
+            :data="editForm.ingredients"
+            style="width: 100%"
+            class="modern-table"
+            :header-cell-style="{
+              backgroundColor: '#f9f9f9',
+              fontWeight: '600',
+            }"
+            :cell-style="{ borderColor: '#e8e8e8' }"
+          >
+            <el-table-column prop="ingredientName" label="食材名称">
+              <template #default="scope">
+                <el-input
+                  v-model="scope.row.ingredientName"
+                  placeholder="请输入食材名称"
+                ></el-input>
+              </template>
+            </el-table-column>
+            <el-table-column prop="weight" label="用量">
+              <template #default="scope">
+                <el-input
+                  v-model.number="scope.row.weight"
+                  type="number"
+                  placeholder="请输入用量"
+                ></el-input>
+              </template>
+            </el-table-column>
+            <el-table-column prop="calories" label="热量(kcal)">
+              <template #default="scope">
+                <el-input
+                  v-model.number="scope.row.calories"
+                  type="number"
+                  placeholder="请输入热量"
+                ></el-input>
+              </template>
+            </el-table-column>
           </el-table>
         </div>
       </div>
@@ -167,13 +267,15 @@
         </div>
         <div class="comment_list">
           <div
-            v-for="(comment, index) in detailForm.comments || []"
-            :key="index"
+            v-for="(comment, index) in comments"
+            :key="comment.id"
             class="forum_comment_item"
           >
             <div class="forum_comment_header">
               <span class="forum_comment_username">{{ comment.username }}</span>
-              <span class="forum_comment_time">{{ comment.addtime }}</span>
+              <span class="forum_comment_time">{{
+                formatDateTime(comment.createTime)
+              }}</span>
               <span
                 v-if="comment.userId == userid && btnAuth('forum', '删除')"
                 class="forum_comment_del"
@@ -189,10 +291,7 @@
             </div>
             <div class="forum_comment_content">{{ comment.content }}</div>
           </div>
-          <div
-            v-if="!detailForm.comments || detailForm.comments.length === 0"
-            class="no-comments"
-          >
+          <div v-if="comments.length === 0" class="no-comments">
             暂无评论，快来发表你的看法吧！
           </div>
         </div>
@@ -203,6 +302,8 @@
 
 <script>
 import { Thumb, Star, Close, ShoppingCart } from "@element-plus/icons-vue";
+import toolUtil from "@/utils/toolUtil";
+import "@/assets/dialog-styles.css";
 
 export default {
   name: "ForumDetail",
@@ -259,18 +360,110 @@ export default {
       commentContent: "",
       replyContent: "",
       replyIndex: -1,
+      isEditMode: false,
+      comments: [],
+      editForm: {
+        title: "",
+        description: "",
+        fitnessGoal: "",
+        mealScene: "",
+        dietaryRestrictions: "",
+        ingredients: [],
+        totalCalories: 0,
+      },
     };
   },
+  watch: {
+    "detailForm.id": {
+      handler(newVal) {
+        if (newVal) {
+          this.getComments();
+        }
+      },
+      immediate: true,
+    },
+  },
   methods: {
+    // 格式化日期时间
+    formatDateTime(date) {
+      return toolUtil.formatDateTime(date);
+    },
+    getComments() {
+      if (!this.detailForm.id) return;
+
+      this.$http({
+        url: `comment/list/${this.detailForm.id}`,
+        method: "get",
+      })
+        .then((res) => {
+          if (res.data.code === 0) {
+            this.comments = res.data.data || [];
+          }
+        })
+        .catch((error) => {
+          console.error("获取评论失败:", error);
+        });
+    },
     recordBehavior(type) {
       this.$emit("recordBehavior", type);
     },
     addComment() {
-      this.$emit("addComment", this.commentContent);
-      this.commentContent = "";
+      if (!this.commentContent.trim()) return;
+
+      this.$http({
+        url: "comment/add",
+        method: "post",
+        data: {
+          postId: this.detailForm.id,
+          userId: this.userid,
+          username: this.detailForm.username,
+          content: this.commentContent,
+        },
+      })
+        .then((res) => {
+          if (res.data.code === 0) {
+            this.$message.success("评论成功");
+            this.commentContent = "";
+            this.getComments();
+          } else {
+            this.$message.error(res.data.msg || "评论失败");
+          }
+        })
+        .catch((error) => {
+          console.error("评论失败:", error);
+          this.$message.error("评论失败");
+        });
     },
     delComment(id) {
-      this.$emit("delComment", id);
+      this.$confirm("确定要删除这条评论吗？", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      })
+        .then(() => {
+          this.$http({
+            url: `comment/delete/${id}`,
+            method: "delete",
+            params: {
+              userId: this.userid,
+            },
+          })
+            .then((res) => {
+              if (res.data.code === 0) {
+                this.$message.success("删除成功");
+                this.getComments();
+              } else {
+                this.$message.error(res.data.msg || "删除失败");
+              }
+            })
+            .catch((error) => {
+              console.error("删除失败:", error);
+              this.$message.error("删除失败");
+            });
+        })
+        .catch(() => {
+          // 取消删除
+        });
     },
     showReplyInput(index) {
       this.replyIndex = index;
@@ -283,6 +476,26 @@ export default {
     goToJD() {
       window.open("https://www.jd.com/", "_blank");
     },
+    enterEditMode() {
+      // 进入编辑模式，复制当前数据到编辑表单
+      this.isEditMode = true;
+      this.editForm = {
+        title: this.detailForm.title || "",
+        description: this.detailForm.description || "",
+        fitnessGoal: this.detailForm.fitnessGoal || "",
+        mealScene: this.detailForm.mealScene || "",
+        dietaryRestrictions: this.detailForm.dietaryRestrictions || "",
+        ingredients: JSON.parse(
+          JSON.stringify(this.detailForm.ingredients || []),
+        ),
+        totalCalories: this.detailForm.totalCalories || 0,
+      };
+    },
+    saveEdit() {
+      // 保存编辑内容
+      this.$emit("update", this.editForm);
+      this.isEditMode = false;
+    },
   },
 };
 </script>
@@ -292,16 +505,22 @@ export default {
 .modern-dialog {
   border-radius: 16px !important;
   overflow: hidden;
+  max-height: 90vh !important;
+  height: 90vh !important;
 }
 
 .modern-dialog .el-dialog__header {
   padding: 0;
   border-bottom: none;
+  height: 40px;
 }
 
 .modern-dialog .el-dialog__body {
   padding: 0;
   background: #f8f9fa;
+  max-height: calc(90vh - 40px) !important;
+  height: calc(90vh - 40px) !important;
+  overflow: hidden !important;
 }
 
 /* 整体弹窗内容 */
@@ -310,6 +529,21 @@ export default {
   padding: 30px;
   background: #f8f9fa;
   border-radius: 16px;
+  height: 100%;
+  overflow-y: auto;
+  max-height: 100%;
+}
+
+/* 覆盖Element UI默认样式 */
+:deep(.el-dialog) {
+  max-height: 90vh !important;
+  height: 90vh !important;
+}
+
+:deep(.el-dialog__body) {
+  max-height: calc(90vh - 40px) !important;
+  height: calc(90vh - 40px) !important;
+  overflow: hidden !important;
 }
 
 /* 标题 */
@@ -596,6 +830,47 @@ export default {
   border-radius: 6px;
   font-size: 12px;
   padding: 4px 12px;
+}
+
+/* 编辑按钮 */
+.edit-btn {
+  border-radius: 6px;
+  font-size: 12px;
+  padding: 4px 12px;
+  margin-right: 8px;
+}
+
+/* 保存按钮 */
+.save-btn {
+  border-radius: 6px;
+  font-size: 12px;
+  padding: 4px 12px;
+  margin-right: 8px;
+}
+
+/* 编辑模式样式 */
+.edit-title-input {
+  width: 100%;
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.meta-select {
+  width: 120px;
+}
+
+.meta-input {
+  width: 150px;
+}
+
+.content-textarea {
+  width: 100%;
+  resize: vertical;
+}
+
+.ingredients-card .el-input {
+  width: 100%;
 }
 
 /* 响应式调整 */

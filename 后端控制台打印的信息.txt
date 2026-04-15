@@ -1,0 +1,12 @@
+Uncaught runtime errors:
+×
+ERROR
+Cannot read properties of null (reading 'component')
+TypeError: Cannot read properties of null (reading 'component')
+    at locateNonHydratedAsyncRoot (webpack-internal:///./node_modules/@vue/runtime-core/dist/runtime-core.esm-bundler.js:6282:41)
+    at locateNonHydratedAsyncRoot (webpack-internal:///./node_modules/@vue/runtime-core/dist/runtime-core.esm-bundler.js:6287:14)
+    at ReactiveEffect.componentUpdateFn [as fn] (webpack-internal:///./node_modules/@vue/runtime-core/dist/runtime-core.esm-bundler.js:5515:40)
+    at ReactiveEffect.run (webpack-internal:///./node_modules/@vue/reactivity/dist/reactivity.esm-bundler.js:291:19)
+    at eval (webpack-internal:///./node_modules/@vue/runtime-core/dist/runtime-core.esm-bundler.js:678:25)
+    at callWithErrorHandling (webpack-internal:///./node_modules/@vue/runtime-core/dist/runtime-core.esm-bundler.js:351:33)
+    at flushJobs (webpack-internal:///./node_modules/@vue/runtime-core/dist/runtime-core.esm-bundler.js:557:9)

@@ -4,24 +4,12 @@
       <div class="list_search_view">
         <el-form :model="searchQuery" class="search_form">
           <div class="search_view">
-            <div class="search_label">帖子标题：</div>
+            <div class="search_label">搜索：</div>
             <div class="search_box">
               <el-input
                 class="search_inp"
-                v-model="searchQuery.title"
-                placeholder="帖子标题"
-                clearable
-              >
-              </el-input>
-            </div>
-          </div>
-          <div class="search_view">
-            <div class="search_label">帖子内容：</div>
-            <div class="search_box">
-              <el-input
-                class="search_inp"
-                v-model="searchQuery.content"
-                placeholder="帖子内容"
+                v-model="searchQuery.keyword"
+                placeholder="输入标题或内容进行搜索"
                 clearable
               >
               </el-input>
@@ -53,26 +41,30 @@
             @click="delClick(null)"
             v-if="btnAuth('forum', '删除')"
           >
-            删除
+            批量删除
           </el-button>
         </div>
       </div>
       <div class="forum_list" v-if="btnAuth('forum', '查看')">
         <div class="forum_grid">
-          <forum-item
+          <div
             v-for="(item, index) in list"
             :key="item.id"
-            :item="item"
-            :index="index"
-            :userid="user?.id || 0"
-            :forum-show-index="forumShowIndex"
-            :btn-auth="btnAuth"
-            @mouseenter="forumShowIndex = index"
-            @mouseleave="forumShowIndex = -1"
-            @click="infoClick(item.id)"
-            @edit="editClick"
-            @del="delClick"
-          />
+            class="forum_item_wrapper"
+          >
+            <el-checkbox
+              v-model="item.checked"
+              @change="handleItemCheck(item)"
+            ></el-checkbox>
+            <forum-item
+              :item="item"
+              :index="index"
+              :userid="user?.id || 0"
+              :forum-show-index="forumShowIndex"
+              :btn-auth="btnAuth"
+              @click="infoClick(item.id)"
+            />
+          </div>
         </div>
       </div>
       <el-pagination
@@ -139,7 +131,9 @@ const tableName = "forum";
 const formName = "美食论坛";
 const route = useRoute();
 //基础信息
-onMounted(() => {});
+onMounted(() => {
+  init();
+});
 //列表数据
 const list = ref(null);
 const table = ref(null);
@@ -149,7 +143,9 @@ const listQuery = ref({
   sort: "addtime",
   order: "desc",
 });
-const searchQuery = ref({});
+const searchQuery = ref({
+  keyword: "",
+});
 const selRows = ref([]);
 const listLoading = ref(false);
 const forumShowIndex = ref(-1);
@@ -162,6 +158,7 @@ const isLiked = ref(false);
 const isCollected = ref(false);
 const isDisliked = ref(false);
 const forumDetailRef = ref(null);
+const originalList = ref([]);
 
 const getList = () => {
   listLoading.value = true;
@@ -172,8 +169,16 @@ const getList = () => {
     })
     .then((res) => {
       console.log("获取帖子列表成功:", res.data);
-      list.value = res.data.recipes;
-      total.value = res.data.recipes.length;
+      // 处理帖子列表数据，确保cover_image字段存在
+      originalList.value = (res.data.recipes || []).map((item) => {
+        return {
+          ...item,
+          // 确保cover_image字段存在
+          cover_image: item.coverImage || item.cover_image || "",
+        };
+      });
+      // 应用搜索过滤
+      applySearchFilter();
       listLoading.value = false;
     })
     .catch((error) => {
@@ -181,40 +186,80 @@ const getList = () => {
       listLoading.value = false;
     });
 };
+
+const applySearchFilter = () => {
+  const keyword = searchQuery.value.keyword.trim();
+  if (keyword) {
+    list.value = originalList.value.filter((item) => {
+      if (!item) return false;
+      const title = item.title || "";
+      const description = item.description || "";
+      return title.includes(keyword) || description.includes(keyword);
+    });
+  } else {
+    list.value = originalList.value;
+  }
+  total.value = list.value.length;
+};
+
 const delClick = (id) => {
-  let ids = ref([]);
+  let ids = [];
   if (id) {
-    ids.value = [id];
+    ids = [id];
   } else {
     if (selRows.value.length) {
-      for (let x in selRows.value) {
-        ids.value.push(selRows.value[x].id);
-      }
+      ids = selRows.value.map((row) => row.id);
     } else {
+      context?.$toolUtil.message("请选择要删除的帖子", "warning");
       return false;
     }
   }
-  ElMessageBox.confirm(`是否删除选中${formName}`, "提示", {
+  ElMessageBox.confirm(`是否删除选中的食谱`, "提示", {
     confirmButtonText: "是",
     cancelButtonText: "否",
     type: "warning",
   }).then(() => {
+    console.log("删除请求数据:", ids);
     context
       .$http({
-        url: `${tableName}/delete`,
+        url: `/recipe/delete`,
         method: "post",
-        data: ids.value,
+        data: ids,
       })
       .then((res) => {
-        context?.$toolUtil.message("删除成功", "success", () => {
+        console.log("删除响应:", res);
+        if (res.data.code === 0) {
           getList();
-        });
+          selRows.value = [];
+          context?.$toolUtil.message("删除成功", "success");
+        } else {
+          console.error("删除失败原因:", res.data.msg);
+          context?.$toolUtil.message(res.data.msg || "删除失败", "error");
+        }
+      })
+      .catch((error) => {
+        console.error("删除失败:", error);
+        context?.$toolUtil.message("删除失败", "error");
       });
   });
 };
-//多选
+
+// 多选
 const handleSelectionChange = (e) => {
   selRows.value = e;
+};
+
+// 处理单个项目的复选框点击
+const handleItemCheck = (item) => {
+  if (item.checked) {
+    // 添加到选中列表
+    if (!selRows.value.some((row) => row.id === item.id)) {
+      selRows.value.push(item);
+    }
+  } else {
+    // 从选中列表中移除
+    selRows.value = selRows.value.filter((row) => row.id !== item.id);
+  }
 };
 //列表数据
 //分页
@@ -236,7 +281,7 @@ const btnAuth = (e, a) => {
 //搜索
 const searchClick = () => {
   listQuery.value.page = 1;
-  getList();
+  applySearchFilter();
 };
 //表单
 const formRef = ref(null);
@@ -507,6 +552,21 @@ init();
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: var(--spacing-lg);
+}
+
+.forum_item_wrapper {
+  position: relative;
+}
+
+.forum_item_wrapper .el-checkbox {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 10;
+}
+
+.forum_item_wrapper .forum_item {
+  padding-top: 40px;
 }
 
 // 分页器

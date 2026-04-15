@@ -5,9 +5,11 @@
       class="edit_form"
       v-model="formVisible"
       :title="formTitle"
-      width="80%"
+      width="40%"
       destroy-on-close
       :fullscreen="false"
+      height="auto"
+      custom-class="small-dialog"
     >
       <el-form
         class="formModel_form"
@@ -23,6 +25,7 @@
                 v-model="form.yonghuzhanghao"
                 placeholder="用户账号"
                 type="text"
+                autocomplete="off"
                 :readonly="!isAdd || disabledForm.yonghuzhanghao ? true : false"
               />
             </el-form-item>
@@ -34,6 +37,7 @@
                 v-model="form.yonghumima"
                 placeholder="用户密码"
                 type="password"
+                autocomplete="off"
                 :readonly="!isAdd || disabledForm.yonghumima ? true : false"
               />
             </el-form-item>
@@ -51,25 +55,13 @@
           </el-col>
 
           <el-col :span="12">
-            <el-form-item prop="touxiang" label="头像">
-              <uploads
-                :disabled="!isAdd || disabledForm.touxiang ? true : false"
-                action="file/upload"
-                tip="请上传头像"
-                style="width: 100%; text-align: left"
-                :fileUrls="form.touxiang ? form.touxiang : ''"
-                @change="touxiangUploadSuccess"
-              >
-              </uploads>
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
             <el-form-item label="性别" prop="xingbie">
               <el-select
                 class="list_sel"
                 :disabled="!isAdd || disabledForm.xingbie ? true : false"
                 v-model="form.xingbie"
                 placeholder="请选择性别"
+                style="width: 100%"
               >
                 <el-option
                   v-for="(item, index) in xingbieLists"
@@ -88,18 +80,6 @@
                 placeholder="手机号码"
                 type="text"
                 :readonly="!isAdd || disabledForm.shoujihaoma ? true : false"
-              />
-            </el-form-item>
-          </el-col>
-
-          <el-col :span="12">
-            <el-form-item label="身份证" prop="shenfenzheng">
-              <el-input
-                class="list_inp"
-                v-model="form.shenfenzheng"
-                placeholder="身份证"
-                type="text"
-                :readonly="!isAdd || disabledForm.shenfenzheng ? true : false"
               />
             </el-form-item>
           </el-col>
@@ -155,7 +135,6 @@ const disabledForm = ref({
   touxiang: false,
   xingbie: false,
   shoujihaoma: false,
-  shenfenzheng: false,
   youxiang: false,
 });
 const formVisible = ref(false);
@@ -170,9 +149,6 @@ const rules = ref({
   xingbie: [],
   shoujihaoma: [
     { validator: context.$toolUtil.validator.mobile, trigger: "blur" },
-  ],
-  shenfenzheng: [
-    { validator: context.$toolUtil.validator.idCard, trigger: "blur" },
   ],
   youxiang: [{ validator: context.$toolUtil.validator.email, trigger: "blur" }],
 });
@@ -201,9 +177,11 @@ const resetForm = () => {
     touxiang: "",
     xingbie: "",
     shoujihaoma: "",
-    shenfenzheng: "",
     youxiang: "",
   };
+  if (formRef.value) {
+    formRef.value.resetFields();
+  }
 };
 //获取info
 const getInfo = () => {
@@ -234,7 +212,22 @@ const init = (
   tips = null,
   statusColumnValue = null,
 ) => {
-  resetForm();
+  // 重置表单
+  form.value = {
+    yonghuzhanghao: "",
+    yonghumima: "",
+    yonghuxingming: "",
+    touxiang: "",
+    xingbie: "",
+    shoujihaoma: "",
+    youxiang: "",
+  };
+
+  // 重置表单验证状态
+  if (formRef.value) {
+    formRef.value.resetFields();
+  }
+
   if (formId) {
     id.value = formId;
     type.value = formType;
@@ -243,6 +236,15 @@ const init = (
     isAdd.value = true;
     formTitle.value = "新增" + formName;
     formVisible.value = true;
+
+    // 强制清空用户账号和密码字段
+    nextTick(() => {
+      form.value.yonghuzhanghao = "";
+      form.value.yonghumima = "";
+      if (formRef.value) {
+        formRef.value.resetFields();
+      }
+    });
   } else if (formType == "info") {
     isAdd.value = false;
     formTitle.value = "查看" + formName;
@@ -284,11 +286,6 @@ const init = (
       if (x == "shoujihaoma") {
         form.value.shoujihaoma = row[x];
         disabledForm.value.shoujihaoma = true;
-        continue;
-      }
-      if (x == "shenfenzheng") {
-        form.value.shenfenzheng = row[x];
-        disabledForm.value.shenfenzheng = true;
         continue;
       }
       if (x == "youxiang") {
@@ -340,11 +337,23 @@ const editorChange = (e, name) => {
 };
 //提交
 const save = async () => {
-  if (form.value.touxiang != null) {
+  // 自动生成DiceBear头像URL（与用户端注册逻辑一致）
+  if (!form.value.touxiang) {
+    form.value.touxiang = `https://api.dicebear.com/7.x/avataaars/svg?seed=${form.value.yonghuzhanghao}`;
+  } else if (form.value.touxiang != null) {
+    // 保留现有的图片路径处理逻辑
     form.value.touxiang = form.value.touxiang.replace(
       new RegExp(context?.$config.url, "g"),
       "",
     );
+  }
+
+  // 添加时间日期字段
+  if (!form.value.id) {
+    form.value.addtime = new Date()
+      .toISOString()
+      .slice(0, 19)
+      .replace("T", " ");
   }
   var table = crossTable.value;
   var objcross = JSON.parse(JSON.stringify(crossRow.value));
@@ -400,6 +409,7 @@ const save = async () => {
                   emit("formModelChange");
                   context?.$toolUtil.message(`操作成功`, "success");
                   formVisible.value = false;
+                  resetForm();
                 });
             }
           });
@@ -414,6 +424,7 @@ const save = async () => {
             emit("formModelChange");
             context?.$toolUtil.message(`操作成功`, "success");
             formVisible.value = false;
+            resetForm();
           });
       }
     } else {
@@ -435,10 +446,37 @@ const changeCrossData = async (row) => {
 };
 </script>
 <style lang="scss" scoped>
+// 强制缩小弹窗高度
+:deep(.small-dialog) {
+  max-height: 30vh !important;
+  height: auto !important;
+  overflow-y: auto;
+
+  .el-dialog__body {
+    padding: 5px 10px !important; /* 进一步减少内边距 */
+    max-height: 20vh !important; /* 进一步限制内容高度 */
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .formModel_form {
+    max-height: 15vh !important;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .formModel_btn_box {
+    margin-top: 10px !important;
+    margin-bottom: 10px !important;
+  }
+}
+
 // 表单
 .formModel_form {
   // form item
   :deep(.el-form-item) {
+    margin-bottom: 10px; // 减少表单元素之间的间距
     //label
     .el-form-item__label {
     }

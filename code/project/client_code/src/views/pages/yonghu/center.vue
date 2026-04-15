@@ -1,10 +1,7 @@
 <template>
   <div class="center_view" :style="{}">
-    <div class="section_title">
-      <span>{{ formName }}</span>
-    </div>
     <!-- 顶部横向导航 -->
-    <div class="top-nav">
+    <div class="section_title top-nav">
       <div
         class="nav-item"
         :class="tabIndex == 'center' ? 'nav-item-active' : ''"
@@ -56,6 +53,13 @@
         <div
           v-else-if="hasBack(item.child[0])"
           class="nav-item"
+          :class="
+            item.child[0].tableName == 'forum' &&
+            item.child[0].menuJump == '14' &&
+            tabIndex == 'myPosts'
+              ? 'nav-item-active'
+              : ''
+          "
           @click="tabClick(item.child[0])"
         >
           {{ item.child[0].menu }}
@@ -67,12 +71,6 @@
         @click="tabClick({ tableName: 'storeup', type: 1 })"
       >
         我的收藏
-      </div>
-      <div
-        class="nav-item"
-        @click="tabClick({ tableName: 'storeup', type: 51 })"
-      >
-        浏览历史
       </div>
     </div>
     <!-- 内容区域 -->
@@ -108,14 +106,21 @@
               </el-col>
               <el-col :span="24">
                 <el-form-item prop="touxiang" label="头像">
-                  <uploads
-                    action="file/upload"
-                    tip="请上传头像"
-                    style="width: 100%; text-align: left"
-                    :fileUrls="userForm.touxiang ? userForm.touxiang : ''"
-                    @change="touxiangUploadSuccess"
+                  <div
+                    style="
+                      width: 200px;
+                      height: 200px;
+                      border: 1px solid #d9d9d9;
+                      border-radius: 4px;
+                      overflow: hidden;
+                    "
                   >
-                  </uploads>
+                    <img
+                      :src="userForm.touxiang"
+                      style="width: 100%; height: 100%; object-fit: cover"
+                      alt="用户头像"
+                    />
+                  </div>
                 </el-form-item>
               </el-col>
               <el-col :span="12">
@@ -397,6 +402,11 @@
                   />
                 </div>
 
+                <div class="predict-section">
+                  <span class="predict-label">目标达成预测</span>
+                  <div class="predict-text">{{ predictText }}</div>
+                </div>
+
                 <div class="goal-setting">
                   <h4>目标设置</h4>
                   <el-form :model="goalForm" label-width="100px">
@@ -491,15 +501,8 @@
                   <el-table-column prop="weight" label="体重(kg)" width="100" />
                   <el-table-column prop="bmi" label="BMI" width="100" />
                   <el-table-column prop="createTime" label="记录时间" />
-                  <el-table-column label="操作" width="150">
+                  <el-table-column label="操作" width="80">
                     <template #default="scope">
-                      <el-button
-                        type="warning"
-                        size="small"
-                        @click="editRecord(scope.row)"
-                      >
-                        编辑
-                      </el-button>
                       <el-button
                         type="danger"
                         size="small"
@@ -568,6 +571,40 @@
         </div>
       </div>
 
+      <!-- 我的发布 -->
+      <div class="content-section" v-if="tabIndex == 'myPosts'">
+        <div class="card">
+          <h3 class="card-title">我的发布</h3>
+          <div class="forum_list">
+            <forum-item
+              v-for="(item, index) in myPostsList"
+              :key="index"
+              :item="item"
+              :index="index"
+              :userid="Number(userid)"
+              :forum-show-index="forumShowIndex"
+              :btn-auth="btnAuth"
+              @mouseenter="(event) => forumEnter(index)"
+              @mouseleave="forumLeave"
+              @click="(id) => detailClick(id)"
+              @del="(id) => delClick(id)"
+            />
+            <el-pagination
+              background
+              :layout="myPostsLayouts.join(',')"
+              :total="myPostsTotal"
+              :page-size="myPostsListQuery.limit"
+              v-model:current-page="myPostsListQuery.page"
+              prev-text="上一页"
+              next-text="下一页"
+              :hide-on-single-page="false"
+              @size-change="myPostsSizeChange"
+              @current-change="myPostsCurrentChange"
+            />
+          </div>
+        </div>
+      </div>
+
       <forum-detail
         v-model:visible="detailVisible"
         :detail-form="detailForm"
@@ -581,10 +618,96 @@
         :btn-auth="btnAuth"
         @del="delClick"
         @record-behavior="recordBehavior"
+        @update="updateRecipe"
       />
     </div>
   </div>
 </template>
+
+<style scoped>
+.predict-section {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #f5f7fa;
+  border-radius: 8px;
+  border-left: 4px solid #03cc88;
+}
+
+.predict-label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.predict-text {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #666;
+}
+
+/* 现代弹窗样式 */
+.modern-alert {
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.modern-alert .el-message-box__title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  padding: 20px 24px 0;
+}
+
+.modern-alert .el-message-box__content {
+  font-size: 14px;
+  line-height: 1.6;
+  color: #666;
+  padding: 20px 24px;
+}
+
+.modern-alert .el-message-box__btns {
+  padding: 0 24px 20px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.modern-confirm-btn {
+  background-color: #03cc88;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.modern-confirm-btn:hover {
+  background-color: #02b378;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(3, 204, 136, 0.3);
+}
+
+.modern-cancel-btn {
+  background-color: #f5f7fa;
+  border: 1px solid #e4e7ed;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.modern-cancel-btn:hover {
+  background-color: #edf2fc;
+  border-color: #dcdfe6;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+</style>
+
 <script setup>
 import { ElMessageBox } from "element-plus";
 import moment from "moment";
@@ -640,7 +763,7 @@ const passwordRules = ref({
 //档案管理
 const profileFormRef = ref(null);
 const profileForm = ref({
-  height: "",
+  height: 170, // 设置默认身高为 170 厘米
   weight: "",
   age: "",
   gender: "男",
@@ -670,6 +793,27 @@ const storeupLayouts = ref([
   "jumper",
 ]);
 
+// 我的发布相关变量
+const myPostsList = ref([]);
+const myPostsTotal = ref(0);
+const myPostsPage = ref(1);
+const myPostsLimit = ref(20);
+const myPostsLoading = ref(false);
+const myPostsListQuery = ref({
+  page: 1,
+  limit: 20,
+  sort: "id",
+  order: "desc",
+});
+const myPostsLayouts = ref([
+  "total",
+  "prev",
+  "pager",
+  "next",
+  "sizes",
+  "jumper",
+]);
+
 //用户ID
 const userid = ref(context?.$toolUtil.storageGet("userid"));
 
@@ -688,18 +832,161 @@ const btnAuth = (e, a) => {
   return context?.$toolUtil.isAuth(e, a);
 };
 
+//获取我的发布列表
+const getMyPostsList = () => {
+  console.log("开始获取我的发布列表");
+  let params = JSON.parse(JSON.stringify(myPostsListQuery.value));
+  console.log("请求参数:", params);
+
+  if (!context || !context.$http) {
+    console.error("context或$http未定义");
+    return;
+  }
+
+  context
+    .$http({
+      url: `recipe/user/${userid.value}`,
+      method: "get",
+    })
+    .then((res) => {
+      console.log("我的发布列表响应:", res);
+      if (res && res.data && res.data.recipes) {
+        const myPostsItems = res.data.recipes || [];
+        console.log("我的发布项目:", myPostsItems);
+
+        // 处理我的发布列表数据
+        myPostsList.value = myPostsItems.map((item) => {
+          return {
+            ...item,
+            // 确保id字段正确
+            id: item.id,
+            // 确保userid字段是帖子作者的ID
+            userid: item.userId,
+            // 确保username字段存在
+            username: item.username || item.nickname || "未知用户",
+            // 确保totalCalories字段存在
+            totalCalories: item.totalCalories || 0,
+            // 确保nutritionTag字段存在
+            nutritionTag: item.nutritionTag || "",
+            // 确保addtime字段存在
+            addtime: item.addtime || "",
+            // 确保title字段存在
+            title: item.title || "无标题",
+            // 确保cover_image字段存在
+            cover_image: item.coverImage || item.cover_image || "",
+          };
+        });
+        myPostsTotal.value = myPostsItems.length || 0;
+        console.log("处理后的我的发布列表:", myPostsList.value);
+      } else {
+        console.error("我的发布列表响应结构不正确");
+        myPostsList.value = [];
+        myPostsTotal.value = 0;
+      }
+    })
+    .catch((error) => {
+      console.error("获取我的发布列表失败:", error);
+      myPostsList.value = [];
+      myPostsTotal.value = 0;
+    });
+};
+
 //获取收藏列表
 const getStoreupList = () => {
+  console.log("开始获取收藏列表");
   let params = JSON.parse(JSON.stringify(storeupListQuery.value));
+  console.log("请求参数:", params);
+
+  if (!context || !context.$http) {
+    console.error("context或$http未定义");
+    return;
+  }
+
   context
-    ?.$http({
+    .$http({
       url: "storeup/page",
       method: "get",
       params: params,
     })
     .then((res) => {
-      storeupList.value = res.data.data.list;
-      storeupTotal.value = Number(res.data.data.total);
+      console.log("收藏列表响应:", res);
+      if (res && res.data && res.data.data) {
+        const storeupItems = res.data.data.list || [];
+        console.log("收藏项目:", storeupItems);
+        // 获取收藏的帖子详情
+        const refIds = storeupItems
+          .map((item) => item.refid)
+          .filter((id) => id);
+        console.log("收藏的帖子ID:", refIds);
+        if (refIds.length > 0) {
+          // 对每个收藏的帖子ID单独调用接口获取详情
+          const recipePromises = refIds.map((id) => {
+            return context.$http({
+              url: `recipe/info/${id}`,
+              method: "get",
+            });
+          });
+
+          Promise.all(recipePromises)
+            .then((recipeResArray) => {
+              console.log("帖子详情响应数组:", recipeResArray);
+              const recipeMap = {};
+              recipeResArray.forEach((recipeRes, index) => {
+                if (recipeRes && recipeRes.data && recipeRes.data.recipe) {
+                  const recipe = recipeRes.data.recipe;
+                  recipeMap[refIds[index]] = recipe;
+                }
+              });
+              console.log("帖子详情映射:", recipeMap);
+
+              // 合并收藏数据和帖子详情
+              storeupList.value = storeupItems.map((item) => {
+                const recipe = recipeMap[item.refid] || {};
+                return {
+                  ...item,
+                  ...recipe,
+                  // 确保id字段正确
+                  id: item.refid,
+                  // 确保userid字段是帖子作者的ID
+                  userid: recipe.userId,
+                  // 确保username字段存在
+                  username: recipe.username || recipe.nickname || "未知用户",
+                  // 确保totalCalories字段存在
+                  totalCalories: recipe.totalCalories || 0,
+                  // 确保nutritionTag字段存在
+                  nutritionTag: recipe.nutritionTag || "",
+                  // 确保addtime字段存在
+                  addtime: item.addtime || recipe.addtime || "",
+                  // 确保title字段存在
+                  title: recipe.title || "无标题",
+                  // 确保cover_image字段存在
+                  cover_image: recipe.coverImage || recipe.cover_image || "",
+                };
+              });
+              storeupTotal.value = Number(res.data.data.total) || 0;
+              console.log("合并后的收藏列表:", storeupList.value);
+            })
+            .catch((error) => {
+              console.error("获取帖子详情失败:", error);
+              // 即使获取帖子详情失败，也显示收藏列表
+              storeupList.value = storeupItems;
+              storeupTotal.value = Number(res.data.data.total) || 0;
+            });
+        } else {
+          storeupList.value = [];
+          storeupTotal.value = 0;
+          console.log("没有收藏的帖子");
+        }
+      } else {
+        storeupList.value = [];
+        storeupTotal.value = 0;
+        console.error("收藏列表响应结构不正确");
+      }
+    })
+    .catch((error) => {
+      console.error("获取收藏列表失败:", error);
+      storeupList.value = [];
+      storeupTotal.value = 0;
     });
 };
 
@@ -712,6 +999,17 @@ const storeupSizeChange = (size) => {
 const storeupCurrentChange = (page) => {
   storeupListQuery.value.page = page;
   getStoreupList();
+};
+
+//我的发布分页
+const myPostsSizeChange = (size) => {
+  myPostsListQuery.value.limit = size;
+  getMyPostsList();
+};
+
+const myPostsCurrentChange = (page) => {
+  myPostsListQuery.value.page = page;
+  getMyPostsList();
 };
 
 //收藏详情
@@ -773,7 +1071,46 @@ const storeupDelClick = (item) => {
 
 //删除方法
 const delClick = (item) => {
-  if (item.id) {
+  // 检查是否是帖子ID（从详情弹窗传递的是帖子ID）
+  if (typeof item === "number") {
+    context
+      .$confirm("确定要删除这条帖子吗？", "提示")
+      .then(() => {
+        context
+          .$http({
+            url: `recipe/delete/${item}`,
+            method: "delete",
+            params: {
+              userId: userid.value,
+            },
+          })
+          .then((res) => {
+            if (res.data.code === 0) {
+              context.$message({
+                type: "success",
+                message: "删除成功！",
+              });
+              // 刷新列表
+              if (tabIndex.value === "myPosts") {
+                getMyPostsList();
+              } else if (tabIndex.value === "storeup") {
+                getStoreupList();
+              }
+              detailVisible.value = false;
+            } else {
+              context.$message.error(res.data.msg || "删除失败");
+            }
+          })
+          .catch((error) => {
+            console.error("删除失败:", error);
+            context.$message.error("删除失败");
+          });
+      })
+      .catch(() => {
+        // 取消删除
+      });
+  } else if (item.id) {
+    // 处理收藏的删除
     context
       .$confirm("确定要删除该收藏吗？", "提示")
       .then(() => {
@@ -787,6 +1124,7 @@ const delClick = (item) => {
       })
       .catch(() => {});
   } else if (item) {
+    // 处理收藏的删除
     context
       .$confirm("确定要删除该收藏吗？", "提示")
       .then(() => {
@@ -799,6 +1137,53 @@ const delClick = (item) => {
       })
       .catch(() => {});
   }
+};
+
+// 更新帖子
+const updateRecipe = (form) => {
+  console.log("updateRecipe called with form:", form);
+  if (!context || !context.$http) {
+    console.error("context或$http未定义");
+    return;
+  }
+
+  // 计算总热量
+  let totalCalories = 0;
+  form.ingredients.forEach((ingredient) => {
+    totalCalories += ingredient.calories || 0;
+  });
+  form.totalCalories = totalCalories;
+  form.id = detailForm.value.id;
+  form.userId = detailForm.value.userId;
+  form.username = detailForm.value.username;
+  form.addtime = detailForm.value.addtime;
+
+  context
+    .$http({
+      url: "recipe/update",
+      method: "post",
+      data: form,
+    })
+    .then((res) => {
+      if (res.data.code === 0) {
+        context.$message({
+          type: "success",
+          message: "更新成功！",
+        });
+        // 刷新列表
+        if (tabIndex.value === "myPosts") {
+          getMyPostsList();
+        }
+        // 更新详情弹窗中的数据
+        detailForm.value = { ...detailForm.value, ...form };
+      } else {
+        context.$message.error(res.data.msg || "更新失败");
+      }
+    })
+    .catch((error) => {
+      console.error("更新失败:", error);
+      context.$message.error("更新失败");
+    });
 };
 
 // 获取行为数量
@@ -1074,77 +1459,110 @@ const rules = ref({
   youxiang: [{ validator: context.$toolUtil.validator.email, trigger: "blur" }],
 });
 const getSession = () => {
+  console.log("=== 开始获取个人中心用户信息 ===");
+  const tableName = context?.$toolUtil.storageGet("frontSessionTable");
+  console.log("数据来源表:", tableName);
+  console.log("请求URL:", `${tableName}/session`);
+
   context
     ?.$http({
-      url: `${context?.$toolUtil.storageGet("frontSessionTable")}/session`,
+      url: `${tableName}/session`,
       method: "get",
     })
     .then((res) => {
-      context?.$toolUtil.storageSet("userid", res.data.data.id);
-      context?.$toolUtil.storageSet("frontName", res.data.data.yonghuzhanghao);
-      context?.$toolUtil.storageSet("headportrait", res.data.data.touxiang);
-      userForm.value = res.data.data;
-      // 更新store中的session状态，确保顶部头像同步更新
-      store.dispatch("user/getSession");
-      // 获取用户档案
-      getProfile(res.data.data.id);
+      if (res?.data?.data) {
+        context?.$toolUtil.storageSet("userid", res.data.data.id);
+        context?.$toolUtil.storageSet(
+          "frontName",
+          res.data.data.yonghuzhanghao,
+        );
+        context?.$toolUtil.storageSet("headportrait", res.data.data.touxiang);
+        userForm.value = res.data.data;
+        // 更新store中的session状态，确保顶部头像同步更新
+        store.dispatch("user/getSession");
+        // 获取用户档案
+        getProfile(res.data.data.id);
+      }
+    })
+    .catch((error) => {
+      console.error("获取个人中心用户信息失败:", error);
     });
 };
 
 // 获取用户档案
 const getProfile = (userId) => {
-  if (context?.$http) {
-    context
-      .$http({
-        url: `user/profile/get`,
-        method: "get",
-        params: { userId },
-      })
-      .then((res) => {
-        if (res?.data?.profile) {
-          // 确保数据类型正确
-          const profileData = res.data.profile;
-          profileForm.value = {
-            ...profileForm.value,
-            ...profileData,
-            height: profileData.height || "",
-            weight: profileData.weight || "",
-            age: profileData.age || "",
-            dailyCalories: profileData.dailyCalories || "",
-            dietaryRestrictions: profileData.dietaryRestrictions
-              ? profileData.dietaryRestrictions.split(",")
-              : [],
-            userId: userId,
-          };
-        } else {
-          // 设置默认值
-          profileForm.value = {
-            height: "",
-            weight: "",
-            age: "",
-            gender: "男",
-            fitnessGoal: "维持",
-            dietaryRestrictions: "无",
-            dailyCalories: "",
-            userId: userId,
-          };
-        }
-      })
-      .catch((error) => {
-        console.error("获取档案失败:", error);
-        // 发生错误时设置默认值
-        profileForm.value = {
-          height: "",
-          weight: "",
-          age: "",
-          gender: "男",
-          fitnessGoal: "维持",
-          dietaryRestrictions: "无",
-          dailyCalories: "",
-          userId: userId,
-        };
-      });
+  // 直接使用个人中心获取到的用户信息，避免调用user/profile/get接口
+  if (userForm.value) {
+    profileForm.value = {
+      ...profileForm.value,
+      ...userForm.value,
+      height: userForm.value.height || 170, // 默认身高为 170 厘米
+      weight: userForm.value.weight || "",
+      age: userForm.value.age || "",
+      dailyCalories: userForm.value.dailyCalories || "",
+      dietaryRestrictions: userForm.value.dietaryRestrictions
+        ? userForm.value.dietaryRestrictions.split(",")
+        : [],
+      fitnessGoal: userForm.value.fitnessGoal || "维持", // 确保健身目标不为空
+      gender: userForm.value.xingbie || userForm.value.gender || "男", // 优先使用xingbie字段，保持与个人中心一致
+      userId: userId,
+    };
+  } else {
+    // 设置默认值
+    profileForm.value = {
+      height: 170, // 默认身高为 170 厘米
+      weight: "",
+      age: "",
+      gender: "男",
+      fitnessGoal: "维持",
+      dietaryRestrictions: "无",
+      dailyCalories: "",
+      userId: userId,
+    };
   }
+};
+
+// 计算每日热量需求
+const calculateDailyCalories = (height, weight, age, gender, fitnessGoal) => {
+  console.log("=== 开始计算每日热量需求 ===");
+  console.log("身高:", height);
+  console.log("体重:", weight);
+  console.log("年龄:", age);
+  console.log("性别:", gender);
+  console.log("健身目标:", fitnessGoal);
+
+  // 使用哈里斯-本尼迪克特方程计算基础代谢率(BMR)
+  let bmr;
+  if (gender === "男") {
+    bmr = 88.362 + 13.397 * weight + 4.799 * height - 5.677 * age;
+  } else {
+    bmr = 447.593 + 9.247 * weight + 3.098 * height - 4.33 * age;
+  }
+  console.log("基础代谢率(BMR):", bmr);
+
+  // 根据健身目标调整活动系数
+  let activityFactor;
+  switch (fitnessGoal) {
+    case "增肌":
+      activityFactor = 1.8; // 高强度运动
+      break;
+    case "减脂":
+      activityFactor = 1.5; // 中等强度运动
+      break;
+    case "维持":
+      activityFactor = 1.375; // 轻度运动
+      break;
+    default:
+      activityFactor = 1.375;
+  }
+  console.log("活动系数:", activityFactor);
+
+  // 计算每日热量需求
+  let dailyCalories = Math.round(bmr * activityFactor);
+  console.log("每日热量需求:", dailyCalories);
+  console.log("=== 计算每日热量需求结束 ===");
+
+  return dailyCalories;
 };
 
 // 保存用户档案
@@ -1158,7 +1576,18 @@ const saveProfile = () => {
           height: Number(profileForm.value.height),
           weight: Number(profileForm.value.weight),
           age: parseInt(profileForm.value.age),
+          fitnessGoal: profileForm.value.fitnessGoal || "维持", // 确保健身目标不为空
+          xingbie: profileForm.value.gender, // 保存性别到xingbie字段，保持与个人中心一致
         };
+
+        // 计算每日热量需求
+        formData.dailyCalories = calculateDailyCalories(
+          formData.height,
+          formData.weight,
+          formData.age,
+          formData.xingbie,
+          formData.fitnessGoal,
+        );
 
         // 将dietaryRestrictions数组转换为逗号分隔的字符串
         if (Array.isArray(formData.dietaryRestrictions)) {
@@ -1167,9 +1596,14 @@ const saveProfile = () => {
 
         console.log("保存档案请求数据:", formData);
 
+        // 使用与个人中心相同的接口保存数据
+        const tableName = context?.$toolUtil.storageGet("frontSessionTable");
+        console.log("保存档案使用的表:", tableName);
+        console.log("保存档案请求URL:", `${tableName}/update`);
+
         context
           .$http({
-            url: `user/profile/save`,
+            url: `${tableName}/update`,
             method: "post",
             data: formData,
           })
@@ -1177,11 +1611,16 @@ const saveProfile = () => {
             console.log("保存档案响应:", res);
             if (res?.data?.code == 0) {
               context?.$toolUtil?.message("保存成功", "success");
-              // 保持表单内容不消失，只更新热量计算结果
-              if (res.data?.profile?.dailyCalories) {
-                profileForm.value.dailyCalories =
-                  res.data.profile.dailyCalories.toString();
+              // 更新个人中心的用户信息
+              if (userForm.value) {
+                userForm.value = {
+                  ...userForm.value,
+                  ...formData,
+                };
+                console.log("更新个人中心用户信息:", userForm.value);
               }
+              // 刷新个人中心的session信息
+              getSession();
             } else {
               context?.$toolUtil?.message(
                 res?.data?.msg || "保存失败",
@@ -1233,7 +1672,8 @@ const tabClick = (item) => {
     return;
   }
   if (item.tableName == "forum" && item.menuJump == "14") {
-    router.push(`/index/forumList?centerType=1&myType=1`);
+    tabIndex.value = "myPosts";
+    getMyPostsList();
     return;
   }
   if (item.tableName == "storeup" && item.type == 1) {
@@ -1260,6 +1700,10 @@ const targetWeight = ref(65);
 const weightDifference = ref(-5);
 const healthStatus = ref("正常");
 const progressPercentage = ref(50);
+const initialWeight = ref(0);
+
+// 预测文本
+const predictText = ref("");
 
 // 目标设置表单
 const goalForm = ref({
@@ -1281,12 +1725,12 @@ const currentPage = ref(1);
 // 图表相关
 const chartRef = ref(null);
 const chartInstance = ref(null);
-const selectedPeriod = ref(7);
+const selectedPeriod = ref("7");
 const chartPeriods = [
-  { label: "7天", value: 7 },
-  { label: "30天", value: 30 },
-  { label: "90天", value: 90 },
-  { label: "自定义", value: 0 },
+  { label: "7天", value: "7" },
+  { label: "30天", value: "30" },
+  { label: "90天", value: "90" },
+  { label: "自定义", value: "custom" },
 ];
 
 // 提示信息
@@ -1298,7 +1742,7 @@ const initHealthData = () => {
   if (profileForm.value.height && profileForm.value.weight) {
     // 计算BMI
     const height = profileForm.value.height / 100; // 转换为米
-    const bmi = (profileForm.value.weight / (height * height)).toFixed(1);
+    const bmi = (profileForm.value.weight / (height * height)).toFixed(2);
 
     // 更新健康数据
     currentWeight.value = parseFloat(profileForm.value.weight);
@@ -1306,6 +1750,13 @@ const initHealthData = () => {
 
     // 从数据库获取目标数据
     if (context?.$http) {
+      console.log("准备发送请求到 user-profile/get-goals");
+      console.log("请求参数:", { userId: userid.value });
+      console.log(
+        "请求URL:",
+        `${process.env.VUE_APP_BASE_API}/user-profile/get-goals?userId=${userid.value}`,
+      );
+
       context
         .$http({
           url: `user-profile/get-goals`,
@@ -1330,34 +1781,23 @@ const initHealthData = () => {
             // 计算差距和进度
             weightDifference.value = currentWeight.value - targetWeight.value;
 
-            // 重新计算进度，使用当前体重作为初始体重
-            const initialWeight = currentWeight.value;
-            const totalDiff = initialWeight - targetWeight.value;
-            const currentDiff = currentWeight.value - targetWeight.value;
+            // 使用从后端获取的初始体重，如果没有则使用当前体重
+            const initialWeight = goals.initialWeight || currentWeight.value;
+            const totalDiff = Math.abs(initialWeight - targetWeight.value);
+            const currentDiff = Math.abs(
+              currentWeight.value - targetWeight.value,
+            );
 
+            // 计算进度：|初始体重 - 当前体重| / |初始体重 - 目标体重| * 100%
             if (totalDiff > 0) {
-              // 减重目标
-              if (currentWeight.value <= targetWeight.value) {
-                progressPercentage.value = 100;
-              } else {
-                progressPercentage.value = Math.round(
-                  ((totalDiff - currentDiff) / totalDiff) * 100,
-                );
-              }
-            } else if (totalDiff < 0) {
-              // 增重目标
-              if (currentWeight.value >= targetWeight.value) {
-                progressPercentage.value = 100;
-              } else {
-                // 计算增重进度：(当前体重 - 初始体重) / (目标体重 - 初始体重) * 100
-                const progress =
-                  ((currentWeight.value - initialWeight) /
-                    (targetWeight.value - initialWeight)) *
-                  100;
-                progressPercentage.value = Math.round(
-                  Math.max(0, Math.min(100, progress)),
-                );
-              }
+              const progress = (currentDiff / totalDiff) * 100;
+              // 进度应该是100%减去当前差距占总差距的比例
+              progressPercentage.value = Math.round(100 - progress);
+              // 确保进度在0-100之间
+              progressPercentage.value = Math.max(
+                0,
+                Math.min(100, progressPercentage.value),
+              );
             } else {
               progressPercentage.value = 100;
             }
@@ -1523,207 +1963,276 @@ const initHealthData = () => {
     }
   }
 
-  // 从数据库获取健康记录
-  console.log(
-    "获取健康记录，用户ID:",
-    userid.value,
-    "类型:",
-    typeof userid.value,
-  );
+  // 初始化健康记录为空数组，等待从数据库获取
+  healthRecords.value = [];
+  healthRecordsTotal.value = 0;
+
+  // 从数据库获取每日体重记录
   if (context?.$http) {
+    // 每次请求前从localStorage中重新获取userid，确保是最新的
+    const currentUserId = context?.$toolUtil.storageGet("userid");
+
     context
       .$http({
-        url: `user-daily-record/list`,
+        url: `/user-daily-record/list`,
         method: "get",
-        params: { userId: Number(userid.value) },
+        params: { userId: parseInt(currentUserId) },
       })
       .then((res) => {
-        console.log("获取健康记录响应:", res);
         if (res && res.data && res.data.code === 0) {
-          healthRecords.value = res.data.data || [];
-          healthRecordsTotal.value = healthRecords.value.length;
-          console.log("健康记录数据:", healthRecords.value);
-        } else {
-          // API调用失败，使用模拟数据
-          console.log("获取健康记录失败，使用模拟数据");
-          healthRecords.value = [
-            {
-              id: 1,
-              recordDate: "2026-01-20",
-              weight: 70.5,
-              bmi: 23.1,
-              createTime: "2026-01-20 10:00:00",
-            },
-            {
-              id: 2,
-              recordDate: "2026-01-28",
-              weight: 70.0,
-              bmi: 22.9,
-              createTime: "2026-01-28 10:00:00",
-            },
-            {
-              id: 3,
-              recordDate: "2026-02-05",
-              weight: 69.5,
-              bmi: 22.7,
-              createTime: "2026-02-05 10:00:00",
-            },
-            {
-              id: 4,
-              recordDate: "2026-02-15",
-              weight: 69.0,
-              bmi: 22.5,
-              createTime: "2026-02-15 10:00:00",
-            },
-            {
-              id: 5,
-              recordDate: "2026-02-25",
-              weight: 68.5,
-              bmi: 22.3,
-              createTime: "2026-02-25 10:00:00",
-            },
-            {
-              id: 6,
-              recordDate: "2026-03-05",
-              weight: 68.0,
-              bmi: 22.1,
-              createTime: "2026-03-05 10:00:00",
-            },
-            {
-              id: 7,
-              recordDate: "2026-03-15",
-              weight: 67.5,
-              bmi: 21.9,
-              createTime: "2026-03-15 10:00:00",
-            },
-          ];
-          healthRecordsTotal.value = healthRecords.value.length;
+          const records = res.data.records;
+          if (records && records.length > 0) {
+            // 更新健康记录数据
+            healthRecords.value = records;
+            healthRecordsTotal.value = records.length;
+            // 更新最新体重
+            // 按日期排序，获取最新记录
+            const sortedRecords = [...records].sort((a, b) => {
+              return new Date(b.recordDate) - new Date(a.recordDate);
+            });
+            const latestRecord = sortedRecords[0];
+            if (latestRecord) {
+              currentWeight.value = latestRecord.weight;
+              currentBMI.value = latestRecord.bmi;
+              // 更新档案管理的体重
+              profileForm.value.weight = latestRecord.weight;
+            }
+            // 计算目标达成进度
+            calculateProgress();
+
+            // 重新渲染图表
+            initChart();
+          }
         }
-        // 初始化图表
-        setTimeout(() => {
-          initChart();
-        }, 100);
       })
       .catch((error) => {
-        console.error("获取健康记录失败:", error);
-        // API调用失败，使用模拟数据
-        healthRecords.value = [
-          {
-            id: 1,
-            recordDate: "2026-01-20",
-            weight: 70.5,
-            bmi: 23.1,
-            createTime: "2026-01-20 10:00:00",
-          },
-          {
-            id: 2,
-            recordDate: "2026-01-28",
-            weight: 70.0,
-            bmi: 22.9,
-            createTime: "2026-01-28 10:00:00",
-          },
-          {
-            id: 3,
-            recordDate: "2026-02-05",
-            weight: 69.5,
-            bmi: 22.7,
-            createTime: "2026-02-05 10:00:00",
-          },
-          {
-            id: 4,
-            recordDate: "2026-02-15",
-            weight: 69.0,
-            bmi: 22.5,
-            createTime: "2026-02-15 10:00:00",
-          },
-          {
-            id: 5,
-            recordDate: "2026-02-25",
-            weight: 68.5,
-            bmi: 22.3,
-            createTime: "2026-02-25 10:00:00",
-          },
-          {
-            id: 6,
-            recordDate: "2026-03-05",
-            weight: 68.0,
-            bmi: 22.1,
-            createTime: "2026-03-05 10:00:00",
-          },
-          {
-            id: 7,
-            recordDate: "2026-03-15",
-            weight: 67.5,
-            bmi: 21.9,
-            createTime: "2026-03-15 10:00:00",
-          },
-        ];
-        healthRecordsTotal.value = healthRecords.value.length;
-        // 初始化图表
-        setTimeout(() => {
-          initChart();
-        }, 100);
+        // 静默处理错误
       });
-  } else {
-    // context.$http 未定义，使用模拟数据
-    console.log("context.$http 未定义，使用模拟数据");
-    healthRecords.value = [
-      {
-        id: 1,
-        recordDate: "2026-01-20",
-        weight: 70.5,
-        bmi: 23.1,
-        createTime: "2026-01-20 10:00:00",
-      },
-      {
-        id: 2,
-        recordDate: "2026-01-28",
-        weight: 70.0,
-        bmi: 22.9,
-        createTime: "2026-01-28 10:00:00",
-      },
-      {
-        id: 3,
-        recordDate: "2026-02-05",
-        weight: 69.5,
-        bmi: 22.7,
-        createTime: "2026-02-05 10:00:00",
-      },
-      {
-        id: 4,
-        recordDate: "2026-02-15",
-        weight: 69.0,
-        bmi: 22.5,
-        createTime: "2026-02-15 10:00:00",
-      },
-      {
-        id: 5,
-        recordDate: "2026-02-25",
-        weight: 68.5,
-        bmi: 22.3,
-        createTime: "2026-02-25 10:00:00",
-      },
-      {
-        id: 6,
-        recordDate: "2026-03-05",
-        weight: 68.0,
-        bmi: 22.1,
-        createTime: "2026-03-05 10:00:00",
-      },
-      {
-        id: 7,
-        recordDate: "2026-03-15",
-        weight: 67.5,
-        bmi: 21.9,
-        createTime: "2026-03-15 10:00:00",
-      },
-    ];
-    healthRecordsTotal.value = healthRecords.value.length;
-    // 初始化图表
-    setTimeout(() => {
-      initChart();
-    }, 100);
   }
+
+  // 初始化当前体重和BMI
+  if (healthRecords.value.length > 0) {
+    // 按日期排序，获取最新记录
+    const sortedRecords = [...healthRecords.value].sort((a, b) => {
+      return new Date(b.recordDate) - new Date(a.recordDate);
+    });
+    const latestRecord = sortedRecords[0];
+    currentWeight.value = latestRecord.weight;
+    currentBMI.value = latestRecord.bmi;
+    // 更新档案管理的体重
+    profileForm.value.weight = latestRecord.weight;
+    console.log("最新健康记录:", latestRecord);
+  }
+
+  // 从本地存储获取目标数据
+  const currentUserId = context?.$toolUtil.storageGet("userid");
+  const goalStorageKey = `healthGoals_${currentUserId}`;
+  const savedGoals = localStorage.getItem(goalStorageKey);
+
+  if (savedGoals) {
+    const goals = JSON.parse(savedGoals);
+    if (goals) {
+      if (goals.targetWeight) {
+        targetWeight.value = parseFloat(goals.targetWeight);
+        goalForm.value.targetWeight = parseFloat(goals.targetWeight);
+      }
+      if (goals.targetBMI) {
+        targetBMI.value = parseFloat(goals.targetBMI);
+        goalForm.value.targetBMI = parseFloat(goals.targetBMI);
+      }
+      if (goals.initialWeight) {
+        initialWeight.value = parseFloat(goals.initialWeight);
+      }
+    }
+  }
+
+  // 如果没有初始体重，使用用户第一次记录的体重作为初始体重
+  if (!initialWeight.value && healthRecords.value.length > 0) {
+    // 按日期排序，获取最早记录
+    const sortedRecords = [...healthRecords.value].sort((a, b) => {
+      return new Date(a.recordDate) - new Date(b.recordDate);
+    });
+    const firstRecord = sortedRecords[0];
+    initialWeight.value = firstRecord.weight;
+    console.log("使用第一次记录的体重作为初始体重:", initialWeight.value);
+
+    // 保存初始体重到本地存储
+    const goalData = {
+      targetWeight: targetWeight.value,
+      targetBMI: targetBMI.value,
+      initialWeight: initialWeight.value,
+    };
+    localStorage.setItem(goalStorageKey, JSON.stringify(goalData));
+  }
+
+  // 修复浮点数精度问题
+  weightDifference.value = parseFloat(weightDifference.value.toFixed(1));
+
+  // 更新健康状态
+  updateHealthStatus();
+
+  // 初始化图表
+  setTimeout(() => {
+    initChart();
+  }, 100);
+
+  // 计算目标达成进度
+  calculateProgress();
+};
+
+// 计算目标达成进度
+const calculateProgress = () => {
+  // 计算差距和进度
+  weightDifference.value = currentWeight.value - targetWeight.value;
+
+  // 使用历史记录中最早的日期作为初始体重，最近的日期作为当前体重
+  let initialWeightVal = 0;
+  let currentWeightVal = 0;
+  let currentBMIVal = 0;
+
+  if (healthRecords.value && healthRecords.value.length > 0) {
+    // 按日期排序记录（升序）
+    const sortedRecords = [...healthRecords.value].sort((a, b) => {
+      return new Date(a.recordDate) - new Date(b.recordDate);
+    });
+
+    // 最早的记录作为初始体重
+    if (sortedRecords.length > 0) {
+      initialWeightVal = sortedRecords[0].weight;
+    }
+
+    // 最新的记录作为当前体重和 BMI
+    if (sortedRecords.length > 0) {
+      const latestRecord = sortedRecords[sortedRecords.length - 1];
+      currentWeightVal = latestRecord.weight;
+      currentBMIVal = latestRecord.bmi;
+      // 更新 currentWeight 和 currentBMI，确保左边上方的数据显示与进度条一致
+      currentWeight.value = currentWeightVal;
+      currentBMI.value = currentBMIVal;
+    }
+  }
+
+  // 确保初始体重和当前体重都是有效的数字
+  initialWeightVal = parseFloat(initialWeightVal) || 0;
+  currentWeightVal = parseFloat(currentWeightVal) || 0;
+
+  // 确保所有值都是数字类型
+  initialWeightVal = parseFloat(initialWeightVal) || 0;
+  currentWeightVal = parseFloat(currentWeightVal) || 0;
+  const targetWeightVal = parseFloat(targetWeight.value) || 0;
+
+  const totalDiff = Math.abs(initialWeightVal - targetWeightVal);
+  const weightChange = Math.abs(initialWeightVal - currentWeightVal);
+
+  // 计算进度：|初始体重 - 当前体重| / |初始体重 - 目标体重| × 100%
+  if (totalDiff > 0) {
+    // 检查是否已经达到或超过目标体重
+    const isGoalAchieved =
+      (initialWeightVal > targetWeightVal &&
+        currentWeightVal <= targetWeightVal) ||
+      (initialWeightVal < targetWeightVal &&
+        currentWeightVal >= targetWeightVal);
+
+    if (isGoalAchieved) {
+      // 如果已经达到或超过目标体重，进度为 100%
+      progressPercentage.value = 100;
+    } else {
+      // 否则计算进度
+      const progress = (weightChange / totalDiff) * 100;
+      // 确保进度在0-100之间
+      progressPercentage.value = Math.max(
+        0,
+        Math.min(100, Math.round(progress)),
+      );
+    }
+  } else {
+    progressPercentage.value = 100;
+  }
+
+  // 输出目标达成进度信息
+  console.log("最新体重:", currentWeightVal);
+  console.log("最早体重:", initialWeightVal);
+  console.log("进度条:", progressPercentage.value);
+  console.log("健康记录数量:", healthRecords.value.length);
+  if (healthRecords.value.length > 0) {
+    console.log("第一条记录:", healthRecords.value[0]);
+    console.log(
+      "最后一条记录:",
+      healthRecords.value[healthRecords.value.length - 1],
+    );
+  }
+
+  // 计算预测
+  calculatePredict();
+};
+
+// 计算预测
+const calculatePredict = () => {
+  let current = currentWeight.value;
+  let goal = targetWeight.value;
+  let pre = 0;
+  let dayDiff = 0;
+
+  if (healthRecords.value && healthRecords.value.length >= 2) {
+    // 按日期排序记录（升序）
+    const sortedRecords = [...healthRecords.value].sort((a, b) => {
+      return new Date(a.recordDate) - new Date(b.recordDate);
+    });
+
+    // 最新的两条记录
+    const latestRecord = sortedRecords[sortedRecords.length - 1];
+    const previousRecord = sortedRecords[sortedRecords.length - 2];
+
+    pre = previousRecord.weight;
+    dayDiff =
+      (new Date(latestRecord.recordDate) -
+        new Date(previousRecord.recordDate)) /
+      (1000 * 60 * 60 * 24);
+  }
+
+  // 没有足够数据
+  if (dayDiff === 0) {
+    predictText.value = "坚持记录两天以上，即可生成预测";
+    return;
+  }
+
+  // 每天体重变化
+  let perDay = (current - pre) / dayDiff;
+
+  // 已经达到目标
+  if (Math.abs(current - goal) < 0.1) {
+    predictText.value = "🎉 恭喜！已达到目标体重，继续保持！";
+    return;
+  }
+
+  // 减重用户
+  if (current > goal) {
+    if (perDay < 0) {
+      // 正常减重
+      let need = (current - goal) / Math.abs(perDay);
+      predictText.value = `🚀 预测还需 ${Math.ceil(need)} 天达到目标体重`;
+    } else {
+      // 体重反弹
+      predictText.value = "⚠️ 最近体重有所上升，坚持住就能重回正轨！";
+    }
+    return;
+  }
+
+  // 增重用户
+  if (current < goal) {
+    if (perDay > 0) {
+      // 正常增重
+      let need = (goal - current) / perDay;
+      predictText.value = `🚀 预测还需 ${Math.ceil(need)} 天达到目标体重`;
+    } else {
+      // 体重下降
+      predictText.value = "⚠️ 最近体重有所下降，多吃点很快就能达标！";
+    }
+    return;
+  }
+
+  // 维持
+  predictText.value = "✅ 当前体重理想，继续保持健康生活！";
 };
 
 // 更新健康状态
@@ -1755,10 +2264,49 @@ const initChart = () => {
     console.log("选择的时间范围:", selectedPeriod.value);
     console.log("所有记录:", sortedRecords);
 
-    // 由于是模拟数据，我们直接使用所有记录，不做时间过滤
-    // 这样可以确保图表显示所有数据
-    filteredRecords = sortedRecords;
-    console.log("使用所有记录:", filteredRecords);
+    // 根据选择的时间范围过滤数据
+    if (selectedPeriod.value === "7") {
+      // 过滤最近7天的记录
+      const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      console.log("7天前日期:", sevenDaysAgo);
+      filteredRecords = sortedRecords.filter((record) => {
+        const recordDate = new Date(record.recordDate);
+        console.log(
+          "记录日期:",
+          recordDate,
+          "是否在范围内:",
+          recordDate >= sevenDaysAgo,
+        );
+        return recordDate >= sevenDaysAgo;
+      });
+    } else if (selectedPeriod.value === "30") {
+      // 过滤最近30天的记录
+      const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      filteredRecords = sortedRecords.filter((record) => {
+        return new Date(record.recordDate) >= thirtyDaysAgo;
+      });
+    } else if (selectedPeriod.value === "90") {
+      // 过滤最近90天的记录
+      const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+      filteredRecords = sortedRecords.filter((record) => {
+        return new Date(record.recordDate) >= ninetyDaysAgo;
+      });
+    } else if (selectedPeriod.value === "custom") {
+      // 自定义时间范围，这里简单处理，使用所有记录
+      // 实际项目中应该添加日期选择器让用户选择自定义时间范围
+      filteredRecords = sortedRecords;
+    } else {
+      // 默认使用所有记录
+      filteredRecords = sortedRecords;
+    }
+
+    // 如果过滤后的记录为空，使用所有记录
+    if (filteredRecords.length === 0 && sortedRecords.length > 0) {
+      console.log("过滤后无数据，使用所有记录");
+      filteredRecords = sortedRecords;
+    }
+
+    console.log("过滤后的记录:", filteredRecords);
 
     // 准备图表数据
     const dates = filteredRecords.map((record) => {
@@ -1773,6 +2321,12 @@ const initChart = () => {
       targetWeight.value,
     );
 
+    // 打印 ECharts 接收到的数据
+    console.log("ECharts 接收到的数据 - 日期:", dates);
+    console.log("ECharts 接收到的数据 - 体重:", weights);
+    console.log("ECharts 接收到的数据 - BMI:", bmis);
+    console.log("ECharts 接收到的数据 - 目标体重:", targetWeights);
+
     // 销毁旧图表
     if (chartInstance.value) {
       chartInstance.value.dispose();
@@ -1781,12 +2335,16 @@ const initChart = () => {
     // 创建新图表
     chartInstance.value = echarts.init(chartRef.value);
 
+    // 检查是否有数据
+    const hasData = filteredRecords.length > 0;
+
     const option = {
       tooltip: {
         trigger: "axis",
       },
       legend: {
-        data: ["体重", "BMI", "目标体重"],
+        data: hasData ? ["体重", "BMI", "目标体重"] : [],
+        bottom: "10%", // 向下移动图例
       },
       grid: {
         left: "3%",
@@ -1797,49 +2355,60 @@ const initChart = () => {
       xAxis: {
         type: "category",
         boundaryGap: false,
-        data: dates.length > 0 ? dates : [""],
+        data: hasData ? dates : [""],
       },
       yAxis: [
         {
           type: "value",
           name: "体重(kg)",
           position: "left",
+          min: 0,
+          max: 100,
         },
         {
           type: "value",
           name: "BMI",
           position: "right",
+          min: 0,
+          max: 40,
         },
       ],
-      series: [
-        {
-          name: "体重",
-          type: "line",
-          data: weights.length > 0 ? weights : [0],
-          itemStyle: {
-            color: "#03CC88",
-          },
-        },
-        {
-          name: "BMI",
-          type: "line",
-          yAxisIndex: 1,
-          data: bmis.length > 0 ? bmis : [0],
-          itemStyle: {
-            color: "#ee6723",
-          },
-        },
-        {
-          name: "目标体重",
-          type: "line",
-          data: targetWeights.length > 0 ? targetWeights : [0],
-          lineStyle: {
-            type: "dashed",
-            color: "#999",
-          },
-          symbol: "none",
-        },
-      ],
+      series: hasData
+        ? [
+            {
+              name: "体重",
+              type: "line",
+              data: weights,
+              itemStyle: {
+                color: "#03CC88",
+              },
+              showSymbol: true,
+              symbolSize: 6,
+            },
+            {
+              name: "BMI",
+              type: "line",
+              yAxisIndex: 1,
+              data: bmis,
+              itemStyle: {
+                color: "#ee6723",
+              },
+              showSymbol: true,
+              symbolSize: 6,
+            },
+            {
+              name: "目标体重",
+              type: "line",
+              data: targetWeights,
+              lineStyle: {
+                type: "dashed",
+                color: "#999",
+              },
+              symbol: "none",
+              showSymbol: false,
+            },
+          ]
+        : [],
     };
 
     chartInstance.value.setOption(option);
@@ -1924,29 +2493,17 @@ const saveGoal = () => {
   targetBMI.value = parseFloat(targetBMI.value.toFixed(1));
   weightDifference.value = parseFloat(weightDifference.value.toFixed(1));
 
-  // 保存目标到数据库
-  if (context?.$http) {
-    const goalData = {
-      userId: userid.value,
-      targetWeight: targetWeight.value,
-      targetBMI: targetBMI.value,
-    };
+  // 保存目标到本地存储
+  const currentUserId = context?.$toolUtil.storageGet("userid");
+  const goalStorageKey = `healthGoals_${currentUserId}`;
+  const goalData = {
+    targetWeight: targetWeight.value,
+    targetBMI: targetBMI.value,
+    initialWeight: currentWeight.value, // 保存初始体重
+  };
 
-    context
-      .$http({
-        url: `user-profile/update-goals`,
-        method: "post",
-        data: goalData,
-      })
-      .then((res) => {
-        if (res && res.data && res.data.code === 0) {
-          console.log("目标保存到数据库成功");
-        }
-      })
-      .catch((error) => {
-        console.error("保存目标到数据库失败:", error);
-      });
-  }
+  localStorage.setItem(goalStorageKey, JSON.stringify(goalData));
+  console.log("目标保存到本地存储成功:", goalData);
 
   context?.$toolUtil.message("目标保存成功", "success");
 };
@@ -1959,15 +2516,32 @@ const saveDailyRecord = () => {
   }
 
   // 计算BMI
-  const height = profileForm.value.height / 100; // 转换为米
-  const bmi = (dailyRecordForm.value.weight / (height * height)).toFixed(1);
-
-  // 调用API保存记录
+  let bmi = 0;
+  if (profileForm.value.height && dailyRecordForm.value.weight) {
+    const height = profileForm.value.height / 100; // 转换为米
+    if (height > 0) {
+      bmi = parseFloat(
+        (dailyRecordForm.value.weight / (height * height)).toFixed(2),
+      );
+    } else {
+      context?.$toolUtil.message("身高必须大于 0", "error");
+      return;
+    }
+  } else {
+    context?.$toolUtil.message("请输入身高和体重", "error");
+    return;
+  }
+  // 准备记录数据
+  const currentUserId = parseInt(context?.$toolUtil.storageGet("userid"));
+  // 确保日期格式为 YYYY-MM-DD
+  const recordDate = new Date(dailyRecordForm.value.recordDate)
+    .toISOString()
+    .split("T")[0];
   const recordData = {
-    userId: userid.value,
-    recordDate: moment(dailyRecordForm.value.recordDate).format("YYYY-MM-DD"),
+    userId: currentUserId,
+    recordDate: recordDate,
     weight: parseFloat(dailyRecordForm.value.weight),
-    bmi: parseFloat(bmi),
+    bmi: bmi,
   };
 
   // 创建新记录对象用于更新UI
@@ -1977,35 +2551,182 @@ const saveDailyRecord = () => {
     createTime: moment().format("YYYY-MM-DD HH:mm:ss"),
   };
 
+  // 检查是否有上一次记录
+  let oldRecord = null;
+  if (healthRecords.value && healthRecords.value.length > 0) {
+    // 按日期排序记录（升序）
+    const sortedRecords = [...healthRecords.value].sort((a, b) => {
+      return new Date(a.recordDate) - new Date(b.recordDate);
+    });
+    // 找到最近的记录（不包括今天的记录）
+    for (let i = sortedRecords.length - 1; i >= 0; i--) {
+      if (sortedRecords[i].recordDate !== recordDate) {
+        oldRecord = sortedRecords[i];
+        break;
+      }
+    }
+  }
+
+  // 检查是否需要弹出警告提示
+  if (oldRecord) {
+    const oldDate = new Date(oldRecord.recordDate);
+    const newDate = new Date(recordDate);
+    const weightDiff = Math.abs(
+      parseFloat(dailyRecordForm.value.weight) - oldRecord.weight,
+    );
+    const dayDiff = (newDate - oldDate) / (1000 * 60 * 60 * 24);
+
+    // 触发提示条件：天数差 ≤7 天（一周内）且体重差绝对值 ≥3kg
+    if (dayDiff <= 7 && weightDiff >= 3) {
+      // 弹出警告提示
+      ElMessageBox.confirm(
+        `检测到您短时间内体重变化较大（7 天内变化≥3kg），请确认是否输入有误。<br>上次记录：${oldRecord.recordDate}，体重 ${oldRecord.weight} kg<br>本次记录：${recordDate}，体重 ${dailyRecordForm.value.weight} kg`,
+        "体重数据异常提醒",
+        {
+          confirmButtonText: "确定",
+          cancelButtonText: "取消",
+          type: "warning",
+          dangerouslyUseHTMLString: true,
+          customClass: "modern-alert",
+          confirmButtonClass: "modern-confirm-btn",
+          cancelButtonClass: "modern-cancel-btn",
+        },
+      )
+        .then(() => {
+          // 点击确定，保存记录
+          saveRecordToDatabase(recordData, newRecord, currentUserId);
+        })
+        .catch(() => {
+          // 点击取消，清空输入框
+          dailyRecordForm.value = {
+            recordDate: new Date(),
+            weight: "",
+          };
+        });
+      return;
+    }
+  }
+
+  // 如果不需要弹出警告提示，直接保存记录
+  saveRecordToDatabase(recordData, newRecord, currentUserId);
+};
+
+// 保存记录到数据库
+const saveRecordToDatabase = (recordData, newRecord, currentUserId) => {
+  // 从本地存储中保存记录，实现覆盖已有记录的功能
+  const storageKey = `healthRecords_${currentUserId}`;
+
+  // 检查是否已存在相同日期的记录
+  const existingIndex = healthRecords.value.findIndex(
+    (item) => item.recordDate === recordData.recordDate,
+  );
+
+  if (existingIndex !== -1) {
+    // 覆盖已有记录
+    healthRecords.value[existingIndex] = newRecord;
+  } else {
+    // 添加新记录
+    healthRecords.value.push(newRecord);
+  }
+
+  // 按日期排序
+  healthRecords.value.sort((a, b) => {
+    return new Date(b.recordDate) - new Date(a.recordDate);
+  });
+
+  healthRecordsTotal.value = healthRecords.value.length;
+
+  // 更新本地存储
+  localStorage.setItem(storageKey, JSON.stringify(healthRecords.value));
+
+  // 调用后端API保存记录到数据库
   if (context?.$http) {
+    console.log("开始保存记录到数据库");
+    console.log("保存URL:", `/user-daily-record/save`);
+    console.log("保存数据:", recordData);
+
     context
       .$http({
-        url: `user-daily-record/save`,
+        url: `/user-daily-record/save`,
         method: "post",
         data: recordData,
       })
       .then((res) => {
-        if (res && res.data && res.data.code === 0) {
-          // 保存成功后重新获取记录
-          context
-            .$http({
-              url: `user-daily-record/list`,
-              method: "get",
-              params: { userId: userid.value },
-            })
-            .then((res) => {
-              if (res && res.data && res.data.code === 0) {
-                healthRecords.value = res.data.data || [];
-                healthRecordsTotal.value = healthRecords.value.length;
-                // 更新图表
-                initChart();
-              }
-            });
+        console.log("保存记录响应:", res);
+        if (res && res.data) {
+          console.log("响应代码:", res.data.code);
+          console.log("响应消息:", res.data.msg);
+
+          if (res.data.code === 0) {
+            console.log("保存记录成功");
+            // 保存成功后，重新从数据库获取健康记录
+            console.log("开始重新获取健康记录");
+            context
+              .$http({
+                url: `/user-daily-record/list`,
+                method: "get",
+                params: { userId: parseInt(currentUserId) },
+              })
+              .then((res) => {
+                console.log("获取健康记录响应:", res);
+                if (res && res.data && res.data.code === 0) {
+                  const records = res.data.records;
+                  console.log("从数据库获取的健康记录:", records);
+                  if (records && records.length > 0) {
+                    // 更新健康记录数据
+                    healthRecords.value = records;
+                    healthRecordsTotal.value = records.length;
+                    // 更新最新体重
+                    const latestRecord = records[0];
+                    if (latestRecord) {
+                      currentWeight.value = latestRecord.weight;
+                      currentBMI.value = latestRecord.bmi;
+                      // 更新档案管理的体重
+                      profileForm.value.weight = latestRecord.weight;
+                    }
+                    // 计算目标达成进度
+                    calculateProgress();
+
+                    // 重新渲染图表
+                    console.log("保存成功后重新渲染图表");
+                    console.log(
+                      "更新后的健康记录数量:",
+                      healthRecords.value.length,
+                    );
+                    if (healthRecords.value.length > 0) {
+                      console.log(
+                        "更新后的第一条记录:",
+                        healthRecords.value[0],
+                      );
+                    }
+                    initChart();
+                  } else {
+                    console.log("数据库中没有健康记录");
+                  }
+                } else {
+                  console.error("获取健康记录失败，响应代码:", res?.data?.code);
+                }
+              })
+              .catch((error) => {
+                console.error("获取健康记录失败:", error);
+              });
+          } else {
+            console.error("保存记录失败，响应代码:", res.data.code);
+            console.error("保存记录失败，响应消息:", res.data.msg);
+          }
+        } else {
+          console.error("保存记录失败，响应格式不正确:", res);
         }
       })
       .catch((error) => {
-        console.error("保存健康记录失败:", error);
+        console.error("保存记录失败，网络错误:", error);
+        console.error("错误详情:", error.message);
+        console.error("错误堆栈:", error.stack);
       });
+  } else {
+    // 如果没有HTTP请求，至少更新图表
+    console.log("没有HTTP请求，更新图表");
+    initChart();
   }
 
   // 更新当前体重和BMI
@@ -2013,36 +2734,49 @@ const saveDailyRecord = () => {
   currentBMI.value = newRecord.bmi;
   weightDifference.value = currentWeight.value - targetWeight.value;
 
-  // 重新计算进度，使用当前体重作为初始体重
-  const initialWeight = currentWeight.value;
-  const totalDiff = initialWeight - targetWeight.value;
-  const currentDiff = currentWeight.value - targetWeight.value;
+  // 从本地存储获取目标数据，包括初始体重
+  const goalStorageKey = `healthGoals_${currentUserId}`;
+  const savedGoals = localStorage.getItem(goalStorageKey);
 
-  if (totalDiff > 0) {
-    // 减重目标
-    if (currentWeight.value <= targetWeight.value) {
-      progressPercentage.value = 100;
-    } else {
-      progressPercentage.value = Math.round(
-        ((totalDiff - currentDiff) / totalDiff) * 100,
+  if (savedGoals) {
+    const goals = JSON.parse(savedGoals);
+    // 使用从本地存储获取的初始体重，如果没有则使用当前体重
+    const initialWeightVal = goals?.initialWeight || currentWeight.value;
+    const totalDiff = Math.abs(initialWeightVal - targetWeight.value);
+    const currentDiff = Math.abs(currentWeight.value - targetWeight.value);
+
+    // 计算进度：|初始体重 - 当前体重| / |初始体重 - 目标体重| * 100%
+    if (totalDiff > 0) {
+      const progress = (currentDiff / totalDiff) * 100;
+      // 进度应该是100%减去当前差距占总差距的比例
+      progressPercentage.value = Math.round(100 - progress);
+      // 确保进度在0-100之间
+      progressPercentage.value = Math.max(
+        0,
+        Math.min(100, progressPercentage.value),
       );
-    }
-  } else if (totalDiff < 0) {
-    // 增重目标
-    if (currentWeight.value >= targetWeight.value) {
-      progressPercentage.value = 100;
     } else {
-      // 计算增重进度：(当前体重 - 初始体重) / (目标体重 - 初始体重) * 100
-      const progress =
-        ((currentWeight.value - initialWeight) /
-          (targetWeight.value - initialWeight)) *
-        100;
-      progressPercentage.value = Math.round(
-        Math.max(0, Math.min(100, progress)),
-      );
+      progressPercentage.value = 100;
     }
   } else {
-    progressPercentage.value = 100;
+    // 如果没有保存的目标数据，使用当前体重作为初始体重
+    const initialWeightVal = currentWeight.value;
+    const totalDiff = Math.abs(initialWeightVal - targetWeight.value);
+    const currentDiff = Math.abs(currentWeight.value - targetWeight.value);
+
+    // 计算进度：|初始体重 - 当前体重| / |初始体重 - 目标体重| * 100%
+    if (totalDiff > 0) {
+      const progress = (currentDiff / totalDiff) * 100;
+      // 进度应该是100%减去当前差距占总差距的比例
+      progressPercentage.value = Math.round(100 - progress);
+      // 确保进度在0-100之间
+      progressPercentage.value = Math.max(
+        0,
+        Math.min(100, progressPercentage.value),
+      );
+    } else {
+      progressPercentage.value = 100;
+    }
   }
 
   // 更新图表
@@ -2074,17 +2808,49 @@ const deleteRecord = (id) => {
   context
     .$confirm("确定要删除该记录吗？", "提示")
     .then(() => {
-      // 这里应该调用API删除记录
+      // 从本地存储中删除记录
+      const currentUserId = context?.$toolUtil.storageGet("userid");
+      const storageKey = `healthRecords_${currentUserId}`;
       healthRecords.value = healthRecords.value.filter(
         (item) => item.id !== id,
       );
       healthRecordsTotal.value = healthRecords.value.length;
 
       // 更新本地存储
-      localStorage.setItem(
-        `healthRecords_${userid.value}`,
-        JSON.stringify(healthRecords.value),
-      );
+      localStorage.setItem(storageKey, JSON.stringify(healthRecords.value));
+
+      // 调用后端API删除数据库中的记录
+      if (context?.$http) {
+        context
+          .$http({
+            url: `/user-daily-record/delete`,
+            method: "delete",
+            params: { id: id },
+          })
+          .then((res) => {
+            console.log("删除记录响应:", res);
+            if (res && res.data && res.data.code === 0) {
+              console.log("删除记录成功");
+            }
+          })
+          .catch((error) => {
+            console.error("删除记录失败:", error);
+          });
+      }
+
+      // 更新图表
+      initChart();
+
+      // 更新当前体重和BMI
+      if (healthRecords.value.length > 0) {
+        // 按日期排序，获取最新记录
+        const sortedRecords = [...healthRecords.value].sort((a, b) => {
+          return new Date(b.recordDate) - new Date(a.recordDate);
+        });
+        const latestRecord = sortedRecords[0];
+        currentWeight.value = latestRecord.weight;
+        currentBMI.value = latestRecord.bmi;
+      }
 
       context?.$toolUtil.message("删除成功", "success");
     })
@@ -2096,18 +2862,40 @@ const deleteRecords = () => {
   context
     .$confirm("确定要删除所有健康记录吗？", "提示")
     .then(() => {
-      // 清空所有健康记录
+      // 从本地存储中删除所有记录
+      const currentUserId = context?.$toolUtil.storageGet("userid");
+      const storageKey = `healthRecords_${currentUserId}`;
       healthRecords.value = [];
       healthRecordsTotal.value = 0;
 
       // 更新本地存储
-      localStorage.setItem(
-        `healthRecords_${userid.value}`,
-        JSON.stringify(healthRecords.value),
-      );
+      localStorage.setItem(storageKey, JSON.stringify(healthRecords.value));
+
+      // 调用后端API删除数据库中的所有记录
+      if (context?.$http) {
+        context
+          .$http({
+            url: `/user-daily-record/delete-all`,
+            method: "delete",
+            params: { userId: currentUserId },
+          })
+          .then((res) => {
+            console.log("删除所有记录响应:", res);
+            if (res && res.data && res.data.code === 0) {
+              console.log("删除所有记录成功");
+            }
+          })
+          .catch((error) => {
+            console.error("删除所有记录失败:", error);
+          });
+      }
 
       // 更新图表
       initChart();
+
+      // 重置当前体重和BMI
+      currentWeight.value = 0;
+      currentBMI.value = 0;
 
       context?.$toolUtil.message("删除成功", "success");
     })
@@ -2155,10 +2943,7 @@ const updatePassword = async () => {
 //菜单
 const menuList = ref([]);
 const role = ref("");
-//头像上传回调
-const touxiangUploadSuccess = (e) => {
-  userForm.value.touxiang = e;
-};
+
 //性别列表
 const xingbieLists = ref([]);
 //初始化
@@ -2231,29 +3016,28 @@ init();
 <style lang="scss" scoped>
 .top-nav {
   display: flex;
-  background: #fff;
-  border-bottom: 1px solid #eaeaea;
-  padding: 0 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  background: #03cc88;
+  padding: 0 24px;
+  position: relative;
+  z-index: 999;
 
   .nav-item {
-    padding: 16px 24px;
+    padding: 15px 24px;
     cursor: pointer;
     position: relative;
     font-size: 15px;
-    color: #666;
+    color: #fff;
     transition: all 0.3s ease;
     border-bottom: 3px solid transparent;
 
     &:hover {
-      color: #03cc88;
-      background: rgba(3, 204, 136, 0.05);
+      color: #fff;
+      background: rgba(255, 255, 255, 0.1);
     }
 
     &.nav-item-active {
-      color: #03cc88;
-      border-bottom-color: #03cc88;
+      color: #fff;
+      border-bottom-color: #fff;
       font-weight: 500;
     }
 
@@ -2531,57 +3315,18 @@ init();
 /* 收藏列表样式 */
 .forum_list {
   width: 100%;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
 
   .forum_item {
-    width: 100%;
     cursor: pointer;
-    display: flex;
-    flex-wrap: wrap;
-    margin: 0 0 16px;
-    padding: 16px;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     transition: box-shadow 0.3s ease;
-
-    &:hover {
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    .forum_item_left {
-      display: flex;
-      align-items: center;
-      flex: 1;
-
-      .forum_item_title {
-        font-size: 16px;
-        color: #333;
-        font-weight: 500;
-      }
-    }
-
-    .forum_item_btn_box {
-      width: auto;
-
-      .forum_del_btn {
-        margin: 0 8px 0 0;
-        padding: 0 16px;
-        height: 32px;
-        font-size: 14px;
-        color: #fff;
-        border-radius: 4px;
-        border: 0;
-        background: #ff4d4f;
-        cursor: pointer;
-
-        &:hover {
-          background: #ff7875;
-        }
-      }
-    }
   }
 
   .el-pagination {
+    grid-column: 1 / -1;
     margin-top: 20px;
     display: flex;
     justify-content: flex-end;
@@ -2613,15 +3358,6 @@ init();
   text-align: left;
   background: #03cc88;
   position: relative;
-}
-
-.center_view .section_title span {
-  display: inline-block;
-  font-size: 20px;
-  color: #fff;
-  font-weight: 500;
-  padding: 15px 24px;
-  min-width: 250px;
 }
 
 /**内容区**/

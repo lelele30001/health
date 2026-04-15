@@ -32,19 +32,23 @@ public class RecipeService extends ServiceImpl<RecipeDao, RecipeEntity> {
     }
 
     public List<RecipeEntity> getUserRecipes(Long userId) {
-        return baseMapper.getUserRecipes(userId);
+        List<RecipeEntity> recipes = baseMapper.getUserRecipes(userId);
+        return recipes;
     }
 
     public List<RecipeEntity> getAllPublicRecipes() {
-        return baseMapper.getAllPublicRecipes();
+        List<RecipeEntity> recipes = baseMapper.getAllPublicRecipes();
+        return recipes;
     }
 
     public RecipeEntity getRecipeById(Long id) {
-        return baseMapper.getRecipeWithIngredients(id);
+        RecipeEntity recipe = baseMapper.getRecipeWithIngredients(id);
+        return recipe;
     }
     
     public List<RecipeEntity> getRecommendedRecipes(Long userId, String dietaryRestrictions) {
-        return baseMapper.getRecommendedRecipes(userId, dietaryRestrictions);
+        List<RecipeEntity> recipes = baseMapper.getRecommendedRecipes(userId, dietaryRestrictions);
+        return recipes;
     }
     
     @Transactional
@@ -53,5 +57,31 @@ public class RecipeService extends ServiceImpl<RecipeDao, RecipeEntity> {
         recipeIngredientDao.deleteByRecipeId(id);
         // 再删除食谱本身
         return this.deleteById(id);
+    }
+    
+    @Transactional
+    public boolean updateRecipe(RecipeEntity recipe) {
+        // 更新食谱主表
+        boolean updated = this.updateById(recipe);
+        if (updated && recipe.getIngredients() != null) {
+            // 先删除原有的食材明细
+            recipeIngredientDao.deleteByRecipeId(recipe.getId());
+            // 再保存新的食材明细
+            for (RecipeIngredientEntity ingredient : recipe.getIngredients()) {
+                ingredient.setRecipeId(recipe.getId());
+                recipeIngredientDao.insert(ingredient);
+            }
+        }
+        return updated;
+    }
+    
+    @Transactional
+    public boolean batchDeleteRecipes(List<Long> ids) {
+        // 批量删除每个食谱的关联食材明细
+        for (Long id : ids) {
+            recipeIngredientDao.deleteByRecipeId(id);
+        }
+        // 批量删除食谱本身
+        return this.deleteBatchIds(ids);
     }
 }

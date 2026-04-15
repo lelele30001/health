@@ -28,5 +28,14 @@
         <where>1=1 ${ew.sqlSegment}</where>
     </select>
 
+    <select id="countByDate" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM yonghu
+        WHERE DATE(addtime) = #{date}
+    </select>
+
+    <select id="countByMonth" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM yonghu
+        WHERE DATE_FORMAT(addtime, '%Y-%m') = #{month}
+    </select>
 
 </mapper>

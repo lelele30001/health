@@ -2,11 +2,12 @@ package com.cl.service;
 
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
 import com.cl.dao.RecipeDao;
-import com.cl.dao.UserPostBehaviorDao;
-import com.cl.dao.UserProfileDao;
+import com.cl.dao.UserBehaviorDao;
+
 import com.cl.entity.RecipeEntity;
-import com.cl.entity.UserPostBehaviorEntity;
-import com.cl.entity.UserProfileEntity;
+import com.cl.entity.UserBehaviorEntity;
+import com.cl.entity.YonghuEntity;
+import com.cl.service.YonghuService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,40 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 /**
+ * 推荐分数详情类
+ * 用于存储推荐分数的详细信息
+ */
+class RecommendationScoreDetail {
+    private double collaborativeScore; // 协同相似度分数
+    private double fitnessGoalScore; // 健身目标匹配分数
+    private double nutritionTagScore; // 营养标签匹配分数
+    private double totalScore; // 总分
+
+    public RecommendationScoreDetail(double collaborativeScore, double fitnessGoalScore, double nutritionTagScore, double totalScore) {
+        this.collaborativeScore = collaborativeScore;
+        this.fitnessGoalScore = fitnessGoalScore;
+        this.nutritionTagScore = nutritionTagScore;
+        this.totalScore = totalScore;
+    }
+
+    public double getCollaborativeScore() {
+        return collaborativeScore;
+    }
+
+    public double getFitnessGoalScore() {
+        return fitnessGoalScore;
+    }
+
+    public double getNutritionTagScore() {
+        return nutritionTagScore;
+    }
+
+    public double getTotalScore() {
+        return totalScore;
+    }
+}
+
+/**
  * 帖子推荐服务
  * 实现基于用户行为的帖子个性化推荐
  */
@@ -23,13 +58,13 @@ import java.util.stream.Collectors;
 public class PostRecommendationService {
 
     @Autowired
-    private UserPostBehaviorDao userPostBehaviorDao;
+    private UserBehaviorDao userBehaviorDao;
 
     @Autowired
     private RecipeDao recipeDao;
 
     @Autowired
-    private UserProfileDao userProfileDao;
+    private YonghuService yonghuService;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -39,9 +74,9 @@ public class PostRecommendationService {
 
     public PostRecommendationService() {
         // 初始化行为权重
-        behaviorWeights.put("collect", 5.0);   // 收藏：最高权重
-        behaviorWeights.put("like", 3.0);       // 点赞：高权重
-        behaviorWeights.put("dislike", -10.0);  // 踩：负权重
+        behaviorWeights.put("collect", 10.0);   // 收藏：10分
+        behaviorWeights.put("like", 5.0);       // 点赞：5分
+        behaviorWeights.put("view", 1.0);       // 浏览：1分
     }
 
     /**
@@ -49,15 +84,8 @@ public class PostRecommendationService {
      */
     private void checkAndCreateTables() {
         try {
-            // 检查 user_post_behavior 表是否存在
-            jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS user_post_behavior (`id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID', `user_id` bigint NOT NULL COMMENT '用户ID', `post_id` bigint NOT NULL COMMENT '帖子ID', `behavior_type` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '行为类型：like(点赞), dislike(踩), collect(收藏)', `behavior_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '行为时间', PRIMARY KEY (`id`), UNIQUE KEY `uk_user_post_behavior` (`user_id`, `post_id`, `behavior_type`), KEY `idx_post_id` (`post_id`), KEY `idx_user_id` (`user_id`), CONSTRAINT `user_post_behavior_ibfk_1` FOREIGN KEY (`post_id`) REFERENCES `recipe` (`id`) ON DELETE CASCADE, CONSTRAINT `user_post_behavior_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `yonghu` (`id`) ON DELETE CASCADE) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户帖子行为记录表'");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        
-        try {
             // 检查 recipe_recommendation 表是否存在
-            jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS recipe_recommendation (`id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID', `user_id` bigint NOT NULL COMMENT '用户ID', `recipe_id` bigint NOT NULL COMMENT '食谱ID', `recommendation_type` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '推荐类型：collaborative, content-based, hybrid', `score` double NOT NULL COMMENT '推荐分数', `create_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间', `update_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间', PRIMARY KEY (`id`), UNIQUE KEY `uk_user_recipe` (`user_id`,`recipe_id`), KEY `idx_user_id` (`user_id`), KEY `idx_score` (`score`), CONSTRAINT `recipe_recommendation_ibfk_1` FOREIGN KEY (`recipe_id`) REFERENCES `recipe` (`id`) ON DELETE CASCADE, CONSTRAINT `recipe_recommendation_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `yonghu` (`id`) ON DELETE CASCADE) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='食谱推荐表'");
+            jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS recipe_recommendation (`id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID', `user_id` bigint NOT NULL COMMENT '用户ID', `recipe_id` bigint NOT NULL COMMENT '帖子ID', `score` double NOT NULL COMMENT '推荐分数', `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间', PRIMARY KEY (`id`), UNIQUE KEY `uk_user_recipe` (`user_id`,`recipe_id`), KEY `idx_user_id` (`user_id`), KEY `idx_score` (`score`), CONSTRAINT `recipe_recommendation_ibfk_1` FOREIGN KEY (`recipe_id`) REFERENCES `recipe` (`id`) ON DELETE CASCADE, CONSTRAINT `recipe_recommendation_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `yonghu` (`id`) ON DELETE CASCADE) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='食谱推荐表'");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -71,221 +99,320 @@ public class PostRecommendationService {
         // 检查并创建必要的表结构
         checkAndCreateTables();
         
-        // 1. 获取用户帖子行为数据
-        List<UserPostBehaviorEntity> userBehaviors = userPostBehaviorDao.getUserBehaviors(userId);
+        // 1. 获取用户资料
+        YonghuEntity userProfile = null;
+        try {
+            userProfile = yonghuService.selectById(userId);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         
-        // 2. 计算用户偏好
-        Map<Long, Double> userPreferences = calculateUserPreferences(userBehaviors);
+        // 如果用户资料为null，创建默认的用户资料
+        if (userProfile == null) {
+            userProfile = new YonghuEntity();
+            userProfile.setId(userId);
+            userProfile.setFitnessGoal("维持"); // 默认健身目标为维持
+            userProfile.setDietaryRestrictions(""); // 默认无饮食禁忌
+        } else {
+            // 使用用户档案中的健身目标
+            System.out.println("使用用户档案中的健身目标: " + userProfile.getFitnessGoal());
+        }
         
-        // 3. 获取所有帖子
+        // 2. 获取用户帖子行为数据
+        List<UserBehaviorEntity> userBehaviors = userBehaviorDao.getUserBehaviors(userId);
+        
+        // 如果用户没有行为数据，添加一些默认的行为数据用于测试
+        if (userBehaviors == null || userBehaviors.isEmpty()) {
+            System.out.println("=== 为用户" + userId + "添加默认行为数据 ===");
+            userBehaviors = new ArrayList<>();
+            // 添加一些默认的行为数据
+            UserBehaviorEntity behavior1 = new UserBehaviorEntity();
+            behavior1.setUserId(userId);
+            behavior1.setRecipeId(1L);
+            behavior1.setBehaviorType("like");
+            userBehaviors.add(behavior1);
+            UserBehaviorEntity behavior2 = new UserBehaviorEntity();
+            behavior2.setUserId(userId);
+            behavior2.setRecipeId(2L);
+            behavior2.setBehaviorType("collect");
+            userBehaviors.add(behavior2);
+            System.out.println("已添加" + userBehaviors.size() + "条默认行为数据");
+        }
+        
+        // 3. 获取所有帖子并过滤饮食禁忌
         List<RecipeEntity> allPosts = recipeDao.selectList(null);
-        List<Long> postIds = allPosts.stream()
-                .map(RecipeEntity::getId)
-                .collect(Collectors.toList());
+        
+        // 过滤用户自己发布的帖子
+        List<RecipeEntity> filteredPostsByUser = new ArrayList<>();
+        for (RecipeEntity post : allPosts) {
+            if (post.getUserId() == null || !post.getUserId().equals(userId)) {
+                filteredPostsByUser.add(post);
+            } else {
+                System.out.println("过滤掉用户自己发布的帖子: " + post.getId() + " (" + post.getTitle() + ")");
+            }
+        }
+        
+        List<RecipeEntity> filteredPosts = filterPostsByDietaryRestrictions(filteredPostsByUser, userProfile.getDietaryRestrictions());
         
         // 4. 计算推荐分数
-        Map<Long, Double> recommendationScores = calculateRecommendationScores(userId, userPreferences, postIds);
+        Map<Long, RecommendationScoreDetail> recommendationScores = new HashMap<>();
+        if (userBehaviors != null && !userBehaviors.isEmpty()) {
+            // 有行为用户：协同相似度 40% + 健身目标匹配 30% + 营养标签匹配 20%
+            Map<Long, Double> userPreferences = calculateUserPreferences(userBehaviors);
+            recommendationScores = calculateRecommendationScores(userId, userProfile, filteredPosts, userPreferences);
+        } else {
+            // 无行为冷启动：健身目标匹配 60% + 营养标签匹配 40%
+            recommendationScores = calculateColdStartScores(userProfile, filteredPosts);
+        }
         
-        // 5. 保存推荐（由于我们使用 recipe_recommendation 表，这里需要特殊处理）
-        // 注意：这里我们将帖子ID作为食谱ID存储，因为我们没有专门的帖子推荐表
+        // 5. 保存推荐（Top 15）
         saveRecommendations(userId, recommendationScores);
+    }
+
+    /**
+     * 根据饮食禁忌过滤帖子
+     */
+    private List<RecipeEntity> filterPostsByDietaryRestrictions(List<RecipeEntity> posts, String forbiddenFoods) {
+        if (forbiddenFoods == null || forbiddenFoods.isEmpty()) {
+            return posts;
+        }
+        
+        String[] restrictions = forbiddenFoods.split(",");
+        return posts.stream()
+                .filter(post -> {
+                    String tabooTags = post.getDietaryRestrictions();
+                    if (tabooTags == null || tabooTags.isEmpty()) {
+                        return true;
+                    }
+                    for (String restriction : restrictions) {
+                        if (tabooTags.contains(restriction.trim())) {
+                            return false;
+                        }
+                    }
+                    return true;
+                })
+                .collect(Collectors.toList());
     }
 
     /**
      * 计算用户偏好
      */
-    private Map<Long, Double> calculateUserPreferences(List<UserPostBehaviorEntity> userBehaviors) {
+    private Map<Long, Double> calculateUserPreferences(List<UserBehaviorEntity> userBehaviors) {
         Map<Long, Double> preferences = new HashMap<>();
         
-        for (UserPostBehaviorEntity behavior : userBehaviors) {
-            Long postId = behavior.getPostId();
+        for (UserBehaviorEntity behavior : userBehaviors) {
+            Long postId = behavior.getRecipeId();
             String behaviorType = behavior.getBehaviorType();
+            
+            // 忽略行为类型为空的记录
+            if (behaviorType == null || behaviorType.isEmpty()) {
+                continue;
+            }
+            
             Double weight = behaviorWeights.getOrDefault(behaviorType, 0.0);
             
-            preferences.put(postId, preferences.getOrDefault(postId, 0.0) + weight);
+            // 同一用户对同一帖子只计一次，不重复累加
+            if (!preferences.containsKey(postId)) {
+                preferences.put(postId, weight);
+            }
         }
         
         return preferences;
     }
 
     /**
-     * 计算推荐分数
+     * 计算有行为用户的推荐分数
      */
-    private Map<Long, Double> calculateRecommendationScores(Long userId, Map<Long, Double> userPreferences, List<Long> postIds) {
-        Map<Long, Double> scores = new HashMap<>();
+    private Map<Long, RecommendationScoreDetail> calculateRecommendationScores(Long userId, YonghuEntity userProfile, List<RecipeEntity> posts, Map<Long, Double> userPreferences) {
+        Map<Long, RecommendationScoreDetail> scores = new HashMap<>();
+        
+        // 计算协同相似度
+        Map<Long, Double> collaborativeScores = calculateCollaborativeScores(userId, posts, userPreferences);
+        
+        // 归一化协同相似度分数
+        Map<Long, Double> normalizedCollaborativeScores = normalizeScores(collaborativeScores);
         
         // 遍历所有帖子
-        for (Long postId : postIds) {
+        for (RecipeEntity post : posts) {
+            Long postId = post.getId();
+            
             // 跳过用户已经有行为的帖子
             if (userPreferences.containsKey(postId)) {
                 continue;
             }
             
-            // 计算推荐分数
-            double score = calculatePostScore(userId, postId, userPreferences);
+            // 跳过用户自己发布的帖子
+            if (post.getUserId() != null && post.getUserId().equals(userId)) {
+                continue;
+            }
             
-            // 包含所有帖子，不管分数是否大于0
-            scores.put(postId, score);
+            // 计算健身目标匹配分数
+            double fitnessGoalScore = calculateFitnessGoalScore(userProfile.getFitnessGoal(), post.getFitnessGoal());
+            
+            // 计算营养标签匹配分数
+            double nutritionTagScore = calculateNutritionTagScore(userProfile.getFitnessGoal(), post.getNutritionTag());
+            
+            // 加权计算总分
+            double collaborativeScore = normalizedCollaborativeScores.getOrDefault(postId, 0.0);
+            double totalScore = collaborativeScore * 0.4 + fitnessGoalScore * 0.3 + nutritionTagScore * 0.2;
+            
+            // 保存详细的得分数据
+            scores.put(postId, new RecommendationScoreDetail(collaborativeScore, fitnessGoalScore, nutritionTagScore, totalScore));
         }
         
         // 按分数排序
-        return scores.entrySet().stream()
-                .sorted(Map.Entry.<Long, Double>comparingByValue().reversed())
-                .collect(Collectors.toMap(
-                        Map.Entry::getKey,
-                        Map.Entry::getValue,
-                        (e1, e2) -> e1,
-                        LinkedHashMap::new
-                ));
+        Map<Long, RecommendationScoreDetail> sortedScores = new LinkedHashMap<>();
+        scores.entrySet().stream()
+                .sorted((e1, e2) -> Double.compare(e2.getValue().getTotalScore(), e1.getValue().getTotalScore()))
+                .forEach(entry -> sortedScores.put(entry.getKey(), entry.getValue()));
+        
+        // 打印排序后的推荐顺序和得分
+        System.out.println("=== 推荐排序结果 ===");
+        int rank = 1;
+        for (Map.Entry<Long, RecommendationScoreDetail> entry : sortedScores.entrySet()) {
+            Long postId = entry.getKey();
+            RecommendationScoreDetail scoreDetail = entry.getValue();
+            System.out.println("排名 " + rank + ": 帖子ID " + postId + "，总得分: " + scoreDetail.getTotalScore() + 
+                    " (协同相似度: " + scoreDetail.getCollaborativeScore() + 
+                    ", 健身目标匹配: " + scoreDetail.getFitnessGoalScore() + 
+                    ", 营养标签匹配: " + scoreDetail.getNutritionTagScore() + ")");
+            rank++;
+        }
+        
+        return sortedScores;
     }
 
     /**
-     * 计算单个帖子的推荐分数
+     * 计算冷启动推荐分数
      */
-    private double calculatePostScore(Long userId, Long postId, Map<Long, Double> userPreferences) {
-        double score = 0.0;
+    private Map<Long, RecommendationScoreDetail> calculateColdStartScores(YonghuEntity userProfile, List<RecipeEntity> posts) {
+        Map<Long, RecommendationScoreDetail> scores = new HashMap<>();
         
-        // 1. 获取帖子信息
-        RecipeEntity post = recipeDao.selectById(postId);
-        if (post == null) {
-            return 0.0;
-        }
-        
-        // 2. 基于帖子热度的分数（使用用户行为数据计算）
-        // 从user_post_behavior表中获取该帖子的点赞数
-        int likeCount = userPostBehaviorDao.countPostBehaviorByType(postId, "like");
-        
-        double popularityScore = likeCount * 0.3;
-        score += popularityScore * 0.2; // 热度权重20%
-        
-        // 3. 基于用户相似度的协同过滤分数
-        // 获取喜欢过相同帖子的用户
-        List<UserPostBehaviorEntity> postBehaviors = userPostBehaviorDao.getPostBehaviors(postId);
-        Set<Long> similarUsers = postBehaviors.stream()
-                .filter(behavior -> !behavior.getUserId().equals(userId))
-                .filter(behavior -> "like".equals(behavior.getBehaviorType()) || "collect".equals(behavior.getBehaviorType()))
-                .map(UserPostBehaviorEntity::getUserId)
-                .collect(Collectors.toSet());
-        
-        // 计算相似用户的偏好
-        double collaborativeScore = 0.0;
-        for (Long similarUserId : similarUsers) {
-            List<UserPostBehaviorEntity> similarUserBehaviors = userPostBehaviorDao.getUserBehaviors(similarUserId);
-            Map<Long, Double> similarUserPreferences = calculateUserPreferences(similarUserBehaviors);
-            
-            // 计算相似度
-            double similarity = calculateSimilarity(userPreferences, similarUserPreferences);
-            
-            // 根据相似度计算分数
-            if (similarity > 0) {
-                collaborativeScore += similarity * 1.0;
+        // 遍历所有帖子
+        for (RecipeEntity post : posts) {
+            // 跳过用户自己发布的帖子
+            if (post.getUserId() != null && post.getUserId().equals(userProfile.getId())) {
+                continue;
             }
+            
+            // 计算健身目标匹配分数
+            double fitnessGoalScore = calculateFitnessGoalScore(userProfile.getFitnessGoal(), post.getFitnessGoal());
+            
+            // 计算营养标签匹配分数
+            double nutritionTagScore = calculateNutritionTagScore(userProfile.getFitnessGoal(), post.getNutritionTag());
+            
+            // 加权计算总分
+            double totalScore = fitnessGoalScore * 0.6 + nutritionTagScore * 0.4;
+            
+            // 保存详细的得分数据（冷启动没有协同相似度分数，设为0）
+            scores.put(post.getId(), new RecommendationScoreDetail(0.0, fitnessGoalScore, nutritionTagScore, totalScore));
         }
         
-        score += collaborativeScore * 0.5; // 协同过滤权重50%
+        // 按分数排序
+        Map<Long, RecommendationScoreDetail> sortedScores = new LinkedHashMap<>();
+        scores.entrySet().stream()
+                .sorted((e1, e2) -> Double.compare(e2.getValue().getTotalScore(), e1.getValue().getTotalScore()))
+                .forEach(entry -> sortedScores.put(entry.getKey(), entry.getValue()));
         
-        // 4. 基于内容相似度的分数
-        double contentScore = calculateContentScore(userId, post, userPreferences);
-        score += contentScore * 0.3; // 内容推荐权重30%
+        // 打印排序后的推荐顺序和得分
+        System.out.println("=== 推荐排序结果 ===");
+        int rank = 1;
+        for (Map.Entry<Long, RecommendationScoreDetail> entry : sortedScores.entrySet()) {
+            Long postId = entry.getKey();
+            RecommendationScoreDetail scoreDetail = entry.getValue();
+            System.out.println("排名 " + rank + ": 帖子ID " + postId + "，总得分: " + scoreDetail.getTotalScore() + 
+                    " (协同相似度: " + scoreDetail.getCollaborativeScore() + 
+                    ", 健身目标匹配: " + scoreDetail.getFitnessGoalScore() + 
+                    ", 营养标签匹配: " + scoreDetail.getNutritionTagScore() + ")");
+            rank++;
+        }
         
-        return score;
+        return sortedScores;
     }
 
     /**
-     * 计算内容相似度分数
+     * 计算协同相似度分数
      */
-    private double calculateContentScore(Long userId, RecipeEntity post, Map<Long, Double> userPreferences) {
-        double score = 0.0;
+    private Map<Long, Double> calculateCollaborativeScores(Long userId, List<RecipeEntity> posts, Map<Long, Double> userPreferences) {
+        Map<Long, Double> scores = new HashMap<>();
         
-        // 基于帖子标题和描述的TF-IDF相似度计算
-        String title = post.getTitle();
-        String description = post.getDescription();
-        
-        if (title == null) title = "";
-        if (description == null) description = "";
-        
-        // 获取用户历史喜欢的帖子
-        List<Long> likedPosts = userPreferences.entrySet().stream()
-                .filter(entry -> entry.getValue() > 0)
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList());
-        
-        // 计算内容相似度
-        for (Long likedPostId : likedPosts) {
-            RecipeEntity likedPost = recipeDao.selectById(likedPostId);
-            if (likedPost != null) {
-                String likedTitle = likedPost.getTitle() != null ? likedPost.getTitle() : "";
-                String likedDescription = likedPost.getDescription() != null ? likedPost.getDescription() : "";
+        try {
+            // 使用实际的用户行为数据
+            System.out.println("=== 使用实际用户行为数据 ===");
+            
+            // 获取所有用户的行为数据
+            List<UserBehaviorEntity> allUserBehaviors = userBehaviorDao.selectList(null);
+            System.out.println("总用户行为数据数量: " + allUserBehaviors.size());
+            
+            // 按用户分组
+            Map<Long, List<UserBehaviorEntity>> userBehaviorsMap = new HashMap<>();
+            for (UserBehaviorEntity behavior : allUserBehaviors) {
+                Long otherUserId = behavior.getUserId();
+                if (!userBehaviorsMap.containsKey(otherUserId)) {
+                    userBehaviorsMap.put(otherUserId, new ArrayList<>());
+                }
+                userBehaviorsMap.get(otherUserId).add(behavior);
+            }
+            
+            System.out.println("有行为的用户数量: " + userBehaviorsMap.size());
+            
+            // 计算与其他用户的相似度
+            Map<Long, Double> userSimilarities = new HashMap<>();
+            for (Map.Entry<Long, List<UserBehaviorEntity>> entry : userBehaviorsMap.entrySet()) {
+                Long otherUserId = entry.getKey();
+                if (otherUserId.equals(userId)) {
+                    continue;
+                }
                 
-                // 简单的关键词匹配
-                double titleSimilarity = calculateTextSimilarity(title, likedTitle);
-                double descriptionSimilarity = calculateTextSimilarity(description, likedDescription);
+                List<UserBehaviorEntity> otherUserBehaviors = entry.getValue();
+                Map<Long, Double> otherUserPreferences = calculateUserPreferences(otherUserBehaviors);
                 
-                score += (titleSimilarity * 0.6 + descriptionSimilarity * 0.4);
-            }
-        }
-        
-        return likedPosts.isEmpty() ? 0.0 : score / likedPosts.size();
-    }
-
-    /**
-     * 计算文本相似度（简单的Jaccard相似度）
-     */
-    private double calculateTextSimilarity(String text1, String text2) {
-        if (text1 == null || text2 == null || text1.isEmpty() || text2.isEmpty()) {
-            return 0.0;
-        }
-        
-        // 分词并创建集合（支持中文分词）
-        Set<String> set1 = tokenize(text1);
-        Set<String> set2 = tokenize(text2);
-        
-        // 计算交集和并集
-        Set<String> intersection = new HashSet<>(set1);
-        intersection.retainAll(set2);
-        
-        Set<String> union = new HashSet<>(set1);
-        union.addAll(set2);
-        
-        if (union.isEmpty()) {
-            return 0.0;
-        }
-        
-        return (double) intersection.size() / union.size();
-    }
-
-    /**
-     * 中文分词（简化版）
-     */
-    private Set<String> tokenize(String text) {
-        Set<String> tokens = new HashSet<>();
-        
-        // 去除标点符号和空格
-        text = text.replaceAll("[^\\u4e00-\\u9fa5a-zA-Z0-9]", " ");
-        
-        // 按空格分割
-        String[] words = text.split("\\s+");
-        
-        for (String word : words) {
-            if (word.length() >= 2) { // 只保留长度大于等于2的词
-                tokens.add(word.toLowerCase());
-            }
-            
-            // 对中文进行2-3元分词
-            if (word.matches("[\\u4e00-\\u9fa5]")) {
-                for (int i = 0; i < word.length() - 1; i++) {
-                    // 二元分词
-                    tokens.add(word.substring(i, i + 2));
-                    
-                    // 三元分词
-                    if (i < word.length() - 2) {
-                        tokens.add(word.substring(i, i + 3));
-                    }
+                double similarity = calculateSimilarity(userPreferences, otherUserPreferences);
+                if (similarity > 0) {
+                    userSimilarities.put(otherUserId, similarity);
+                    System.out.println("用户" + userId + "与用户" + otherUserId + "的相似度: " + similarity);
                 }
             }
+            
+            // 为每个帖子计算协同分数
+            for (RecipeEntity post : posts) {
+                Long postId = post.getId();
+                
+                // 跳过用户已经有行为的帖子
+                if (userPreferences.containsKey(postId)) {
+                    continue;
+                }
+                
+                double score = 0.0;
+                for (Map.Entry<Long, Double> entry : userSimilarities.entrySet()) {
+                    Long otherUserId = entry.getKey();
+                    double similarity = entry.getValue();
+                    
+                    // 检查其他用户是否对该帖子有正向行为
+                    List<UserBehaviorEntity> otherUserBehaviors = userBehaviorsMap.get(otherUserId);
+                    if (otherUserBehaviors != null) {
+                        for (UserBehaviorEntity behavior : otherUserBehaviors) {
+                            if (behavior.getRecipeId().equals(postId)) {
+                                String behaviorType = behavior.getBehaviorType();
+                                if ("like".equals(behaviorType) || "collect".equals(behaviorType)) {
+                                    double weight = behaviorWeights.getOrDefault(behaviorType, 0.0);
+                                    score += similarity * weight;
+                                    System.out.println("用户" + otherUserId + "对帖子" + postId + "的" + behaviorType + "行为，权重: " + weight + "，贡献分数: " + (similarity * weight));
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                scores.put(postId, score);
+                System.out.println("帖子" + postId + "的协同过滤分数: " + score);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         
-        return tokens;
+        return scores;
     }
 
     /**
@@ -319,23 +446,129 @@ public class PostRecommendationService {
     }
 
     /**
-     * 保存推荐结果
+     * 计算健身目标匹配分数
      */
-    private void saveRecommendations(Long userId, Map<Long, Double> scores) {
-        // 由于我们使用 recipe_recommendation 表，这里需要直接执行 SQL 语句
+    private double calculateFitnessGoalScore(String userGoal, String postGoal) {
+        if (userGoal == null || postGoal == null) {
+            return 0.0;
+        }
+        
+        if (userGoal.equals(postGoal)) {
+            return 100.0; // 目标完全一致：100分
+        } else if ("维持".equals(userGoal)) {
+            return 90.0; // 维持用户对所有目标都有较高分数
+        } else if ("维持".equals(postGoal)) {
+            return 70.0; // 其他用户对维持目标有中等分数
+        } else {
+            return 0.0; // 不一致：0分
+        }
+    }
+
+    /**
+     * 计算营养标签匹配分数
+     */
+    private double calculateNutritionTagScore(String userGoal, String nutritionTag) {
+        // 帖子未填 nutrition_tag，默认按均衡处理
+        if (nutritionTag == null || nutritionTag.isEmpty()) {
+            nutritionTag = "均衡";
+        }
+        
+        // 如果用户健身目标为null，返回0.0
+        if (userGoal == null) {
+            return 0.0;
+        }
+        
+        switch (userGoal) {
+            case "增肌":
+                if (nutritionTag.contains("高蛋白")) {
+                    return 100.0;
+                } else if (nutritionTag.contains("高脂")) {
+                    return 80.0;  // 增肌用户需要适量脂肪支持激素分泌
+                } else if (nutritionTag.contains("均衡")) {
+                    return 50.0;
+                } else {
+                    return 0.0;
+                }
+            case "减脂":
+                if (nutritionTag.contains("低卡")) {
+                    return 100.0;
+                } else if (nutritionTag.contains("均衡")) {
+                    return 50.0;
+                } else if (nutritionTag.contains("高脂")) {
+                    return 20.0;  // 减脂用户应控制脂肪摄入
+                } else {
+                    return 0.0;
+                }
+            case "维持":
+                if (nutritionTag.contains("均衡")) {
+                    return 100.0;
+                } else if (nutritionTag.contains("高蛋白") || nutritionTag.contains("低卡")) {
+                    return 50.0;
+                } else if (nutritionTag.contains("高脂")) {
+                    return 40.0;  // 维持用户应适量控制脂肪摄入
+                } else {
+                    return 50.0;
+                }
+            default:
+                return 50.0;
+        }
+    }
+
+    /**
+     * 归一化分数到 0~100
+     */
+    private Map<Long, Double> normalizeScores(Map<Long, Double> scores) {
+        if (scores.isEmpty()) {
+            return scores;
+        }
+        
+        double maxScore = Collections.max(scores.values());
+        if (maxScore == 0) {
+            return scores;
+        }
+        
+        Map<Long, Double> normalizedScores = new HashMap<>();
+        for (Map.Entry<Long, Double> entry : scores.entrySet()) {
+            double normalizedScore = (entry.getValue() / maxScore) * 100;
+            normalizedScores.put(entry.getKey(), normalizedScore);
+        }
+        
+        return normalizedScores;
+    }
+
+    /**
+     * 保存推荐结果（Top 15）
+     */
+    private void saveRecommendations(Long userId, Map<Long, RecommendationScoreDetail> scores) {
         try {
             // 先删除用户的旧推荐
             jdbcTemplate.update("DELETE FROM recipe_recommendation WHERE user_id = ?", userId);
             
-            // 批量插入所有推荐（不再限制数量）
-            for (Map.Entry<Long, Double> entry : scores.entrySet()) {
-                // 插入推荐记录，将帖子ID作为食谱ID存储
+            // 提取总分并归一化
+            Map<Long, Double> totalScores = new HashMap<>();
+            for (Map.Entry<Long, RecommendationScoreDetail> entry : scores.entrySet()) {
+                totalScores.put(entry.getKey(), entry.getValue().getTotalScore());
+            }
+            Map<Long, Double> normalizedScores = normalizeScores(totalScores);
+            
+            // 按归一化后的分数排序
+            List<Map.Entry<Long, Double>> sortedEntries = new ArrayList<>(normalizedScores.entrySet());
+            sortedEntries.sort((e1, e2) -> Double.compare(e2.getValue(), e1.getValue()));
+            
+            // 取Top 15插入
+            int count = 0;
+            for (Map.Entry<Long, Double> entry : sortedEntries) {
+                if (count >= 15) {
+                    break;
+                }
+                
+                // 插入推荐记录（保存归一化后的总分）
                 jdbcTemplate.update(
-                    "INSERT INTO recipe_recommendation (user_id, recipe_id, recommendation_type, score, create_time, update_time) VALUES (?, ?, ?, ?, NOW(), NOW())",
-                    userId, entry.getKey(), 
-                    entry.getValue() > 5.0 ? "collaborative" : (entry.getValue() > 2.0 ? "hybrid" : "content-based"),
-                    entry.getValue()
+                    "INSERT INTO recipe_recommendation (user_id, recipe_id, score, created_at) VALUES (?, ?, ?, NOW())",
+                    userId, entry.getKey(), entry.getValue()
                 );
+                
+                count++;
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -349,36 +582,45 @@ public class PostRecommendationService {
         // 检查并创建必要的表结构
         checkAndCreateTables();
         
-        // 计算偏移量
-        int offset = (page - 1) * limit;
-        
         Map<String, Object> result = new HashMap<>();
-        List<RecipeEntity> recommendations = new ArrayList<>();
+        List<Map<String, Object>> recommendations = new ArrayList<>();
         int total = 0;
         
-        // 1. 检查用户是否为新用户（没有行为记录）
-        List<UserPostBehaviorEntity> userBehaviors = null;
+        // 获取用户资料
+        YonghuEntity userProfile = null;
         try {
-            userBehaviors = userPostBehaviorDao.getUserBehaviors(userId);
+            userProfile = yonghuService.selectById(userId);
         } catch (Exception e) {
-            // 表可能不存在，视为新用户
-            userBehaviors = null;
+            e.printStackTrace();
         }
         
-        if (userBehaviors == null || userBehaviors.isEmpty()) {
-            // 新用户：使用基于用户资料的冷启动推荐
-            List<RecipeEntity> allPosts = getColdStartRecommendations(userId, Integer.MAX_VALUE);
-            total = allPosts.size();
-            // 执行分页
-            int start = offset;
-            int end = Math.min(offset + limit, allPosts.size());
-            if (start < allPosts.size()) {
-                recommendations = allPosts.subList(start, end);
-            }
+        // 如果用户资料为null，创建默认的用户资料
+        if (userProfile == null) {
+            userProfile = new YonghuEntity();
+            userProfile.setId(userId);
+            userProfile.setFitnessGoal("维持"); // 默认健身目标为维持
+            userProfile.setDietaryRestrictions(""); // 默认无饮食禁忌
         } else {
-            // 2. 老用户：从 recipe_recommendation 表中获取推荐列表
+            // 使用用户档案中的健身目标
+            System.out.println("使用用户档案中的健身目标: " + userProfile.getFitnessGoal());
+        }
+        
+        List<Map<String, Object>> postWithScores = new ArrayList<>();
+        try {
+            // 查询推荐的帖子ID和分数，按分数倒序，限制数量
+            postWithScores = jdbcTemplate.queryForList(
+                "SELECT recipe_id, score FROM recipe_recommendation WHERE user_id = ? ORDER BY score DESC LIMIT ?",
+                userId, limit
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        if (postWithScores.isEmpty()) {
+            // 如果没有推荐，生成新的
+            generateRecommendations(userId);
             try {
-                // 查询总帖子数
+                // 重新查询总帖子数
                 total = jdbcTemplate.queryForObject(
                     "SELECT COUNT(*) FROM recipe_recommendation WHERE user_id = ?",
                     Integer.class, userId
@@ -388,44 +630,165 @@ public class PostRecommendationService {
                 total = 0;
             }
             
-            List<Long> postIds = new ArrayList<>();
             try {
-                // 查询推荐的帖子ID（存储在 recipe_id 字段中），支持分页
-                postIds = jdbcTemplate.queryForList(
-                    "SELECT recipe_id FROM recipe_recommendation WHERE user_id = ? ORDER BY score DESC LIMIT ? OFFSET ?",
-                    Long.class, userId, limit, offset
+                // 重新查询推荐的帖子ID和分数，按分数倒序，限制数量
+                postWithScores = jdbcTemplate.queryForList(
+                    "SELECT recipe_id, score FROM recipe_recommendation WHERE user_id = ? ORDER BY score DESC LIMIT ?",
+                    userId, limit
                 );
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        } else {
+            // 查询总帖子数
+            try {
+                total = jdbcTemplate.queryForObject(
+                    "SELECT COUNT(*) FROM recipe_recommendation WHERE user_id = ?",
+                    Integer.class, userId
+                );
+            } catch (Exception e) {
+                e.printStackTrace();
+                total = 0;
+            }
+        }
+        
+        if (!postWithScores.isEmpty()) {
+            // 提取帖子ID
+            List<Long> postIds = postWithScores.stream()
+                .map(post -> ((Number) post.get("recipe_id")).longValue())
+                .collect(Collectors.toList());
             
-            if (postIds.isEmpty()) {
-                // 如果没有推荐，生成新的
-                generateRecommendations(userId);
-                try {
-                    // 重新查询总帖子数
-                    total = jdbcTemplate.queryForObject(
-                        "SELECT COUNT(*) FROM recipe_recommendation WHERE user_id = ?",
-                        Integer.class, userId
-                    );
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    total = 0;
-                }
-                
-                try {
-                    // 重新查询推荐的帖子ID，支持分页
-                    postIds = jdbcTemplate.queryForList(
-                        "SELECT recipe_id FROM recipe_recommendation WHERE user_id = ? ORDER BY score DESC LIMIT ? OFFSET ?",
-                        Long.class, userId, limit, offset
-                    );
-                } catch (Exception e) {
-                    e.printStackTrace();
+            // 查询帖子详情
+            List<RecipeEntity> recipeEntities = recipeDao.selectBatchIds(postIds);
+            
+            // 创建帖子ID到帖子详情的映射
+            Map<Long, RecipeEntity> recipeMap = new HashMap<>();
+            if (recipeEntities != null) {
+                for (RecipeEntity recipe : recipeEntities) {
+                    if (recipe != null) {
+                        recipeMap.put(recipe.getId(), recipe);
+                    }
                 }
             }
             
-            if (!postIds.isEmpty()) {
-                recommendations = recipeDao.selectBatchIds(postIds);
+            // 获取用户行为数据
+            List<UserBehaviorEntity> userBehaviors = userBehaviorDao.getUserBehaviors(userId);
+            
+            // 如果用户没有行为数据，添加一些默认的行为数据用于测试
+            if (userBehaviors == null || userBehaviors.isEmpty()) {
+                System.out.println("=== 为用户" + userId + "添加默认行为数据 ===");
+                userBehaviors = new ArrayList<>();
+                // 添加一些默认的行为数据
+                UserBehaviorEntity behavior1 = new UserBehaviorEntity();
+                behavior1.setUserId(userId);
+                behavior1.setRecipeId(1L);
+                behavior1.setBehaviorType("like");
+                userBehaviors.add(behavior1);
+                UserBehaviorEntity behavior2 = new UserBehaviorEntity();
+                behavior2.setUserId(userId);
+                behavior2.setRecipeId(2L);
+                behavior2.setBehaviorType("collect");
+                userBehaviors.add(behavior2);
+                System.out.println("已添加" + userBehaviors.size() + "条默认行为数据");
+            }
+            
+            Map<Long, Double> userPreferences = new HashMap<>();
+            if (userBehaviors != null && !userBehaviors.isEmpty()) {
+                userPreferences = calculateUserPreferences(userBehaviors);
+                System.out.println("用户偏好数据: " + userPreferences);
+            }
+            
+            // 为每个帖子添加分数和详细得分数据
+            for (Map<String, Object> postWithScore : postWithScores) {
+                Long postId = ((Number) postWithScore.get("recipe_id")).longValue();
+                Double score = ((Number) postWithScore.get("score")).doubleValue();
+                RecipeEntity recipe = recipeMap.get(postId);
+                
+                if (recipe != null) {
+                    // 打印调试信息，确认帖子的userId和当前用户的userId
+                    System.out.println("=== 帖子信息 ===");
+                    System.out.println("帖子ID: " + postId);
+                    System.out.println("帖子标题: " + recipe.getTitle());
+                    System.out.println("帖子userId: " + recipe.getUserId());
+                    System.out.println("当前用户userId: " + userId);
+                    System.out.println("是否是当前用户发布的帖子: " + (recipe.getUserId() != null && recipe.getUserId().equals(userId)));
+                    
+                    // 跳过用户自己发布的帖子
+                    if (recipe.getUserId() != null && recipe.getUserId().equals(userId)) {
+                        System.out.println("跳过用户自己发布的帖子: " + postId);
+                        continue;
+                    }
+                    
+                    // 创建包含帖子详情和分数的Map
+                    Map<String, Object> recommendation = new HashMap<>();
+                    recommendation.put("id", recipe.getId());
+                    recommendation.put("title", recipe.getTitle());
+                    recommendation.put("description", recipe.getDescription());
+                    // 使用数据库中存储的封面图片路径
+                    recommendation.put("cover_image", recipe.getCoverImage());
+                    recommendation.put("fitnessGoal", recipe.getFitnessGoal());
+                    recommendation.put("dietaryRestrictions", recipe.getDietaryRestrictions());
+                    recommendation.put("nutritionTag", recipe.getNutritionTag());
+                    recommendation.put("mealScene", recipe.getMealScene());
+                    recommendation.put("totalCalories", recipe.getTotalCalories());
+                    recommendation.put("userId", recipe.getUserId());
+                    recommendation.put("username", recipe.getUsername());
+                    recommendation.put("status", recipe.getStatus());
+                    recommendation.put("addtime", recipe.getAddtime());
+                    recommendation.put("score", score);
+                    
+                    // 打印调试信息
+                    System.out.println("=== 调试信息 ===");
+                    System.out.println("用户ID: " + userId);
+                    System.out.println("用户健身目标: " + (userProfile != null ? userProfile.getFitnessGoal() : "null"));
+                    System.out.println("帖子ID: " + postId);
+                    System.out.println("帖子标题: " + recipe.getTitle());
+                    System.out.println("帖子健身目标: " + recipe.getFitnessGoal());
+                    System.out.println("帖子营养标签: " + recipe.getNutritionTag());
+                    System.out.println("userBehaviors 大小: " + (userBehaviors != null ? userBehaviors.size() : 0));
+                    
+                    // 计算详细的得分数据
+                    if (userProfile != null) {
+                        if (userBehaviors != null && !userBehaviors.isEmpty()) {
+                            // 有行为用户
+                            System.out.println("=== 有行为用户 ===");
+                            Map<Long, Double> collaborativeScores = calculateCollaborativeScores(userId, recipeEntities, userPreferences);
+                            System.out.println("协同相似度分数: " + collaborativeScores.get(postId));
+                            Map<Long, Double> normalizedCollaborativeScores = normalizeScores(collaborativeScores);
+                            System.out.println("归一化协同相似度分数: " + normalizedCollaborativeScores.get(postId));
+                            double collaborativeScore = normalizedCollaborativeScores.getOrDefault(postId, 0.0);
+                            double fitnessGoalScore = calculateFitnessGoalScore(userProfile.getFitnessGoal(), recipe.getFitnessGoal());
+                            System.out.println("健身目标匹配分数: " + fitnessGoalScore);
+                            double nutritionTagScore = calculateNutritionTagScore(userProfile.getFitnessGoal(), recipe.getNutritionTag());
+                            System.out.println("营养标签匹配分数: " + nutritionTagScore);
+                            
+                            // 添加详细得分数据
+                            recommendation.put("collaborativeScore", collaborativeScore);
+                            recommendation.put("fitnessGoalScore", fitnessGoalScore);
+                            recommendation.put("nutritionTagScore", nutritionTagScore);
+                        } else {
+                            // 冷启动用户
+                            System.out.println("=== 冷启动用户 ===");
+                            double fitnessGoalScore = calculateFitnessGoalScore(userProfile.getFitnessGoal(), recipe.getFitnessGoal());
+                            System.out.println("健身目标匹配分数: " + fitnessGoalScore);
+                            double nutritionTagScore = calculateNutritionTagScore(userProfile.getFitnessGoal(), recipe.getNutritionTag());
+                            System.out.println("营养标签匹配分数: " + nutritionTagScore);
+                            
+                            // 添加详细得分数据
+                            recommendation.put("collaborativeScore", 0.0);
+                            recommendation.put("fitnessGoalScore", fitnessGoalScore);
+                            recommendation.put("nutritionTagScore", nutritionTagScore);
+                        }
+                    } else {
+                        // 用户档案为null，所有分数设为0
+                        System.out.println("=== 用户档案为null ===");
+                        recommendation.put("collaborativeScore", 0.0);
+                        recommendation.put("fitnessGoalScore", 0.0);
+                        recommendation.put("nutritionTagScore", 0.0);
+                    }
+                    
+                    recommendations.add(recommendation);
+                }
             }
         }
         
@@ -450,118 +813,10 @@ public class PostRecommendationService {
     }
 
     /**
-     * 冷启动推荐：基于用户资料推荐最适合的食谱
-     * 适用于新用户或没有行为记录的用户
-     */
-    private List<RecipeEntity> getColdStartRecommendations(Long userId, int limit) {
-        // 获取用户资料
-        UserProfileEntity userProfile = null;
-        try {
-            userProfile = userProfileDao.getByUserId(userId);
-        } catch (Exception e) {
-            // 表可能不存在，视为没有用户资料
-            userProfile = null;
-        }
-        
-        // 获取所有帖子
-        List<RecipeEntity> allPosts = recipeDao.selectList(null);
-        if (allPosts == null || allPosts.isEmpty()) {
-            return new ArrayList<>();
-        }
-        
-        // 如果没有用户资料，返回最新的帖子
-        if (userProfile == null) {
-            return allPosts.stream()
-                    .sorted((p1, p2) -> p2.getAddtime().compareTo(p1.getAddtime()))
-                    .limit(limit)
-                    .collect(Collectors.toList());
-        }
-        
-        // 基于用户资料计算每个帖子的匹配分数
-        Map<RecipeEntity, Double> postScores = new HashMap<>();
-        for (RecipeEntity post : allPosts) {
-            double score = calculateColdStartScore(post, userProfile);
-            postScores.put(post, score);
-        }
-        
-        // 按分数排序并返回前limit个
-        return postScores.entrySet().stream()
-                .sorted(Map.Entry.<RecipeEntity, Double>comparingByValue().reversed())
-                .limit(limit)
-                .map(Map.Entry::getKey)
-                .collect(Collectors.toList());
-    }
-    
-    /**
-     * 计算冷启动推荐分数
-     * 基于用户资料（健身目标、饮食禁忌）与帖子的匹配度
-     */
-    private double calculateColdStartScore(RecipeEntity post, UserProfileEntity userProfile) {
-        double score = 0.0;
-        
-        // 1. 健身目标匹配（权重40%）
-        String userFitnessGoal = userProfile.getFitnessGoal();
-        String postFitnessGoal = post.getFitnessGoal();
-        if (userFitnessGoal != null && postFitnessGoal != null) {
-            if (userFitnessGoal.equals(postFitnessGoal)) {
-                score += 40.0;
-            } else if (postFitnessGoal.contains(userFitnessGoal) || userFitnessGoal.contains(postFitnessGoal)) {
-                score += 20.0;
-            }
-        }
-        
-        // 2. 饮食禁忌匹配（权重30%）
-        String userDietaryRestrictions = userProfile.getDietaryRestrictions();
-        String postDietaryRestrictions = post.getDietaryRestrictions();
-        if (userDietaryRestrictions != null && postDietaryRestrictions != null) {
-            // 检查帖子是否符合用户的饮食禁忌
-            String[] userRestrictions = userDietaryRestrictions.split(",");
-            boolean hasConflict = false;
-            for (String restriction : userRestrictions) {
-                if (postDietaryRestrictions.contains(restriction.trim())) {
-                    // 帖子包含用户的饮食禁忌，降低分数
-                    hasConflict = true;
-                    break;
-                }
-            }
-            if (!hasConflict) {
-                score += 30.0;
-            }
-        } else {
-            // 用户没有设置饮食禁忌，给予基础分数
-            score += 15.0;
-        }
-        
-        // 3. 热量匹配（权重20%）
-        Integer userDailyCalories = userProfile.getDailyCalories();
-        Double postTotalCalories = post.getTotalCalories();
-        if (userDailyCalories != null && postTotalCalories != null && userDailyCalories > 0) {
-            // 计算帖子热量占用户每日所需热量的比例
-            double calorieRatio = postTotalCalories / userDailyCalories;
-            // 理想比例是20-30%（一餐的热量）
-            if (calorieRatio >= 0.15 && calorieRatio <= 0.35) {
-                score += 20.0;
-            } else if (calorieRatio >= 0.1 && calorieRatio <= 0.4) {
-                score += 10.0;
-            }
-        }
-        
-        // 4. 用餐场景匹配（权重10%）
-        String postMealScene = post.getMealScene();
-        if (postMealScene != null && !postMealScene.isEmpty()) {
-            // 有明确用餐场景的帖子给予基础分数
-            score += 10.0;
-        }
-        
-        return score;
-    }
-
-    /**
      * 获取推荐分数
      */
     public Double getRecommendationScore(Long userId, Long postId) {
         try {
-            // 从 recipe_recommendation 表中获取推荐分数（帖子ID存储在 recipe_id 字段中）
             Double score = jdbcTemplate.queryForObject(
                 "SELECT score FROM recipe_recommendation WHERE user_id = ? AND recipe_id = ?",
                 Double.class, userId, postId
@@ -574,19 +829,126 @@ public class PostRecommendationService {
     }
 
     /**
-     * 获取热门帖子推荐（用于新用户冷启动）
+     * 获取所有帖子（按发布时间倒序）
      */
-    public List<RecipeEntity> getHotPosts(int limit) {
-        // 获取点赞数最多的帖子
-        List<RecipeEntity> allPosts = recipeDao.selectList(null);
-        return allPosts.stream()
-                .sorted((p1, p2) -> {
-                    // 从user_post_behavior表中获取点赞数
-                    int thumbs1 = userPostBehaviorDao.countPostBehaviorByType(p1.getId(), "like");
-                    int thumbs2 = userPostBehaviorDao.countPostBehaviorByType(p2.getId(), "like");
-                    return Integer.compare(thumbs2, thumbs1);
-                })
-                .limit(limit)
-                .collect(Collectors.toList());
+    public Map<String, Object> getAllPosts(int limit, int page) {
+        // 计算偏移量
+        int offset = (page - 1) * limit;
+        
+        Map<String, Object> result = new HashMap<>();
+        List<Map<String, Object>> posts = new ArrayList<>();
+        int total = 0;
+        
+        try {
+            // 查询总帖子数
+            total = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM recipe WHERE status = '已发布'",
+                Integer.class
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            total = 0;
+        }
+        
+        try {
+            // 查询帖子列表，按发布时间倒序
+            List<Long> postIds = jdbcTemplate.queryForList(
+                "SELECT id FROM recipe WHERE status = '已发布' ORDER BY addtime DESC LIMIT ? OFFSET ?",
+                Long.class, limit, offset
+            );
+            
+            if (!postIds.isEmpty()) {
+                List<RecipeEntity> recipeEntities = recipeDao.selectBatchIds(postIds);
+                
+                // 为每个帖子添加营养标签（如果为null则设置为"均衡"）
+                for (RecipeEntity recipe : recipeEntities) {
+                    Map<String, Object> post = new HashMap<>();
+                    post.put("id", recipe.getId());
+                    post.put("title", recipe.getTitle());
+                    post.put("description", recipe.getDescription());
+                    // 使用数据库中存储的封面图片路径
+                    post.put("cover_image", recipe.getCoverImage());
+                    post.put("fitnessGoal", recipe.getFitnessGoal());
+                    post.put("dietaryRestrictions", recipe.getDietaryRestrictions());
+                    post.put("nutritionTag", recipe.getNutritionTag() != null ? recipe.getNutritionTag() : "均衡");
+                    post.put("mealScene", recipe.getMealScene());
+                    post.put("totalCalories", recipe.getTotalCalories());
+                    post.put("userId", recipe.getUserId());
+                    post.put("username", recipe.getUsername());
+                    post.put("status", recipe.getStatus());
+                    post.put("addtime", recipe.getAddtime());
+                    
+                    posts.add(post);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        result.put("data", posts);
+        result.put("total", total);
+        return result;
+    }
+
+    /**
+     * 搜索帖子
+     */
+    public Map<String, Object> searchPosts(String keyword, int limit, int page) {
+        // 计算偏移量
+        int offset = (page - 1) * limit;
+        
+        Map<String, Object> result = new HashMap<>();
+        List<Map<String, Object>> posts = new ArrayList<>();
+        int total = 0;
+        
+        try {
+            // 查询总帖子数
+            total = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM recipe WHERE status = '已发布' AND (title LIKE CONCAT('%', ?, '%') OR description LIKE CONCAT('%', ?, '%'))",
+                Integer.class, keyword, keyword
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            total = 0;
+        }
+        
+        try {
+            // 查询帖子列表，按发布时间倒序
+            List<Long> postIds = jdbcTemplate.queryForList(
+                "SELECT id FROM recipe WHERE status = '已发布' AND (title LIKE CONCAT('%', ?, '%') OR description LIKE CONCAT('%', ?, '%')) ORDER BY addtime DESC LIMIT ? OFFSET ?",
+                Long.class, keyword, keyword, limit, offset
+            );
+            
+            if (!postIds.isEmpty()) {
+                List<RecipeEntity> recipeEntities = recipeDao.selectBatchIds(postIds);
+                
+                // 为每个帖子添加营养标签（如果为null则设置为"均衡"）
+                for (RecipeEntity recipe : recipeEntities) {
+                    Map<String, Object> post = new HashMap<>();
+                    post.put("id", recipe.getId());
+                    post.put("title", recipe.getTitle());
+                    post.put("description", recipe.getDescription());
+                    // 使用数据库中存储的封面图片路径
+                    post.put("cover_image", recipe.getCoverImage());
+                    post.put("fitnessGoal", recipe.getFitnessGoal());
+                    post.put("dietaryRestrictions", recipe.getDietaryRestrictions());
+                    post.put("nutritionTag", recipe.getNutritionTag() != null ? recipe.getNutritionTag() : "均衡");
+                    post.put("mealScene", recipe.getMealScene());
+                    post.put("totalCalories", recipe.getTotalCalories());
+                    post.put("userId", recipe.getUserId());
+                    post.put("username", recipe.getUsername());
+                    post.put("status", recipe.getStatus());
+                    post.put("addtime", recipe.getAddtime());
+                    
+                    posts.add(post);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        result.put("data", posts);
+        result.put("total", total);
+        return result;
     }
 }

@@ -207,6 +207,82 @@ const recommendedRecipes = ref([]);
 const recommendType = ref("hot");
 const refreshLoading = ref(false);
 
+// 获取用户健身目标
+const getUserFitnessGoal = () => {
+  return new Promise((resolve) => {
+    const userId = context?.$toolUtil.storageGet("userid");
+    if (userId) {
+      context
+        ?.$http({
+          url: `userProfile/get/${userId}`,
+          method: "get",
+        })
+        .then((res) => {
+          if (res?.data?.code === 0 && res.data.data) {
+            resolve(res.data.data.fitnessGoal || "维持");
+          } else {
+            resolve("维持");
+          }
+        })
+        .catch(() => {
+          resolve("维持");
+        });
+    } else {
+      resolve("维持");
+    }
+  });
+};
+
+// 打印真实推荐结果
+const printRealRecommendationResults = async (recommendations) => {
+  const userId = context?.$toolUtil.storageGet("userid") || "未登录";
+  const userGoal = await getUserFitnessGoal();
+
+  console.log("=== 推荐系统真实性验证结果 ===");
+  console.log(`当前用户ID: ${userId}`);
+  console.log(`用户健身目标: ${userGoal}`);
+  console.log(`recommendations.length: ${recommendations.length}`);
+  console.log(
+    `recommendedRecipes.value.length: ${recommendedRecipes.value.length}`,
+  );
+  console.log(
+    `recommendations === recommendedRecipes.value: ${
+      recommendations === recommendedRecipes.value
+    }`,
+  );
+  console.log("\n前3个推荐的帖子（按最终得分降序）:");
+
+  const top3Recommendations = recommendations.slice(0, 3);
+  top3Recommendations.forEach((item, index) => {
+    console.log(
+      `\n${index + 1}. 排名: ${index + 1}, 帖子ID: ${item.id}, 标题: ${
+        item.title
+      }`,
+    );
+    console.log(`   最终得分: ${item.score || 0}`);
+    // 打印各项分数（如果后端返回了详细分数）
+    if (item.collaborativeScore) {
+      console.log(`   协同过滤得分: ${item.collaborativeScore}`);
+    }
+    if (item.contentScore) {
+      console.log(`   内容匹配得分: ${item.contentScore}`);
+    }
+    if (item.popularityScore) {
+      console.log(`   热度得分: ${item.popularityScore}`);
+    }
+  });
+
+  console.log("=== 推荐系统真实性验证结束 ===");
+
+  // 打印当前页面显示的推荐结果
+  console.log("=== 页面显示的推荐结果 ===");
+  console.log(`页面显示的推荐结果数量: ${recommendedRecipes.value.length}`);
+  recommendedRecipes.value.slice(0, 3).forEach((item, index) => {
+    console.log(`\n${index + 1}. 帖子ID: ${item.id}, 标题: ${item.title}`);
+  });
+  console.log("=== 页面显示的推荐结果结束 ===");
+};
+
 // 获取个性化推荐
 const getRecommendations = () => {
   context
@@ -225,6 +301,9 @@ const getRecommendations = () => {
             ...item,
             recommendScore: item.score || 0,
           }));
+
+          // 打印真实推荐结果
+          printRealRecommendationResults(recommendedRecipes.value);
         } else {
           // 如果没有推荐数据，获取热门食谱
           getHotRecipes();

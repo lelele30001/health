@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cl.dao.CommentDao">
+
+    <resultMap type="com.cl.entity.CommentEntity" id="CommentResult">
+        <result property="id" column="id"/>
+        <result property="recipeId" column="recipe_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="username" column="username"/>
+        <result property="content" column="content"/>
+        <result property="createTime" column="create_time"/>
+    </resultMap>
+
+    <sql id="selectCommentVo">
+        select id, recipe_id, user_id, username, content, create_time from comment
+    </sql>
+
+    <select id="selectByPostId" parameterType="Long" resultMap="CommentResult">
+        <include refid="selectCommentVo"/>
+        where recipe_id = #{postId}
+        order by create_time desc
+    </select>
+
+    <select id="selectByUserId" parameterType="Long" resultMap="CommentResult">
+        <include refid="selectCommentVo"/>
+        where user_id = #{userId}
+        order by create_time desc
+    </select>
+
+    <delete id="deleteByPostIdAndUserId" parameterType="java.util.Map">
+        delete from comment
+        where recipe_id = #{postId} and user_id = #{userId}
+    </delete>
+
+    <delete id="deleteByCommentIdAndUserId" parameterType="map">
+        delete from comment
+        where id = #{commentId} and user_id = #{userId}
+    </delete>
+
+</mapper>

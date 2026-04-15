@@ -25,5 +25,9 @@ public interface YonghuDao extends BaseMapper<YonghuEntity> {
 
     YonghuView selectView(@Param("ew") Wrapper<YonghuEntity> wrapper);
 
+    int countByDate(@Param("date") String date);
+    
+    int countByMonth(@Param("month") String month);
+
 
 }

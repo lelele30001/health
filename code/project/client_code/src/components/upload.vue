@@ -121,7 +121,7 @@ const handlePictureCardPreview = (e) => {
 };
 //成功回调
 const uploadSuccess = (e, file, fileList) => {
-  fileUrlList.value.push("file/" + e.file);
+  fileUrlList.value.push(e.file);
   fileUrlsChange(fileUrlList.value);
   emit("change", fileUrlList.value.join(","));
 };
@@ -149,7 +149,8 @@ const fileUrlsChange = (list) => {
     var name = index + 1;
     var file = {
       name: name,
-      url: fileUrl + (fileUrl.includes("?") ? "&" : "?") + "token=" + token,
+      // 对DiceBear的URL不添加token参数
+      url: fileUrl.includes("api.dicebear.com") ? fileUrl : fileUrl + (fileUrl.includes("?") ? "&" : "?") + "token=" + token,
       uid: index + 1,
     };
     list1.push(file);
@@ -164,7 +165,7 @@ const uploadExceed = () => {
 };
 //created
 const init = () => {
-  uploadUrl.value = "project/file/upload";
+  uploadUrl.value = context?.$config.url + "file/upload";
   uploadHeaders.value = {
     Token: context?.$toolUtil.storageGet("frontToken"),
   };

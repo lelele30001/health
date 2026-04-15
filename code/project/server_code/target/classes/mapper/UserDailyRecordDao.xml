@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.cl.dao.UserDailyRecordDao">
+    
+    <select id="getByUserId" parameterType="java.lang.Long" resultType="com.cl.entity.UserDailyRecordEntity">
+        SELECT * FROM user_daily_record WHERE user_id = #{userId} ORDER BY record_date DESC
+    </select>
+    
+    <select id="getByUserIdAndDate" resultType="com.cl.entity.UserDailyRecordEntity">
+        SELECT * FROM user_daily_record WHERE user_id = #{userId} AND record_date = #{recordDate}
+    </select>
+    
+</mapper>

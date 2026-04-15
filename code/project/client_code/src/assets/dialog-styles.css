@@ -1,0 +1,64 @@
+.modern-dialog {
+  border-radius: 16px !important;
+  overflow: hidden !important;
+  max-height: 90vh !important;
+  height: 90vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+}
+
+.modern-dialog .el-dialog__header {
+  padding: 0 !important;
+  border-bottom: none !important;
+  height: 40px !important;
+}
+
+.modern-dialog .el-dialog__body {
+  padding: 0 !important;
+  background: #f8f9fa !important;
+  max-height: calc(90vh - 40px) !important;
+  height: calc(90vh - 40px) !important;
+  overflow: hidden !important;
+}
+
+.modern-dialog .forum_detail {
+  width: 100% !important;
+  padding: 30px !important;
+  background: #f8f9fa !important;
+  border-radius: 16px !important;
+  height: 100% !important;
+  overflow-y: auto !important;
+  max-height: 100% !important;
+  /* 隐藏滚动条但保留滚动功能 */
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* IE/Edge */
+}
+
+/* 隐藏WebKit浏览器的滚动条 */
+.modern-dialog .forum_detail::-webkit-scrollbar {
+  display: none !important;
+}
+
+/* 直接覆盖Element UI弹窗样式 */
+.el-dialog {
+  max-height: 90vh !important;
+  height: 90vh !important;
+  display: flex !important;
+  flex-direction: column !important;
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  margin: 0 !important;
+}
+
+.el-dialog__body {
+  max-height: calc(90vh - 40px) !important;
+  height: calc(90vh - 40px) !important;
+  overflow: hidden !important;
+}

@@ -13,6 +13,7 @@ import shicaixinxi from "@/views/shicaixinxi/list";
 import shicaileixing from "@/views/shicaileixing/list";
 import config from "@/views/config/list";
 import usersCenter from "@/views/users/center";
+import stats from "@/views/stats/list";
 
 export const routes = [
   {
@@ -28,7 +29,7 @@ export const routes = [
       {
         path: "/",
         name: "首页1",
-        component: () => import("../views/HomeView.vue"),
+        component: yonghu,
         meta: {
           affix: true,
         },
@@ -108,6 +109,11 @@ export const routes = [
         path: "/config",
         name: "轮播图",
         component: config,
+      },
+      {
+        path: "/stats",
+        name: "统计",
+        component: stats,
       },
     ],
   },

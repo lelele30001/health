@@ -2,9 +2,6 @@
   <div class="home">
     <div class="index_top">
       <div class="index_top_left">
-        <div class="index_top_title"><span>智慧膳食分享系统</span></div>
-      </div>
-      <div class="index_top_right">
         <div class="logo">
           <svg
             t="1773642571598"
@@ -29,6 +26,20 @@
             ></path>
           </svg>
         </div>
+        <div class="index_top_title"><span>智慧膳食分享系统</span></div>
+        <div class="nav-buttons">
+          <el-button class="nav-button" @click="menuHandler('/index/forumList')"
+            >膳食分享</el-button
+          >
+          <el-button class="nav-button" @click="menuHandler('center')"
+            >个人中心</el-button
+          >
+          <el-button class="nav-button" @click="showPostRecipeDialog"
+            >发布食谱</el-button
+          >
+        </div>
+      </div>
+      <div class="index_top_right">
         <el-button
           v-if="!Token"
           class="login"
@@ -40,23 +51,16 @@
         <div class="user" v-if="Token">
           <el-dropdown class="avatar-container" trigger="hover">
             <div class="avatar-wrapper">
-              <img
-                class="user-avatar"
-                :src="store.getters['user/avatar']"
-                style="width: 50px"
-              />
               <div class="nickname">
-                {{ $toolUtil.storageGet("frontName") }}
+                欢迎 {{ $toolUtil.storageGet("frontName") }}
               </div>
+              <img class="user-avatar" :src="store.getters['user/avatar']" />
               <el-icon class="el-icon-arrow-down">
                 <arrow-down />
               </el-icon>
             </div>
             <template #dropdown>
               <el-dropdown-menu class="user-dropDown" slot="dropdown">
-                <el-dropdown-item @click="menuHandler('center')" class="center">
-                  <span>个人中心</span>
-                </el-dropdown-item>
                 <el-dropdown-item @click="loginOut" class="loginOut">
                   <span>退出登录</span>
                 </el-dropdown-item>
@@ -67,61 +71,6 @@
       </div>
     </div>
     <el-scrollbar class="contain_view">
-      <div class="menu-wrapper">
-        <el-scrollbar wrap-class="scrollbar-wrapper" class="menu_scrollbar">
-          <el-menu
-            :default-openeds="[]"
-            :unique-opened="true"
-            :default-active="menuIndex"
-            class="menu_view"
-            mode="horizontal"
-            :ellipsis="false"
-            @select="menuChange"
-            :key="menuIndex"
-          >
-            <el-menu-item
-              class="first-item"
-              index="0"
-              @click="menuHandler('/')"
-            >
-              <template #title>
-                <span>首页</span>
-              </template>
-            </el-menu-item>
-            <template v-for="(menu, index) in menuList" :key="menu.menu">
-              <el-sub-menu
-                v-if="menu.child.length > 1"
-                :index="index + 2 + ''"
-                class="first-item"
-                :teleported="true"
-              >
-                <template #title>
-                  <span>{{ menu.name }}</span>
-                </template>
-                <el-menu-item
-                  class="second-item"
-                  v-for="(child, sort) in menu.child"
-                  :key="sort"
-                  :index="index + 2 + '-' + sort"
-                  @click="menuHandler(child.url)"
-                  >{{ child.name }}
-                </el-menu-item>
-              </el-sub-menu>
-              <el-menu-item
-                v-else
-                :index="index + 2 + ''"
-                class="first-item"
-                @click="menuHandler(menu.child[0].url)"
-              >
-                <template #title>
-                  <span>{{ menu.child[0].name }}</span>
-                </template>
-              </el-menu-item>
-            </template>
-          </el-menu>
-        </el-scrollbar>
-      </div>
-
       <router-view />
       <el-backtop :right="100" :bottom="100" />
       <div class="bottom_view">
@@ -179,6 +128,7 @@ const Token = ref("");
 const date = ref("");
 const timer = ref("");
 const interval = ref(null);
+const postRecipeDialogVisible = ref(false);
 if (localStorage.getItem("frontToken") && !store.getters["user/session"].id) {
   store.dispatch("user/getSession");
 }
@@ -207,7 +157,7 @@ watch(
   },
   {
     immediate: true,
-  }
+  },
 );
 const init = () => {
   // 获取菜单
@@ -258,6 +208,20 @@ const loginOut = () => {
   context?.$toolUtil.storageSet("menuIndex", "0");
   Token.value = "";
 };
+// 修改密码
+const updatepasswordClick = () => {
+  router.push("/updatepassword");
+};
+// 显示发布食谱弹窗
+const showPostRecipeDialog = () => {
+  if (!Token.value) {
+    context?.$toolUtil.message("请先登录", "warning");
+    router.push("/login");
+    return;
+  }
+  // 跳转到膳食分享页面并带上publish参数，自动打开发布食谱弹窗
+  router.push("/index/forumList?publish=true");
+};
 //菜单跳转
 const menuHandler = (name) => {
   if (name == "center") {
@@ -281,7 +245,7 @@ const getSession = () => {
       if (context?.$toolUtil.storageGet("frontSessionTable") == "yonghu") {
         context?.$toolUtil.storageSet(
           "frontName",
-          res.data.data.yonghuzhanghao
+          res.data.data.yonghuzhanghao,
         );
       }
       if (context?.$toolUtil.storageGet("frontSessionTable") == "yonghu") {
@@ -465,8 +429,8 @@ init();
   display: flex;
   align-items: center;
   height: 80px;
-  background: var(--background-color);
-  color: var(--text-color);
+  background: #333;
+  color: #fff;
   justify-content: space-between;
   padding: 0px var(--spacing-xl);
   z-index: 1002;
@@ -477,13 +441,59 @@ init();
 .index_top .index_top_left {
   display: flex;
   align-items: center;
+  gap: var(--spacing-md);
+}
+
+.index_top .index_top_left .logo {
+  margin-right: var(--spacing-md);
 }
 
 .index_top .index_top_left .index_top_title {
   font-size: var(--font-size-xl);
-  color: var(--text-color);
+  color: #fff;
   font-weight: 700;
   margin-left: 0;
+}
+
+.index_top .nav-buttons {
+  display: flex;
+  gap: var(--spacing-md);
+  margin-left: var(--spacing-xl);
+}
+
+.index_top .nav-buttons .nav-button {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: 16px;
+  color: #fff;
+  transition: var(--transition);
+  position: relative;
+  padding: 0 var(--spacing-lg);
+  height: 60px;
+  line-height: 60px;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &::after {
+    content: "";
+    height: 3px;
+    background: var(--primary-color);
+    display: block;
+    margin-top: -3px;
+    transition: transform 0.3s ease;
+    transform: scaleX(0);
+    transform-origin: 50% 0;
+  }
+
+  &:hover {
+    color: var(--primary-color);
+    background: none;
+  }
+
+  &:hover::after {
+    transform: scaleX(1);
+  }
 }
 
 .index_top .index_top_right {
@@ -491,10 +501,6 @@ init();
   align-items: center;
   gap: var(--spacing-md);
   color: inherit;
-}
-
-.index_top .index_top_right .logo {
-  margin-right: var(--spacing-md);
 }
 
 .index_top .notice-btn {
@@ -554,64 +560,97 @@ init();
   background: none;
 }
 .index_top .index_top_right .login {
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: 16px;
+  color: #fff;
+  transition: var(--transition);
+  position: relative;
+  padding: 0 var(--spacing-lg);
+  height: 60px;
+  line-height: 60px;
+  white-space: nowrap;
+  cursor: pointer;
+
+  &::after {
+    content: "";
+    height: 3px;
+    background: var(--primary-color);
+    display: block;
+    margin-top: -3px;
+    transition: transform 0.3s ease;
+    transform: scaleX(0);
+    transform-origin: 50% 0;
+  }
+
+  &:hover {
+    color: var(--primary-color);
+    background: none;
+  }
+
+  &:hover::after {
+    transform: scaleX(1);
+  }
 }
 .index_top .index_top_right .login .el-icon {
   color: #fff !important;
 }
 
-.index_top .user .avatar-wrapper {
+.index_top .avatar-container {
+  cursor: pointer;
+}
+
+.index_top .avatar-wrapper {
   display: flex;
   align-items: center;
-  cursor: pointer;
-  color: inherit;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm);
+  border-radius: var(--border-radius-md);
+  transition: all var(--transition-fast);
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
 }
 
-.index_top .user .avatar-wrapper .user-avatar {
-  width: 36px !important;
+.index_top img.user-avatar {
+  width: 36px;
   height: 36px;
-  border-radius: 100%;
-  margin-right: 5px;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
-.index_top .user .avatar-wrapper .nickname {
+.index_top .avatar-wrapper .nickname {
   font-size: 16px;
-  margin-right: 5px;
+  color: #fff;
+  font-weight: 500;
+}
+
+.index_top .avatar-wrapper .el-icon-arrow-down {
   color: #fff;
 }
 
-.index_top .user .avatar-wrapper .el-icon-arrow-down {
-  color: #fff;
-}
-
-.user-dropDown {
-  padding: 10px 0;
-  margin: 5px 0;
+.index_top .el-dropdown-menu {
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+  padding: var(--spacing-xs);
   background: #fff;
-  border: 1px solid #e6ebf5;
-  border-radius: 4px;
-  -webkit-box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-}
-.user-dropDown li {
-  padding: 0 20px !important;
-  line-height: 36px !important;
-  font-size: 14px !important;
-  color: #606266 !important;
-}
-.user-dropDown li:hover {
-  color: #0076ca !important;
-  background: none !important;
 }
 
-.user-dropDown li.loginOut {
-  background: none !important;
-  border-color: none !important;
-  color: #666 !important;
-}
-.user-dropDown li.loginOut:hover {
-  border-radius: 0px !important;
-  background: none !important;
-  color: #0076ca !important;
+.index_top .el-dropdown-menu__item {
+  padding: var(--spacing-sm) var(--spacing-md);
+  margin: var(--spacing-xs);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-sm);
+  transition: all var(--transition-fast);
+
+  &:focus,
+  &:not(.is-disabled):hover {
+    color: var(--primary-color);
+    background-color: rgba(3, 204, 136, 0.1);
+  }
 }
 .bottom_view {
   width: 100%;

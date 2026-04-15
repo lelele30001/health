@@ -8,6 +8,7 @@
         <result column="cover_image" property="coverImage"/>
         <result column="fitness_goal" property="fitnessGoal"/>
         <result column="dietary_restrictions" property="dietaryRestrictions"/>
+        <result column="nutrition_tag" property="nutritionTag"/>
         <result column="meal_scene" property="mealScene"/>
         <result column="total_calories" property="totalCalories"/>
         <result column="user_id" property="userId"/>

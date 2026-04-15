@@ -75,7 +75,6 @@ const context = getCurrentInstance()?.appContext.config.globalProperties;
 const handleLogin = () => {
   if (!loginForm.value.username) {
     context?.$toolUtil.message("请输入用户名", "error");
-
     return;
   }
   if (!loginForm.value.password) {
@@ -85,17 +84,21 @@ const handleLogin = () => {
   if (userList.value.length > 1) {
     if (!loginForm.value.role) {
       context?.$toolUtil.message("请选择角色", "error");
-      verifySlider.value.reset();
       return;
     }
     for (let i = 0; i < menus.value.length; i++) {
-      if (menus.value[i].roleName == loginForm.value.role) {
-        tableName.value = menus.value[i].pathName || menus.value[i].tableName;
+      if (menus.value[i] && menus.value[i].roleName == loginForm.value.role) {
+        tableName.value =
+          menus.value[i].pathName || menus.value[i].tableName || "users";
       }
     }
+  } else if (userList.value.length > 0) {
+    tableName.value =
+      userList.value[0].pathName || userList.value[0].tableName || "users";
+    loginForm.value.role = userList.value[0].roleName || "管理员";
   } else {
-    tableName.value = userList.value[0].pathName || userList.value[0].tableName;
-    loginForm.value.role = userList.value[0].roleName;
+    context?.$toolUtil.message("获取用户类型失败，请刷新页面重试", "error");
+    return;
   }
   login();
 };
@@ -186,7 +189,7 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .login_view {
-  background-image: url("http://codegen.caihongy.cn/20250110/77e5dc5f8b2a41c3befbae43f31623cf.jpg");
+  background: #fff3e0; /* 浅橙色背景 */
   // 标题盒子
   .outTitle_view {
     .outTilte {
@@ -263,191 +266,257 @@ onMounted(() => {
 }
 </style>
 <style>
+/* 全局样式 */
+:root {
+  --primary-color: #ff8a3d; /* 活力橙 */
+  --secondary-color: #4cd964; /* 健身绿 */
+  --accent-color: #4da3ff; /* 天空蓝 */
+  --light-gray: #f5f5f5;
+  --medium-gray: #e0e0e0;
+  --dark-gray: #999999;
+  --white: #ffffff;
+  --shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  --border-radius: 12px;
+}
+
+/* 登录页面容器 */
 .login_view {
   min-height: 100vh;
   position: relative;
-  background: url(http://codegen.caihongy.cn/20250110/77e5dc5f8b2a41c3befbae43f31623cf.jpg)
-    no-repeat center center / cover;
+  background: #fff3e0; /* 浅橙色背景 */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  padding: 20px;
+  font-family: "Arial", sans-serif;
+  background-image: none !important; /* 确保背景图片被移除 */
 }
 
-.login_view .login_form {
-  width: 600px;
-  margin: 40px 10% 0 0;
-  box-shadow: rgb(187, 187, 187) 0px 4px 9px;
-  padding: 30px 60px 30px 20px;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  border-radius: 10px;
-  background: #fff;
-  border: 1px solid #ddd;
-}
-
+/* 标题样式 */
 .login_view .outTitle_view {
   display: flex;
   align-items: center;
-  padding: 0px 0px 20px;
-  margin: 0 10% 0px 0;
-}
-.login_view .outTitle_view .outTilte {
-  color: rgb(51, 51, 51);
-  font-size: 30px;
-  font-weight: 600;
-  -webkit-box-reflect: below 2px
-    linear-gradient(transparent, rgba(0, 0, 0, 0.1));
-  background: linear-gradient(
-    90deg,
-    var(--theme) 0%,
-    var(--theme) 50%,
-    var(--theme) 100%
-  );
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  margin-bottom: 30px;
+  text-align: center;
 }
 
+.login_view .outTitle_view .outTilte {
+  color: #4cd964;
+  font-size: 32px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.login_view .outTitle_view .outTilte::before {
+  content: "🏋️‍♀️";
+  font-size: 36px;
+}
+
+/* 登录表单 */
+.login_view .login_form {
+  width: 100%;
+  max-width: 450px;
+  background: var(--white);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  padding: 40px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.login_view .login_form:hover {
+  transform: translateY(-5px);
+}
+
+/* 表单项目 */
 .login_view .login_form .list_item {
   display: flex;
   align-items: center;
   width: 100%;
-  justify-content: center;
-  margin: 0px 10px 20px 0px;
-}
-.login_view .login_form .list_item .list_label {
-  width: 120px;
-  text-align: right;
-  font-size: 16px;
-}
-.login_view .login_form .list_item .list_inp {
-  height: 36px;
-  line-height: 36px;
-  border: none;
-  border-bottom: 1px solid rgb(221, 221, 221);
-  padding: 0px 10px;
-  width: calc(100% - 120px);
-  font-size: 16px;
+  margin-bottom: 20px;
 }
 
+.login_view .login_form .list_item .list_label {
+  width: 100px;
+  text-align: right;
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  margin-right: 15px;
+}
+
+/* 输入框样式 */
+.login_view .login_form .list_item .list_inp {
+  height: 48px;
+  line-height: 48px;
+  border: 1px solid var(--medium-gray);
+  border-radius: 8px;
+  padding: 0 15px;
+  width: calc(100% - 115px);
+  font-size: 16px;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.login_view .login_form .list_item .list_inp:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(255, 138, 61, 0.1);
+}
+
+/* 用户类型选择 */
 .login_view .login_form .list_type {
   display: flex;
   align-items: center;
   width: 100%;
-  justify-content: center;
-  margin: 0px 10px 20px 0px;
-}
-.login_view .login_form .list_type .list_label {
-  width: 120px;
-  text-align: right;
-  font-size: 16px;
-  color: #333;
-}
-.login_view .login_form .list_type .el-select {
-  line-height: 36px;
-  border: none;
-  border-bottom: 1px solid rgb(221, 221, 221);
-  box-sizing: border-box;
-  width: calc(100% - 120px);
-  padding: 0px 10px;
-  border-radius: 0px;
-  font-size: 16px;
-  color: rgb(102, 102, 102);
-}
-.login_view .login_form .list_type .el-select .el-input__inner {
-  font-size: 16px;
+  margin-bottom: 20px;
 }
 
-.login_view .login_form .listCode_view {
+.login_view .login_form .list_type .list_label {
+  width: 100px;
+  text-align: right;
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  margin-right: 15px;
+}
+
+.login_view .login_form .list_type .el-select {
+  width: calc(100% - 115px);
+}
+
+.login_view .login_form .list_type .el-select .el-input__inner {
+  height: 48px;
+  border-radius: 8px;
+  border: 1px solid var(--medium-gray);
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.login_view .login_form .list_type .el-select .el-input__inner:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(255, 138, 61, 0.1);
+}
+
+/* 记住密码 */
+.login_view .login_form .remember_view {
+  padding: 0 0 0 115px;
+  margin: 0 0 20px;
+  width: 100%;
+}
+
+.login_view .login_form .remember_view .el-checkbox {
+  margin: 0;
   display: flex;
   align-items: center;
-  width: 100%;
-  justify-content: center;
-  margin: 0px 10px 10px 0px;
-}
-.login_view .login_form .listCode_view .listCode_label {
-  width: 120px;
-  text-align: right;
-  font-size: 16px;
-}
-.login_view .login_form .listCode_view .listCode_inp {
-  height: 36px;
-  line-height: 36px;
-  border: none;
-  border-bottom: 1px solid rgb(221, 221, 221);
-  padding: 0px 10px;
-  width: calc(100% - 220px);
-  font-size: 16px;
-}
-.login_view .login_form .listCode_view .listCode_btn {
-  width: 100px;
-  border-style: solid;
-  border-color: rgb(221, 221, 221);
-  border-image: initial;
-  height: 36px;
-  line-height: 36px;
-  text-align: center;
-  border-width: 0px 0px 1px 0px;
 }
 
+.login_view .login_form .remember_view .el-checkbox .el-checkbox__label {
+  color: #666;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.login_view .login_form .remember_view .el-checkbox .el-checkbox__inner {
+  border: 1px solid var(--medium-gray);
+  background: var(--white);
+  transition: all 0.3s ease;
+}
+
+.login_view
+  .login_form
+  .remember_view
+  .el-checkbox.is-checked
+  .el-checkbox__inner {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+/* 按钮容器 */
 .login_view .login_form .btn_view {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
-  padding: 0px 0px 0px 120px;
+  justify-content: center;
   width: 100%;
+  padding: 0;
+  margin-top: 20px;
 }
+
+/* 登录按钮 */
 .login_view .login_form .btn_view .login {
   margin: 0px 20px 12px 0px;
-  padding: 0px 10px;
-  width: auto;
-  height: 34px;
-  font-size: 16px;
-  color: rgb(255, 255, 255);
-  border-radius: 0px;
-  border: 0px;
-  background: var(--theme);
+  padding: 0px 30px;
+  height: 48px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--white);
+  border-radius: 24px;
+  border: none;
+  background: #4cd964;
   cursor: pointer;
-  min-width: 80px;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(76, 217, 100, 0.3);
 }
-.login_view .login_form .btn_view .register {
-  margin: 0px 20px 12px 0px;
-  padding: 0px;
-  width: auto;
-  height: 34px;
-  font-size: 16px;
-  color: #333;
-  border-radius: 4px;
-  border: 0px;
-  background: none;
-  cursor: pointer;
+
+.login_view .login_form .btn_view .login:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(76, 217, 100, 0.4);
 }
-.login_view .login_form .btn_view .register:hover {
-  color: var(--theme);
-}
+
+/* 忘记密码 */
 .login_view .login_form .btn_view .forget {
-  margin: 0px 10px 12px 0px;
+  margin: 10px 0 0;
   padding: 0px;
   width: 100%;
-  height: 44px;
-  font-size: 16px;
-  color: rgb(102, 102, 102);
-  border-radius: 4px;
-  border: 0px;
+  text-align: center;
+  font-size: 14px;
+  color: var(--dark-gray);
   background: none;
+  border: none;
   cursor: pointer;
-  text-align: right;
+  transition: all 0.3s ease;
 }
+
 .login_view .login_form .btn_view .forget:hover {
+  color: var(--primary-color);
   text-decoration: underline;
 }
-.login_view .login_form .face {
-  font-size: 16px;
-  color: rgb(102, 102, 102);
-  cursor: pointer;
-  padding: 0px 0px 0px 120px;
-  text-align: left;
-  width: 100%;
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .login_view .login_form {
+    padding: 30px;
+  }
+
+  .login_view .login_form .list_item .list_label {
+    width: 80px;
+  }
+
+  .login_view .login_form .list_item .list_inp {
+    width: calc(100% - 95px);
+  }
+
+  .login_view .login_form .list_type .list_label {
+    width: 80px;
+  }
+
+  .login_view .login_form .list_type .el-select {
+    width: calc(100% - 95px);
+  }
+
+  .login_view .login_form .remember_view {
+    padding: 0 0 0 95px;
+  }
+
+  .login_view .login_form .btn_view {
+    padding: 0 0 0 95px;
+  }
 }
 </style>

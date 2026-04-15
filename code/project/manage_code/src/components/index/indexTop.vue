@@ -27,8 +27,13 @@
       </div>
       <div class="projectTitle">智慧膳食分享系统后台</div>
       <div class="nav-buttons">
-        <el-button class="nav-button" @click="navigateToUsers">用户</el-button>
-        <el-button class="nav-button" @click="navigateToPosts">帖子</el-button>
+        <el-button class="nav-button" @click="navigateToUsers"
+          >用户管理</el-button
+        >
+        <el-button class="nav-button" @click="navigateToPosts"
+          >帖子管理</el-button
+        >
+        <el-button class="nav-button" @click="navigateToStats">统计</el-button>
       </div>
     </div>
 
@@ -111,6 +116,11 @@ const navigateToUsers = () => {
 // 导航到帖子页面
 const navigateToPosts = () => {
   router.push("/forum");
+};
+
+// 导航到统计页面
+const navigateToStats = () => {
+  router.push("/stats");
 };
 
 // 退出登录

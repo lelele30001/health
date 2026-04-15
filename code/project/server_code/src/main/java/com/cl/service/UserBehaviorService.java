@@ -29,6 +29,11 @@ public class UserBehaviorService extends ServiceImpl<UserBehaviorDao, UserBehavi
     // 记录用户行为
     @Transactional
     public boolean recordUserBehavior(UserBehaviorEntity behavior) {
+        // 检查行为类型是否为空或无效
+        if (behavior.getBehaviorType() == null || behavior.getBehaviorType().isEmpty()) {
+            return false;
+        }
+        
         // 检查是否已存在相同行为
         UserBehaviorEntity existingBehavior = userBehaviorDao.getUserBehavior(
                 behavior.getUserId(), behavior.getRecipeId(), behavior.getBehaviorType());
@@ -36,9 +41,6 @@ public class UserBehaviorService extends ServiceImpl<UserBehaviorDao, UserBehavi
         if (existingBehavior != null) {
             // 更新已存在的行为
             existingBehavior.setBehaviorTime(new Date());
-            if ("comment".equals(behavior.getBehaviorType())) {
-                existingBehavior.setCommentContent(behavior.getCommentContent());
-            }
             return this.updateById(existingBehavior);
         } else {
             // 创建新行为

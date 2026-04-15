@@ -691,7 +691,6 @@ CREATE TABLE `yonghu`
     `touxiang`       longtext COLLATE utf8mb4_unicode_ci COMMENT '头像',
     `xingbie`        varchar(200) COLLATE utf8mb4_unicode_ci          DEFAULT NULL COMMENT '性别',
     `shoujihaoma`    varchar(200) COLLATE utf8mb4_unicode_ci          DEFAULT NULL COMMENT '手机号码',
-    `shenfenzheng`   varchar(200) COLLATE utf8mb4_unicode_ci          DEFAULT NULL COMMENT '身份证',
     `youxiang`       varchar(200) COLLATE utf8mb4_unicode_ci          DEFAULT NULL COMMENT '邮箱',
     PRIMARY KEY (`id`),
     UNIQUE KEY `yonghuzhanghao` (`yonghuzhanghao`)

@@ -1,0 +1,51 @@
+[GroupMarkerNotSet(crbug.com/242999)!:A020450034370000]Automatic fallback to software WebGL has been deprecated. Please use the --enable-unsafe-swiftshader (about:flags#enable-unsafe-swiftshader) flag to opt in to lower security guarantees for trusted content.
+restapi.amap.com/v3/log/init?jscode=4d8f1bda690b722d8a547dabb51a9933&eventId=resource.load&s=rsv3&product=JsInit&platform=JS&logversion=2.0&t=1776172663578&csid=6133006A-FABB-4E7B-8D1E-6A6787BDE529&appname=http%25253A%25252F%25252F192.168.7.13%25253A8084%25252F%252523%25252Findex%25252FyonghuCenter&resolution=1536*864&mob=0&vt=1&dpr=0.8333333730697632&sdkversion=2.3.5.6&key=5c1c06db19e483c5b00dc052ca37848b&scale=1&callback=jsonp_620735_1776172663578_:1   Failed to load resource: net::ERR_BLOCKED_BY_CLIENT
+:8084/#/index/yonghuCenter:1  [GroupMarkerNotSet(crbug.com/242999)!:A050450034370000]Automatic fallback to software WebGL has been deprecated. Please use the --enable-unsafe-swiftshader (about:flags#enable-unsafe-swiftshader) flag to opt in to lower security guarantees for trusted content.
+center.vue:791 收藏列表响应: {data: {…}, status: 200, statusText: 'OK', headers: AxiosHeaders, config: {…}, …}
+center.vue:794 收藏项目: (3) [{…}, {…}, {…}]0: {id: 7, addtime: 1776172049000, refid: 17, tablename: 'recipe', name: '健康料理早餐', …}1: {id: 6, addtime: 1776172046000, refid: 37, tablename: 'recipe', name: '营养均衡加餐', …}2: {id: 5, addtime: 1776167391000, refid: 7, tablename: 'recipe', name: '营养均衡午餐', …}length: 3[[Prototype]]: Array(0)
+center.vue:799 收藏的帖子ID: (3) [17, 37, 7]0: 171: 372: 7length: 3[[Prototype]]: Array(0)
+center.vue:801   GET http://192.168.7.13:8084/project/recipe/list?ids=17%7C37%7C7 404 (Not Found)
+dispatchXhrRequest @ axios.cjs:2592
+xhr @ axios.cjs:2412
+dispatchRequest @ axios.cjs:3061
+Promise.then
+_request @ axios.cjs:3339
+request @ axios.cjs:3218
+wrap @ axios.cjs:6
+eval @ center.vue:801
+Promise.then
+getStoreupList @ center.vue:789
+tabClick @ center.vue:1456
+onClick._cache.<computed>._cache.<computed> @ center.vue:67
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+invoker @ runtime-dom.esm-bundler.js:729
+http.js:45  请求错误: AxiosError {message: 'Request failed with status code 404', name: 'AxiosError', code: 'ERR_BAD_REQUEST', config: {…}, request: XMLHttpRequest, …}
+eval @ http.js:45
+Promise.then
+_request @ axios.cjs:3339
+request @ axios.cjs:3218
+wrap @ axios.cjs:6
+eval @ center.vue:801
+Promise.then
+getStoreupList @ center.vue:789
+tabClick @ center.vue:1456
+onClick._cache.<computed>._cache.<computed> @ center.vue:67
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+invoker @ runtime-dom.esm-bundler.js:729
+center.vue:834  获取帖子详情失败: AxiosError {message: 'Request failed with status code 404', name: 'AxiosError', code: 'ERR_BAD_REQUEST', config: {…}, request: XMLHttpRequest, …}
+eval @ center.vue:834
+Promise.catch
+eval @ center.vue:832
+Promise.then
+getStoreupList @ center.vue:789
+tabClick @ center.vue:1456
+onClick._cache.<computed>._cache.<computed> @ center.vue:67
+callWithErrorHandling @ runtime-core.esm-bundler.js:199
+callWithAsyncErrorHandling @ runtime-core.esm-bundler.js:206
+invoker @ runtime-dom.esm-bundler.js:729
+[新] 使用 Edge 中的 Copilot 来解释控制台错误: 单击
+         
+         以说明错误。
+        了解更多信息

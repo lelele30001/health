@@ -7,7 +7,6 @@
         <result column="recipe_id" property="recipeId"/>
         <result column="behavior_type" property="behaviorType"/>
         <result column="behavior_time" property="behaviorTime"/>
-        <result column="comment_content" property="commentContent"/>
     </resultMap>
 
     <select id="getUserBehavior" resultMap="userBehaviorResultMap">

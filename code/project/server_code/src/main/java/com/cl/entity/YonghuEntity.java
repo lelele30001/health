@@ -58,15 +58,46 @@ public class YonghuEntity<T> implements Serializable {
 
     private String shoujihaoma;
     /**
-     * 身份证
-     */
-
-    private String shenfenzheng;
-    /**
      * 邮箱
      */
 
     private String youxiang;
+    
+    /**
+     * 身高
+     */
+    private Double height;
+    
+    /**
+     * 体重
+     */
+    private Double weight;
+    
+    /**
+     * 年龄
+     */
+    private Integer age;
+    
+    /**
+     * 性别（健康档案）
+     */
+    private String gender;
+    
+    /**
+     * 健身目标
+     */
+    private String fitnessGoal;
+    
+    /**
+     * 饮食禁忌
+     */
+    private String dietaryRestrictions;
+    
+    /**
+     * 每日热量需求
+     */
+    private Integer dailyCalories;
+    
     @JsonFormat(locale = "zh", timezone = "GMT+8", pattern = "yyyy-MM-dd HH:mm:ss")
     @DateTimeFormat
     private Date addtime;
@@ -186,20 +217,6 @@ public class YonghuEntity<T> implements Serializable {
     }
 
     /**
-     * 获取：身份证
-     */
-    public String getShenfenzheng() {
-        return shenfenzheng;
-    }
-
-    /**
-     * 设置：身份证
-     */
-    public void setShenfenzheng(String shenfenzheng) {
-        this.shenfenzheng = shenfenzheng;
-    }
-
-    /**
      * 获取：邮箱
      */
     public String getYouxiang() {
@@ -211,6 +228,104 @@ public class YonghuEntity<T> implements Serializable {
      */
     public void setYouxiang(String youxiang) {
         this.youxiang = youxiang;
+    }
+
+    /**
+     * 获取：身高
+     */
+    public Double getHeight() {
+        return height;
+    }
+
+    /**
+     * 设置：身高
+     */
+    public void setHeight(Double height) {
+        this.height = height;
+    }
+
+    /**
+     * 获取：体重
+     */
+    public Double getWeight() {
+        return weight;
+    }
+
+    /**
+     * 设置：体重
+     */
+    public void setWeight(Double weight) {
+        this.weight = weight;
+    }
+
+    /**
+     * 获取：年龄
+     */
+    public Integer getAge() {
+        return age;
+    }
+
+    /**
+     * 设置：年龄
+     */
+    public void setAge(Integer age) {
+        this.age = age;
+    }
+
+    /**
+     * 获取：性别（健康档案）
+     */
+    public String getGender() {
+        return gender;
+    }
+
+    /**
+     * 设置：性别（健康档案）
+     */
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    /**
+     * 获取：健身目标
+     */
+    public String getFitnessGoal() {
+        return fitnessGoal;
+    }
+
+    /**
+     * 设置：健身目标
+     */
+    public void setFitnessGoal(String fitnessGoal) {
+        this.fitnessGoal = fitnessGoal;
+    }
+
+    /**
+     * 获取：饮食禁忌
+     */
+    public String getDietaryRestrictions() {
+        return dietaryRestrictions;
+    }
+
+    /**
+     * 设置：饮食禁忌
+     */
+    public void setDietaryRestrictions(String dietaryRestrictions) {
+        this.dietaryRestrictions = dietaryRestrictions;
+    }
+
+    /**
+     * 获取：每日热量需求
+     */
+    public Integer getDailyCalories() {
+        return dailyCalories;
+    }
+
+    /**
+     * 设置：每日热量需求
+     */
+    public void setDailyCalories(Integer dailyCalories) {
+        this.dailyCalories = dailyCalories;
     }
 
 }

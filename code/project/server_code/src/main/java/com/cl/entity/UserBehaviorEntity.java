@@ -27,8 +27,6 @@ public class UserBehaviorEntity implements Serializable {
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private Date behaviorTime;
 
-    private String commentContent;
-
     // getter and setter methods
     public Long getId() {
         return id;
@@ -68,13 +66,5 @@ public class UserBehaviorEntity implements Serializable {
 
     public void setBehaviorTime(Date behaviorTime) {
         this.behaviorTime = behaviorTime;
-    }
-
-    public String getCommentContent() {
-        return commentContent;
-    }
-
-    public void setCommentContent(String commentContent) {
-        this.commentContent = commentContent;
     }
 }

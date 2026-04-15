@@ -7,7 +7,8 @@ import { ElMessage } from "element-plus";
 const http = axios.create({
   timeout: 1000 * 86400,
   withCredentials: true,
-  baseURL: process.env.VUE_APP_BASE_API,
+  baseURL:
+    process.env.VUE_APP_BASE_API_URL + process.env.VUE_APP_BASE_API_PREFIX,
   headers: {
     "Content-Type": "application/json; charset=utf-8",
   },

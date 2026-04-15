@@ -27,4 +27,10 @@ public interface UserBehaviorDao extends BaseMapper<UserBehaviorEntity> {
     
     // 获取用户行为权重统计
     List<Map<String, Object>> getUserBehaviorWeights(@Param("userId") Long userId);
+    
+    // 获取所有有行为的用户ID列表
+    List<Long> getActiveUserIds();
+    
+    // 获取用户相似的行为（用于协同过滤）
+    List<UserBehaviorEntity> getSimilarUserBehaviors(@Param("userId") Long userId, @Param("behaviorType") String behaviorType);
 }
