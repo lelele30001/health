@@ -8,16 +8,17 @@
         <result property="userId" column="user_id"/>
         <result property="username" column="username"/>
         <result property="content" column="content"/>
+        <result property="status" column="status"/>
         <result property="createTime" column="create_time"/>
     </resultMap>
 
     <sql id="selectCommentVo">
-        select id, recipe_id, user_id, username, content, create_time from comment
+        select id, recipe_id, user_id, username, content, status, create_time from comment
     </sql>
 
     <select id="selectByPostId" parameterType="Long" resultMap="CommentResult">
         <include refid="selectCommentVo"/>
-        where recipe_id = #{postId}
+        where recipe_id = #{postId} and status = 'approved'
         order by create_time desc
     </select>
 

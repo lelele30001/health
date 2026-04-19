@@ -6,7 +6,9 @@
       </div>
       <el-form :model="registerForm" class="register_form">
         <div class="list_item">
-          <div class="list_label">用户账号：</div>
+          <div class="list_label">
+            <span class="required">*</span>用户账号：
+          </div>
           <input
             class="list_inp"
             v-model="registerForm.yonghuzhanghao"
@@ -15,7 +17,9 @@
           />
         </div>
         <div class="list_item">
-          <div class="list_label">用户密码：</div>
+          <div class="list_label">
+            <span class="required">*</span>用户密码：
+          </div>
           <input
             class="list_inp"
             v-model="registerForm.yonghumima"
@@ -24,7 +28,9 @@
           />
         </div>
         <div class="list_item">
-          <div class="list_label">确认用户密码：</div>
+          <div class="list_label">
+            <span class="required">*</span>确认用户密码：
+          </div>
           <input
             class="list_inp"
             v-model="registerForm.yonghumima2"
@@ -33,7 +39,9 @@
           />
         </div>
         <div class="list_item">
-          <div class="list_label">用户姓名：</div>
+          <div class="list_label">
+            <span class="required">*</span>用户姓名：
+          </div>
           <input
             class="list_inp"
             v-model="registerForm.yonghuxingming"
@@ -42,7 +50,7 @@
           />
         </div>
         <div class="list_item">
-          <div class="list_label">性别：</div>
+          <div class="list_label"><span class="required">*</span>性别：</div>
           <el-select
             class="list_sel"
             v-model="registerForm.xingbie"
@@ -56,7 +64,9 @@
           </el-select>
         </div>
         <div class="list_item">
-          <div class="list_label">手机号码：</div>
+          <div class="list_label">
+            <span class="required">*</span>手机号码：
+          </div>
           <input
             class="list_inp"
             v-model="registerForm.shoujihaoma"
@@ -66,13 +76,42 @@
         </div>
 
         <div class="list_item">
-          <div class="list_label">邮箱：</div>
+          <div class="list_label">
+            <span class="required">*</span>身高(cm)：
+          </div>
           <input
             class="list_inp"
-            v-model="registerForm.youxiang"
-            placeholder="请输入邮箱"
-            type="text"
+            v-model="registerForm.height"
+            placeholder="请输入身高"
+            type="number"
           />
+        </div>
+        <div class="list_item">
+          <div class="list_label">
+            <span class="required">*</span>体重(kg)：
+          </div>
+          <input
+            class="list_inp"
+            v-model="registerForm.weight"
+            placeholder="请输入体重"
+            type="number"
+          />
+        </div>
+        <div class="list_item">
+          <div class="list_label">
+            <span class="required">*</span>健身目标：
+          </div>
+          <el-select
+            class="list_sel"
+            v-model="registerForm.fitnessGoal"
+            placeholder="请选择健身目标"
+          >
+            <el-option
+              v-for="item in jianshenmubiaoLists"
+              :label="item"
+              :value="item"
+            ></el-option>
+          </el-select>
         </div>
         <div class="list_btn">
           <el-button class="register" type="success" @click="handleRegister"
@@ -102,8 +141,10 @@ const registerForm = ref({
   xingbie: "",
 });
 const yonghuxingbieLists = ref([]);
+const jianshenmubiaoLists = ref([]);
 const init = () => {
   yonghuxingbieLists.value = "男,女".split(",");
+  jianshenmubiaoLists.value = "增肌,减脂,维持".split(",");
 };
 // 多级联动参数
 //注册按钮
@@ -125,6 +166,10 @@ const handleRegister = () => {
     context?.$toolUtil.message(`用户姓名不能为空`, "error");
     return false;
   }
+  if (!registerForm.value.xingbie) {
+    context?.$toolUtil.message(`性别不能为空`, "error");
+    return false;
+  }
   // 自动生成DiceBear头像URL
   registerForm.value.touxiang = `https://api.dicebear.com/7.x/avataaars/svg?seed=${registerForm.value.yonghuzhanghao}`;
   if (
@@ -135,11 +180,16 @@ const handleRegister = () => {
     return false;
   }
 
-  if (
-    registerForm.value.youxiang &&
-    !context?.$toolUtil.isEmail(registerForm.value.youxiang)
-  ) {
-    context?.$toolUtil.message(`邮箱应输入邮件格式`, "error");
+  if (!registerForm.value.height) {
+    context?.$toolUtil.message(`身高不能为空`, "error");
+    return false;
+  }
+  if (!registerForm.value.weight) {
+    context?.$toolUtil.message(`体重不能为空`, "error");
+    return false;
+  }
+  if (!registerForm.value.fitnessGoal) {
+    context?.$toolUtil.message(`健身目标不能为空`, "error");
     return false;
   }
   context
@@ -235,6 +285,15 @@ onMounted(() => {});
   --white: #ffffff;
   --shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
   --border-radius: 12px;
+  --required-color: #ff4d4f; /* 红色，用于必填项星号 */
+}
+
+/* 必填项星号样式 */
+.required {
+  color: var(--required-color);
+  margin-right: 4px;
+  font-size: 16px;
+  font-weight: bold;
 }
 
 /* 注册页面容器 */

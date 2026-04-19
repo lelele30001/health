@@ -14,6 +14,9 @@ import shicaileixing from "@/views/shicaileixing/list";
 import config from "@/views/config/list";
 import usersCenter from "@/views/users/center";
 import stats from "@/views/stats/list";
+import foods from "@/views/foods/list";
+import recipeAudit from "@/views/audit/recipe/list";
+import commentAudit from "@/views/audit/comment/list";
 
 export const routes = [
   {
@@ -114,6 +117,21 @@ export const routes = [
         path: "/stats",
         name: "统计",
         component: stats,
+      },
+      {
+        path: "/foods",
+        name: "食材管理",
+        component: foods,
+      },
+      {
+        path: "/audit/recipe",
+        name: "食谱审核",
+        component: recipeAudit,
+      },
+      {
+        path: "/audit/comment",
+        name: "评论审核",
+        component: commentAudit,
       },
     ],
   },

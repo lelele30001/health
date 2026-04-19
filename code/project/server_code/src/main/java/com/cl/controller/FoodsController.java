@@ -30,8 +30,13 @@ public class FoodsController {
      */
     @IgnoreAuth
     @RequestMapping("/list")
-    public R list(@RequestParam Map<String, Object> params, FoodsEntity foods, HttpServletRequest request) {
+    public R list(@RequestParam Map<String, Object> params, HttpServletRequest request) {
         EntityWrapper<FoodsEntity> ew = new EntityWrapper<FoodsEntity>();
+        // 处理搜索参数
+        String name = (String) params.get("name");
+        if (name != null && !name.isEmpty()) {
+            ew.like("name", name);
+        }
         PageUtils page = foodsService.queryPage(params, ew);
         return R.ok().put("data", page);
     }

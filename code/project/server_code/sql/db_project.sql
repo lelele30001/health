@@ -608,6 +608,28 @@ UNLOCK
 TABLES;
 
 --
+-- Table structure for table `message`
+--
+
+DROP TABLE IF EXISTS `message`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `message`
+(
+    `id`          bigint(20) NOT NULL AUTO_INCREMENT COMMENT '主键',
+    `user_id`     bigint(20) NOT NULL COMMENT '接收消息的用户',
+    `type`        int(11) DEFAULT '1' COMMENT '消息类型（1=审核，2=互动）',
+    `content`     varchar(500) COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '消息内容',
+    `related_id`  bigint(20) DEFAULT NULL COMMENT '关联对象（食谱ID、评论ID）',
+    `status`      int(11) DEFAULT '0' COMMENT '是否已读（0未读 1已读）',
+    `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    PRIMARY KEY (`id`),
+    KEY `idx_user_id` (`user_id`),
+    KEY `idx_status` (`status`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='消息表';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `token`
 --
 

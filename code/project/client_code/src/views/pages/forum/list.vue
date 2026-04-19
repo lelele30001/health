@@ -119,8 +119,8 @@
     <el-dialog
       v-model="formVisible"
       :title="formTitle"
-      width="80%"
-      custom-class="edit_view"
+      width="70%"
+      custom-class="edit_view modern-dialog"
       destroy-on-close
     >
       <el-form
@@ -280,15 +280,20 @@
                   <template #default="scope">
                     <el-input-number
                       v-model="scope.row.weight"
-                      :min="0.1"
-                      :step="0.1"
+                      :min="1"
+                      :step="1"
+                      size="small"
                       @change="calculateCalories"
                     ></el-input-number>
                   </template>
                 </el-table-column>
                 <el-table-column prop="unit" label="单位" width="100">
                   <template #default="scope">
-                    <el-select v-model="scope.row.unit" placeholder="单位">
+                    <el-select
+                      v-model="scope.row.unit"
+                      placeholder="单位"
+                      @change="checkUnitChange"
+                    >
                       <el-option label="g" value="g"></el-option>
                       <el-option label="kg" value="kg"></el-option>
                       <el-option label="ml" value="ml"></el-option>
@@ -649,6 +654,20 @@ const resetForm = () => {
     ingredients: [],
   };
 };
+//删除食材
+const removeIngredient = (index) => {
+  form.value.ingredients.splice(index, 1);
+  calculateCalories();
+};
+
+// 监听食材单位变化
+const watchIngredients = () => {
+  form.value.ingredients.forEach((ingredient, index) => {
+    // 保存原始单位
+    ingredient._originalUnit = ingredient.unit;
+  });
+};
+
 //添加食材
 const addIngredient = async () => {
   form.value.ingredients.push({
@@ -658,6 +677,7 @@ const addIngredient = async () => {
     unit: "g",
     baseCalories: 0,
     calories: 0,
+    _originalUnit: "g", // 保存原始单位
   });
   // 清空搜索关键词
   foodSearchKeyword.value = "";
@@ -679,10 +699,36 @@ const addIngredient = async () => {
     }
   }, 100);
 };
-//删除食材
-const removeIngredient = (index) => {
-  form.value.ingredients.splice(index, 1);
-  calculateCalories();
+
+// 检查单位变化并换算
+const checkUnitChange = () => {
+  form.value.ingredients.forEach((ingredient, index) => {
+    if (
+      ingredient._originalUnit &&
+      ingredient._originalUnit !== ingredient.unit
+    ) {
+      console.log("单位变化:", ingredient._originalUnit, "->", ingredient.unit);
+      console.log("变化前重量:", ingredient.weight);
+
+      // 单位换算逻辑
+      if (ingredient._originalUnit === "g" && ingredient.unit === "kg") {
+        ingredient.weight = ingredient.weight / 1000;
+      } else if (ingredient._originalUnit === "kg" && ingredient.unit === "g") {
+        ingredient.weight = ingredient.weight * 1000;
+      } else if (ingredient._originalUnit === "ml" && ingredient.unit === "l") {
+        ingredient.weight = ingredient.weight / 1000;
+      } else if (ingredient._originalUnit === "l" && ingredient.unit === "ml") {
+        ingredient.weight = ingredient.weight * 1000;
+      }
+      // 确保重量为整数
+      ingredient.weight = Math.round(ingredient.weight);
+      console.log("变化后重量:", ingredient.weight);
+      // 更新原始单位
+      ingredient._originalUnit = ingredient.unit;
+      // 重新计算热量
+      calculateCalories();
+    }
+  });
 };
 //计算热量
 const calculateCalories = () => {
@@ -862,6 +908,7 @@ const uploadChange = (value) => {
 const addClick = () => {
   resetForm();
   formTitle.value = "发布食谱";
+  initIngredients();
   formVisible.value = true;
 };
 //修改食谱
@@ -939,6 +986,15 @@ const init = async () => {
   if (route.query.publish === "true") {
     addClick();
   }
+};
+
+// 初始化食材的_originalUnit属性
+const initIngredients = () => {
+  form.value.ingredients.forEach((ingredient) => {
+    if (!ingredient._originalUnit) {
+      ingredient._originalUnit = ingredient.unit;
+    }
+  });
 };
 const detailVisible = ref(false);
 const detailForm = ref({});
@@ -1250,7 +1306,7 @@ const save = () => {
           // 检查响应数据结构
           if (res && res.data && res.data.code === 0) {
             context?.$toolUtil.message(
-              `${form.value.id ? "修改" : "发布"}成功`,
+              res.data.message || `${form.value.id ? "修改" : "发布"}成功`,
               "success",
               () => {
                 getList();
@@ -1260,7 +1316,7 @@ const save = () => {
           } else {
             console.error("响应数据结构不符合预期:", res);
             context?.$toolUtil.message(
-              `${form.value.id ? "修改" : "发布"}失败`,
+              res.data.msg || `${form.value.id ? "修改" : "发布"}失败`,
               "error",
             );
           }
@@ -1721,11 +1777,124 @@ init();
   min-width: 0;
 }
 
+/* 现代对话框样式 */
+.modern-dialog {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.modern-dialog .el-dialog__header {
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e9ecef;
+  padding: 16px 24px;
+}
+
+.modern-dialog .el-dialog__title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.modern-dialog .el-dialog__body {
+  padding: 24px;
+  background-color: #fff;
+}
+
+.modern-dialog .el-dialog__footer {
+  padding: 16px 24px;
+  background-color: #f8f9fa;
+  border-top: 1px solid #e9ecef;
+}
+
+/* 表单样式优化 */
+.add_form {
+  max-width: 100%;
+}
+
+.add_form .el-form-item {
+  margin-bottom: 16px;
+}
+
+.add_form .el-form-item__label {
+  font-weight: 500;
+  color: #495057;
+}
+
+.add_form .el-input,
+.add_form .el-select,
+.add_form .el-input-number {
+  border-radius: 4px;
+  border: 1px solid #ced4da;
+  transition: all 0.3s ease;
+}
+
+.add_form .el-input:focus,
+.add_form .el-select:focus,
+.add_form .el-input-number:focus {
+  border-color: #409eff;
+  box-shadow: 0 0 0 2px rgba(64, 158, 255, 0.2);
+}
+
+/* 食材表格样式优化 */
+.add_form .el-table {
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.add_form .el-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #495057;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.add_form .el-table tr:hover {
+  background-color: #f8f9fa;
+}
+
+/* 按钮样式优化 */
+.add_form .el-button {
+  border-radius: 4px;
+  padding: 8px 16px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.add_form .el-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.add_form .el-button--primary {
+  background-color: #409eff;
+  border-color: #409eff;
+}
+
+.add_form .el-button--primary:hover {
+  background-color: #66b1ff;
+  border-color: #66b1ff;
+}
+
+.add_form .el-button--danger {
+  background-color: #f56c6c;
+  border-color: #f56c6c;
+}
+
+.add_form .el-button--danger:hover {
+  background-color: #f78989;
+  border-color: #f78989;
+}
+
 /* 响应式布局 */
 @media screen and (max-width: 1400px) {
   .fixed_ai_chat {
     width: 320px;
     right: 10px;
+  }
+
+  .modern-dialog {
+    width: 80% !important;
   }
 }
 
@@ -1742,6 +1911,46 @@ init();
 
   .ai_chat_wrapper {
     height: 500px;
+  }
+
+  .modern-dialog {
+    width: 90% !important;
+  }
+
+  .add_form .el-form-item__label {
+    width: 100px;
+  }
+
+  .add_form .el-form-item__content {
+    margin-left: 110px !important;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  .modern-dialog {
+    width: 95% !important;
+  }
+
+  .add_form .el-form-item {
+    margin-bottom: 12px;
+  }
+
+  .add_form .el-form-item__label {
+    width: 80px;
+    font-size: 14px;
+  }
+
+  .add_form .el-form-item__content {
+    margin-left: 90px !important;
+  }
+
+  .add_form .el-table {
+    font-size: 14px;
+  }
+
+  .add_form .el-table th,
+  .add_form .el-table td {
+    padding: 8px;
   }
 }
 </style>

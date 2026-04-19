@@ -1,0 +1,12 @@
+/*! *****************************************************************************
+                              这里是与设计对其的标准色盘
+注意：所有的颜色须从色盘中提取，不得擅自添加颜色。若设计师给出的UI稿中带有色盘中不存在的颜色，
+请与王坤联系并确认。
+***************************************************************************** */
+/*! **************************************
+        Naming Rule:
+          modules(BEM) + rule name
+
+        Example:
+          @main-container-bg
+*****************************************/.innerdocbody.adit-container ul.r-list-done li{color:var(--text-caption)}.suite-body{background-color:var(--bg-body);height:100%;max-height:100%;position:relative}.opendoc .suite-body,.opendoc .suite-body .etherpad-container-wrapper{background:var(--opendoc-background,var(--bg-body))}.suite-body .suite-error__title{color:var(--text-title);font-size:18px;font-weight:500}.suite-body .suite-error__body{font-size:14px;font-weight:400;margin-top:17px;transition:box-shadow .25s ease-in-out}.suite-body.opendoc-border-radius .suite-body{background-color:var(--opendoc-border-radius-color,var(--bg-body))}.suite-body.opendoc-border-radius .bear-web-x-container{background-color:var(--bg-body);border-radius:8px}.suite-body.need-overflow-hidden-suite-body{overflow:hidden}.opendoc-hide-scrollbar .bear-web-x-container::-webkit-scrollbar,.opendoc-hide-scrollbar .etherpad-container-wrapper::-webkit-scrollbar{width:0}

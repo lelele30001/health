@@ -30,6 +30,14 @@ public class CommentController {
     public R list(@PathVariable Long postId) {
         return R.ok().put("data", commentService.getCommentsByPostId(postId));
     }
+    
+    /**
+     * 获取所有评论（管理员审核用）
+     */
+    @RequestMapping("/all")
+    public R listAll() {
+        return R.ok().put("data", commentService.getAllComments());
+    }
 
     /**
      * 发表评论
@@ -38,7 +46,7 @@ public class CommentController {
     public R add(@RequestBody CommentEntity comment) {
         boolean result = commentService.addComment(comment);
         if (result) {
-            return R.ok().put("comment", comment);
+            return R.ok().put("comment", comment).put("message", "评论已提交，等待审核");
         } else {
             return R.error("评论失败");
         }
@@ -54,6 +62,19 @@ public class CommentController {
             return R.ok("删除成功");
         } else {
             return R.error("删除失败");
+        }
+    }
+    
+    /**
+     * 更新评论状态
+     */
+    @RequestMapping("/updateStatus")
+    public R updateStatus(@RequestBody CommentEntity comment) {
+        boolean result = commentService.updateById(comment);
+        if (result) {
+            return R.ok("状态更新成功");
+        } else {
+            return R.error("状态更新失败");
         }
     }
 

@@ -77,4 +77,18 @@ public class CommentEntity implements Serializable {
     @TableField("create_time")
     private Date createTime;
 
+    /**
+     * 审核状态（pending:待审核, approved:已通过, locked:已锁定）
+     */
+    @TableField("status")
+    private String status;
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
 }

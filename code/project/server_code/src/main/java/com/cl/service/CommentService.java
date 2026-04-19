@@ -40,6 +40,8 @@ public class CommentService extends ServiceImpl<CommentDao, CommentEntity> {
      * @return 操作结果
      */
     public boolean addComment(CommentEntity comment) {
+        // 设置状态为待审核
+        comment.setStatus("pending");
         return this.insert(comment);
     }
     
@@ -63,6 +65,14 @@ public class CommentService extends ServiceImpl<CommentDao, CommentEntity> {
     public boolean deleteCommentsByPostId(Long postId, Long userId) {
         int result = baseMapper.deleteByPostIdAndUserId(postId, userId);
         return result > 0;
+    }
+    
+    /**
+     * 获取所有评论
+     * @return 所有评论列表
+     */
+    public List<CommentEntity> getAllComments() {
+        return this.selectList(null);
     }
 
 }

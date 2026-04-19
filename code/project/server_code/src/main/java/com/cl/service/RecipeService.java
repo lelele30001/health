@@ -84,4 +84,8 @@ public class RecipeService extends ServiceImpl<RecipeDao, RecipeEntity> {
         // 批量删除食谱本身
         return this.deleteBatchIds(ids);
     }
+    
+    public List<RecipeEntity> getAllRecipes() {
+        return this.selectList(null);
+    }
 }

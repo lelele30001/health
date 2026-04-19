@@ -64,6 +64,7 @@ public class YonghuController {
         }
         Long uId = new Date().getTime();
         yonghu.setId(uId);
+        yonghu.setAddtime(new Date());
         yonghuService.insert(yonghu);
         return R.ok();
     }

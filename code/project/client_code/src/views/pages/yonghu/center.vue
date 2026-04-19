@@ -341,25 +341,8 @@
 
       <!-- 健康管理 -->
       <div class="content-section" v-if="tabIndex == 'health'">
-        <div class="health-tabs">
-          <div
-            class="health-tab-item"
-            :class="healthTabIndex == 'overview' ? 'health-tab-active' : ''"
-            @click="healthTabIndex = 'overview'"
-          >
-            健康概览
-          </div>
-          <div
-            class="health-tab-item"
-            :class="healthTabIndex == 'record' ? 'health-tab-active' : ''"
-            @click="healthTabIndex = 'record'"
-          >
-            健康记录
-          </div>
-        </div>
-
         <!-- 健康概览 -->
-        <div v-if="healthTabIndex == 'overview'" class="health-content">
+        <div class="health-content">
           <div class="grid-container">
             <!-- 左侧：健康档案概览 + 目标设置 + 每日记录 -->
             <div class="grid-item left-card">
@@ -525,14 +508,6 @@
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-
-        <!-- 健康记录 -->
-        <div v-if="healthTabIndex == 'record'" class="health-content">
-          <div class="card">
-            <h3 class="card-title">健康记录管理</h3>
-            <!-- 这里可以添加更多健康记录相关的功能 -->
           </div>
         </div>
       </div>
@@ -1642,7 +1617,6 @@ const saveProfile = () => {
 };
 //菜单跳转
 const tabIndex = ref("center");
-const healthTabIndex = ref("overview");
 const tabClick = (item) => {
   if (item.tableName == "center") {
     tabIndex.value = "center";
@@ -1663,7 +1637,6 @@ const tabClick = (item) => {
   }
   if (item.tableName == "health") {
     tabIndex.value = "health";
-    healthTabIndex.value = "overview";
     initHealthData();
     return;
   }

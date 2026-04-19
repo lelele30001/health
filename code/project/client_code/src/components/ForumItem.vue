@@ -1,5 +1,9 @@
 <template>
-  <div class="forum_item" @click.stop="$emit('click', item.refid || item.id)">
+  <div
+    class="forum_item"
+    :class="[getStatusClass(item.status)]"
+    @click.stop="$emit('click', item.refid || item.id)"
+  >
     <div class="forum_item_content">
       <div class="forum_item_left">
         <span class="forum_item_title">{{ item.title }}</span>
@@ -11,6 +15,12 @@
           (营养标签：{{ item.nutritionTag }})
         </span>
         <div class="forum_time">{{ formatDate(item.addtime) }}</div>
+        <div
+          class="forum_status"
+          v-if="item.status && item.status !== 'approved'"
+        >
+          {{ getStatusText(item.status) }}
+        </div>
       </div>
       <div class="forum_item_right">
         <img
@@ -94,6 +104,22 @@ export default {
       const seconds = String(date.getSeconds()).padStart(2, "0");
       return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
     },
+    getStatusClass(status) {
+      if (status === "pending") {
+        return "forum_item_pending";
+      } else if (status === "locked") {
+        return "forum_item_locked";
+      }
+      return "";
+    },
+    getStatusText(status) {
+      if (status === "pending") {
+        return "待审核";
+      } else if (status === "locked") {
+        return "已锁定";
+      }
+      return "";
+    },
   },
 };
 </script>
@@ -107,6 +133,38 @@ export default {
   cursor: pointer;
   transition: all 0.2s ease;
   height: 100%; /* 让卡片高度自适应 */
+  border: 2px solid transparent;
+}
+
+/* 待审核状态 */
+.forum_item_pending {
+  border-color: #999;
+  background-color: rgba(153, 153, 153, 0.05);
+}
+
+/* 锁定状态 */
+.forum_item_locked {
+  border-color: #ff4d4f;
+  background-color: rgba(255, 77, 79, 0.05);
+}
+
+/* 状态标签 */
+.forum_status {
+  margin-top: 10px;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.forum_item_pending .forum_status {
+  background-color: #999;
+  color: #fff;
+}
+
+.forum_item_locked .forum_status {
+  background-color: #ff4d4f;
+  color: #fff;
 }
 
 .forum_item:hover {

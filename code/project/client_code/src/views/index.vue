@@ -40,6 +40,28 @@
         </div>
       </div>
       <div class="index_top_right">
+        <div v-if="Token" class="notification-container">
+          <el-dropdown trigger="click" @command="handleNotificationCommand">
+            <div class="notification-button">
+              <el-icon class="bell-icon">
+                <Bell />
+              </el-icon>
+              <span v-if="unreadCount > 0" class="notification-badge">{{
+                unreadCount
+              }}</span>
+            </div>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item v-if="unreadCount > 0" @click="markAllAsRead">
+                  全部标为已读
+                </el-dropdown-item>
+                <el-dropdown-item @click="navigateToNotifications">
+                  查看所有消息
+                </el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </div>
         <el-button
           v-if="!Token"
           class="login"
@@ -61,6 +83,9 @@
             </div>
             <template #dropdown>
               <el-dropdown-menu class="user-dropDown" slot="dropdown">
+                <el-dropdown-item @click="navigateToNotifications">
+                  <span>消息中心</span>
+                </el-dropdown-item>
                 <el-dropdown-item @click="loginOut" class="loginOut">
                   <span>退出登录</span>
                 </el-dropdown-item>
@@ -119,6 +144,7 @@ import {
 } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useStore } from "vuex";
+import { Bell, ArrowDown } from "@element-plus/icons-vue";
 import "@/styles/global.css";
 const store = useStore();
 const router = useRouter();
@@ -129,6 +155,7 @@ const date = ref("");
 const timer = ref("");
 const interval = ref(null);
 const postRecipeDialogVisible = ref(false);
+const unreadCount = ref(0);
 if (localStorage.getItem("frontToken") && !store.getters["user/session"].id) {
   store.dispatch("user/getSession");
 }
@@ -171,6 +198,7 @@ const init = () => {
   }, 1000);
   if (Token.value) {
     getSession();
+    getUnreadCount();
   }
 };
 // 切换菜单保存index
@@ -221,6 +249,56 @@ const showPostRecipeDialog = () => {
   }
   // 跳转到膳食分享页面并带上publish参数，自动打开发布食谱弹窗
   router.push("/index/forumList?publish=true");
+};
+
+// 处理通知下拉菜单命令
+const handleNotificationCommand = (command) => {
+  if (command === "markAllRead") {
+    markAllAsRead();
+  } else if (command === "viewAll") {
+    navigateToNotifications();
+  }
+};
+
+// 导航到消息中心
+const navigateToNotifications = () => {
+  if (!Token.value) {
+    context?.$toolUtil.message("请先登录", "warning");
+    router.push("/login");
+    return;
+  }
+  router.push("/index/notifications");
+};
+
+// 标记所有消息为已读
+const markAllAsRead = () => {
+  // 模拟标记所有消息为已读
+  console.log("标记所有消息为已读");
+  unreadCount.value = 0;
+  context?.$toolUtil.message("所有消息已标为已读", "success");
+};
+
+// 获取未读消息数量
+const getUnreadCount = () => {
+  if (!Token.value) return;
+
+  // 从API获取未读消息数量
+  context
+    ?.$http({
+      url: `/message/unread/count`,
+      method: "get",
+      params: {
+        userId: context?.$toolUtil.storageGet("userid"),
+      },
+    })
+    .then((res) => {
+      if (res.data.code === 0) {
+        unreadCount.value = res.data.count || 0;
+      }
+    })
+    .catch((error) => {
+      console.error("获取未读消息数量失败:", error);
+    });
 };
 //菜单跳转
 const menuHandler = (name) => {
@@ -501,6 +579,49 @@ init();
   align-items: center;
   gap: var(--spacing-md);
   color: inherit;
+}
+
+.index_top .notification-container {
+  position: relative;
+}
+
+.index_top .notification-button {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+}
+
+.index_top .bell-icon {
+  font-size: 20px;
+  color: #fff;
+}
+
+.index_top .notification-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 6px;
+  border-radius: 9px;
+  background-color: #f5222d;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .index_top .notice-btn {

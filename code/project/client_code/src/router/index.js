@@ -25,6 +25,7 @@ import shicaixinxiAdd from "@/views/pages/shicaixinxi/formAdd";
 import shipuanpaiList from "@/views/pages/shipuanpai/list";
 import shipuanpaiDetail from "@/views/pages/shipuanpai/formModel";
 import shipuanpaiAdd from "@/views/pages/shipuanpai/formAdd";
+import notificationsList from "@/views/pages/notifications/list";
 
 const routes = [
   {
@@ -126,6 +127,10 @@ const routes = [
       {
         path: "shipuanpaiAdd",
         component: shipuanpaiAdd,
+      },
+      {
+        path: "notifications",
+        component: notificationsList,
       },
     ],
   },

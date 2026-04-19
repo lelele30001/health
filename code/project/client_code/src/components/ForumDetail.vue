@@ -422,9 +422,8 @@ export default {
       })
         .then((res) => {
           if (res.data.code === 0) {
-            this.$message.success("评论成功");
+            this.$message.success(res.data.message || "评论已提交，等待审核");
             this.commentContent = "";
-            this.getComments();
           } else {
             this.$message.error(res.data.msg || "评论失败");
           }

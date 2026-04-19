@@ -23,10 +23,12 @@ public class RecipeController {
         Long userId = (Long) request.getSession().getAttribute("userId");
         recipe.setUsername(username);
         recipe.setUserId(userId);
+        // 设置状态为待审核
+        recipe.setStatus("pending");
         
         boolean saved = recipeService.saveRecipeWithIngredients(recipe);
         if (saved) {
-            return R.ok().put("recipe", recipe);
+            return R.ok().put("recipe", recipe).put("message", "食谱已提交，等待审核");
         } else {
             return R.error("发布失败");
         }
@@ -41,6 +43,12 @@ public class RecipeController {
     @GetMapping("/public")
     public R getAllPublicRecipes() {
         List<RecipeEntity> recipes = recipeService.getAllPublicRecipes();
+        return R.ok().put("recipes", recipes);
+    }
+    
+    @GetMapping("/all")
+    public R getAllRecipes() {
+        List<RecipeEntity> recipes = recipeService.getAllRecipes();
         return R.ok().put("recipes", recipes);
     }
 
@@ -133,6 +141,17 @@ public class RecipeController {
             return R.ok("删除成功");
         } else {
             return R.error("删除失败");
+        }
+    }
+    
+    @PostMapping("/updateStatus")
+    public R updateRecipeStatus(@RequestBody RecipeEntity recipe) {
+        // 更新食谱状态
+        boolean updated = recipeService.updateById(recipe);
+        if (updated) {
+            return R.ok("状态更新成功");
+        } else {
+            return R.error("状态更新失败");
         }
     }
 }

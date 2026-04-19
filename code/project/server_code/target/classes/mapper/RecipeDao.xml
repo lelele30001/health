@@ -35,7 +35,7 @@
     </select>
 
     <select id="getAllPublicRecipes" resultMap="recipeResultMap">
-        SELECT * FROM recipe WHERE status = '已发布' ORDER BY addtime DESC
+        SELECT * FROM recipe WHERE status = 'approved' ORDER BY addtime DESC
     </select>
 
     <select id="getRecipeWithIngredients" resultMap="recipeWithIngredientsResultMap">
@@ -56,7 +56,7 @@
     
     <select id="getRecommendedRecipes" resultMap="recipeResultMap">
         SELECT * FROM recipe 
-        WHERE status = '已发布' 
+        WHERE status = 'approved' 
         AND user_id != #{userId}
         <if test="dietaryRestrictions != null and dietaryRestrictions != ''">
             AND dietary_restrictions NOT LIKE CONCAT('%', #{dietaryRestrictions}, '%')

@@ -1,10 +1,14 @@
 package com.cl.service;
 
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
+import com.baomidou.mybatisplus.mapper.Wrapper;
+import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.cl.dao.RecipeDao;
+import com.cl.dao.StoreupDao;
 import com.cl.dao.UserBehaviorDao;
 
 import com.cl.entity.RecipeEntity;
+import com.cl.entity.StoreupEntity;
 import com.cl.entity.UserBehaviorEntity;
 import com.cl.entity.YonghuEntity;
 import com.cl.service.YonghuService;
@@ -25,12 +29,25 @@ class RecommendationScoreDetail {
     private double fitnessGoalScore; // 健身目标匹配分数
     private double nutritionTagScore; // 营养标签匹配分数
     private double totalScore; // 总分
+    private double popularityScore; // 热度分数
+    private Long addtime; // 发布时间
 
     public RecommendationScoreDetail(double collaborativeScore, double fitnessGoalScore, double nutritionTagScore, double totalScore) {
         this.collaborativeScore = collaborativeScore;
         this.fitnessGoalScore = fitnessGoalScore;
         this.nutritionTagScore = nutritionTagScore;
         this.totalScore = totalScore;
+        this.popularityScore = 0.0;
+        this.addtime = 0L;
+    }
+
+    public RecommendationScoreDetail(double collaborativeScore, double fitnessGoalScore, double nutritionTagScore, double totalScore, double popularityScore, Long addtime) {
+        this.collaborativeScore = collaborativeScore;
+        this.fitnessGoalScore = fitnessGoalScore;
+        this.nutritionTagScore = nutritionTagScore;
+        this.totalScore = totalScore;
+        this.popularityScore = popularityScore;
+        this.addtime = addtime;
     }
 
     public double getCollaborativeScore() {
@@ -48,6 +65,22 @@ class RecommendationScoreDetail {
     public double getTotalScore() {
         return totalScore;
     }
+
+    public double getPopularityScore() {
+        return popularityScore;
+    }
+
+    public void setPopularityScore(double popularityScore) {
+        this.popularityScore = popularityScore;
+    }
+
+    public Long getAddtime() {
+        return addtime;
+    }
+
+    public void setAddtime(Long addtime) {
+        this.addtime = addtime;
+    }
 }
 
 /**
@@ -59,6 +92,9 @@ public class PostRecommendationService {
 
     @Autowired
     private UserBehaviorDao userBehaviorDao;
+
+    @Autowired
+    private StoreupDao storeupDao;
 
     @Autowired
     private RecipeDao recipeDao;
@@ -84,7 +120,9 @@ public class PostRecommendationService {
      */
     private void checkAndCreateTables() {
         try {
-            // 检查 recipe_recommendation 表是否存在
+            // 先删除旧表（如果存在），避免外键约束错误
+            jdbcTemplate.execute("DROP TABLE IF EXISTS recipe_recommendation");
+            // 创建新表，确保外键约束指向正确的表
             jdbcTemplate.execute("CREATE TABLE IF NOT EXISTS recipe_recommendation (`id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID', `user_id` bigint NOT NULL COMMENT '用户ID', `recipe_id` bigint NOT NULL COMMENT '帖子ID', `score` double NOT NULL COMMENT '推荐分数', `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间', PRIMARY KEY (`id`), UNIQUE KEY `uk_user_recipe` (`user_id`,`recipe_id`), KEY `idx_user_id` (`user_id`), KEY `idx_score` (`score`), CONSTRAINT `recipe_recommendation_ibfk_1` FOREIGN KEY (`recipe_id`) REFERENCES `recipe` (`id`) ON DELETE CASCADE, CONSTRAINT `recipe_recommendation_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `yonghu` (`id`) ON DELETE CASCADE) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='食谱推荐表'");
         } catch (Exception e) {
             e.printStackTrace();
@@ -139,8 +177,18 @@ public class PostRecommendationService {
             System.out.println("已添加" + userBehaviors.size() + "条默认行为数据");
         }
         
-        // 3. 获取所有帖子并过滤饮食禁忌
-        List<RecipeEntity> allPosts = recipeDao.selectList(null);
+        // 3. 获取所有已审核通过的帖子并过滤饮食禁忌
+        List<RecipeEntity> allPosts = recipeDao.selectList(
+            new EntityWrapper<RecipeEntity>()
+                .eq("status", "approved")
+        );
+        System.out.println("=== 帖子数据 ===");
+        System.out.println("从数据库获取的帖子数量: " + (allPosts != null ? allPosts.size() : 0));
+        if (allPosts != null) {
+            for (RecipeEntity post : allPosts) {
+                System.out.println("帖子ID: " + post.getId() + "，标题: " + post.getTitle() + "，用户ID: " + post.getUserId());
+            }
+        }
         
         // 过滤用户自己发布的帖子
         List<RecipeEntity> filteredPostsByUser = new ArrayList<>();
@@ -152,7 +200,11 @@ public class PostRecommendationService {
             }
         }
         
+        System.out.println("过滤用户后帖子数量: " + filteredPostsByUser.size());
+        
         List<RecipeEntity> filteredPosts = filterPostsByDietaryRestrictions(filteredPostsByUser, userProfile.getDietaryRestrictions());
+        System.out.println("过滤饮食禁忌后帖子数量: " + filteredPosts.size());
+        System.out.println("用户饮食禁忌: " + (userProfile.getDietaryRestrictions() != null ? userProfile.getDietaryRestrictions() : "无"));
         
         // 4. 计算推荐分数
         Map<Long, RecommendationScoreDetail> recommendationScores = new HashMap<>();
@@ -170,28 +222,121 @@ public class PostRecommendationService {
     }
 
     /**
+     * 计算帖子的热度分数（点赞+收藏+浏览的加权总和）
+     * 热度权重：收藏:10分, 点赞:5分, 浏览:1分
+     */
+    private Map<Long, Double> calculatePostPopularity(List<RecipeEntity> posts) {
+        Map<Long, Double> popularityScores = new HashMap<>();
+
+        // 初始化所有帖子的热度为0
+        for (RecipeEntity post : posts) {
+            popularityScores.put(post.getId(), 0.0);
+        }
+
+        try {
+            // 从 storeup 表获取收藏和点赞数据 (type: 1=收藏, 21=赞, 22=踩)
+            List<StoreupEntity> storeups = storeupDao.selectList(null);
+            for (StoreupEntity storeup : storeups) {
+                Long postId = storeup.getRefid();
+                if (postId == null) continue;
+
+                String type = storeup.getType();
+                double weight = 0.0;
+                if ("1".equals(type)) {
+                    weight = 10.0; // 收藏
+                } else if ("21".equals(type)) {
+                    weight = 5.0; // 赞
+                } else if ("22".equals(type)) {
+                    weight = -2.0; // 踩（负面权重但不会让热度变负）
+                }
+
+                double currentScore = popularityScores.getOrDefault(postId, 0.0);
+                popularityScores.put(postId, currentScore + weight);
+            }
+
+            // 从 user_post_behavior 表获取行为数据 (like, collect, view)
+            List<UserBehaviorEntity> behaviors = userBehaviorDao.selectList(null);
+            for (UserBehaviorEntity behavior : behaviors) {
+                Long postId = behavior.getRecipeId();
+                if (postId == null) continue;
+
+                String behaviorType = behavior.getBehaviorType();
+                double weight = 0.0;
+                if ("like".equals(behaviorType)) {
+                    weight = 5.0;
+                } else if ("collect".equals(behaviorType)) {
+                    weight = 10.0;
+                } else if ("view".equals(behaviorType)) {
+                    weight = 1.0;
+                }
+
+                double currentScore = popularityScores.getOrDefault(postId, 0.0);
+                popularityScores.put(postId, currentScore + weight);
+            }
+
+            // 确保热度分数不为负数
+            for (Long postId : popularityScores.keySet()) {
+                if (popularityScores.get(postId) < 0) {
+                    popularityScores.put(postId, 0.0);
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return popularityScores;
+    }
+
+    /**
      * 根据饮食禁忌过滤帖子
      */
     private List<RecipeEntity> filterPostsByDietaryRestrictions(List<RecipeEntity> posts, String forbiddenFoods) {
-        if (forbiddenFoods == null || forbiddenFoods.isEmpty()) {
+        System.out.println("=== 饮食禁忌过滤 ===");
+        System.out.println("输入帖子数量: " + (posts != null ? posts.size() : 0));
+        System.out.println("用户饮食禁忌: " + (forbiddenFoods != null ? forbiddenFoods : "null"));
+        
+        // 如果用户没有饮食禁忌，直接返回所有帖子
+        if (forbiddenFoods == null || forbiddenFoods.trim().isEmpty() || "无".equals(forbiddenFoods.trim())) {
+            System.out.println("无饮食禁忌，直接返回所有帖子");
             return posts;
         }
         
+        // 有饮食禁忌，进行过滤
         String[] restrictions = forbiddenFoods.split(",");
-        return posts.stream()
-                .filter(post -> {
-                    String tabooTags = post.getDietaryRestrictions();
-                    if (tabooTags == null || tabooTags.isEmpty()) {
-                        return true;
-                    }
-                    for (String restriction : restrictions) {
-                        if (tabooTags.contains(restriction.trim())) {
-                            return false;
-                        }
-                    }
-                    return true;
-                })
-                .collect(Collectors.toList());
+        System.out.println("饮食禁忌列表: " + Arrays.toString(restrictions));
+        
+        List<RecipeEntity> filteredPosts = new ArrayList<>();
+        for (RecipeEntity post : posts) {
+            String tabooTags = post.getDietaryRestrictions();
+            System.out.println("  帖子ID: " + post.getId() + "，标题: " + post.getTitle() + "，禁忌标签: " + (tabooTags != null ? tabooTags : "null"));
+            
+            // 如果帖子没有禁忌标签，通过
+            if (tabooTags == null || tabooTags.trim().isEmpty()) {
+                System.out.println("    帖子无禁忌标签，通过");
+                filteredPosts.add(post);
+                continue;
+            }
+            
+            // 检查帖子是否包含用户的禁忌食物
+            boolean hasRestriction = false;
+            for (String restriction : restrictions) {
+                String trimmedRestriction = restriction.trim();
+                if (!trimmedRestriction.isEmpty() && tabooTags.contains(trimmedRestriction)) {
+                    System.out.println("    帖子包含禁忌: " + trimmedRestriction + "，过滤掉");
+                    hasRestriction = true;
+                    break;
+                }
+            }
+            
+            if (!hasRestriction) {
+                System.out.println("    帖子不包含禁忌，通过");
+                filteredPosts.add(post);
+            }
+        }
+        
+        System.out.println("过滤后帖子数量: " + filteredPosts.size());
+        return filteredPosts;
     }
 
     /**
@@ -225,60 +370,88 @@ public class PostRecommendationService {
      */
     private Map<Long, RecommendationScoreDetail> calculateRecommendationScores(Long userId, YonghuEntity userProfile, List<RecipeEntity> posts, Map<Long, Double> userPreferences) {
         Map<Long, RecommendationScoreDetail> scores = new HashMap<>();
-        
+
+        // 打印帖子数量
+        System.out.println("=== 帖子数量 ===");
+        System.out.println("总帖子数量: " + (posts != null ? posts.size() : 0));
+
         // 计算协同相似度
         Map<Long, Double> collaborativeScores = calculateCollaborativeScores(userId, posts, userPreferences);
-        
+
         // 归一化协同相似度分数
         Map<Long, Double> normalizedCollaborativeScores = normalizeScores(collaborativeScores);
-        
+
+        // 计算帖子热度分数
+        Map<Long, Double> popularityScores = calculatePostPopularity(posts);
+
         // 遍历所有帖子
         for (RecipeEntity post : posts) {
             Long postId = post.getId();
-            
+
             // 跳过用户已经有行为的帖子
             if (userPreferences.containsKey(postId)) {
+                System.out.println("跳过用户有行为的帖子: " + postId + " (" + post.getTitle() + ")");
                 continue;
             }
-            
+
             // 跳过用户自己发布的帖子
             if (post.getUserId() != null && post.getUserId().equals(userId)) {
+                System.out.println("跳过用户自己发布的帖子: " + postId + " (" + post.getTitle() + ")");
                 continue;
             }
-            
+
             // 计算健身目标匹配分数
             double fitnessGoalScore = calculateFitnessGoalScore(userProfile.getFitnessGoal(), post.getFitnessGoal());
-            
+
             // 计算营养标签匹配分数
             double nutritionTagScore = calculateNutritionTagScore(userProfile.getFitnessGoal(), post.getNutritionTag());
-            
+
             // 加权计算总分
             double collaborativeScore = normalizedCollaborativeScores.getOrDefault(postId, 0.0);
-            double totalScore = collaborativeScore * 0.4 + fitnessGoalScore * 0.3 + nutritionTagScore * 0.2;
-            
+            double totalScore = collaborativeScore * 0.5 + fitnessGoalScore * 0.3 + nutritionTagScore * 0.2;
+
+            // 获取热度分数
+            double popularityScore = popularityScores.getOrDefault(postId, 0.0);
+
+            // 获取发布时间
+            Long addtime = post.getAddtime() != null ? post.getAddtime().getTime() : 0L;
+
             // 保存详细的得分数据
-            scores.put(postId, new RecommendationScoreDetail(collaborativeScore, fitnessGoalScore, nutritionTagScore, totalScore));
+            scores.put(postId, new RecommendationScoreDetail(collaborativeScore, fitnessGoalScore, nutritionTagScore, totalScore, popularityScore, addtime));
+            System.out.println("添加推荐帖子: " + postId + " (" + post.getTitle() + ")，总得分: " + totalScore);
         }
-        
-        // 按分数排序
+
+        // 打印过滤后的帖子数量
+        System.out.println("=== 过滤后结果 ===");
+        System.out.println("推荐分数数量: " + scores.size());
+
+        // 按分数排序（总分 > 热度 > 发布时间）
         Map<Long, RecommendationScoreDetail> sortedScores = new LinkedHashMap<>();
         scores.entrySet().stream()
-                .sorted((e1, e2) -> Double.compare(e2.getValue().getTotalScore(), e1.getValue().getTotalScore()))
+                .sorted((e1, e2) -> {
+                    double scoreDiff = Double.compare(e2.getValue().getTotalScore(), e1.getValue().getTotalScore());
+                    if (scoreDiff != 0) return (int) scoreDiff;
+                    double popularityDiff = Double.compare(e2.getValue().getPopularityScore(), e1.getValue().getPopularityScore());
+                    if (popularityDiff != 0) return (int) popularityDiff;
+                    return Long.compare(e2.getValue().getAddtime(), e1.getValue().getAddtime());
+                })
                 .forEach(entry -> sortedScores.put(entry.getKey(), entry.getValue()));
-        
+
         // 打印排序后的推荐顺序和得分
         System.out.println("=== 推荐排序结果 ===");
         int rank = 1;
         for (Map.Entry<Long, RecommendationScoreDetail> entry : sortedScores.entrySet()) {
             Long postId = entry.getKey();
             RecommendationScoreDetail scoreDetail = entry.getValue();
-            System.out.println("排名 " + rank + ": 帖子ID " + postId + "，总得分: " + scoreDetail.getTotalScore() + 
-                    " (协同相似度: " + scoreDetail.getCollaborativeScore() + 
-                    ", 健身目标匹配: " + scoreDetail.getFitnessGoalScore() + 
-                    ", 营养标签匹配: " + scoreDetail.getNutritionTagScore() + ")");
+            System.out.println("排名 " + rank + ": 帖子ID " + postId + "，总得分: " + scoreDetail.getTotalScore() +
+                    " (协同相似度: " + scoreDetail.getCollaborativeScore() +
+                    ", 健身目标匹配: " + scoreDetail.getFitnessGoalScore() +
+                    ", 营养标签匹配: " + scoreDetail.getNutritionTagScore() +
+                    ", 热度: " + scoreDetail.getPopularityScore() +
+                    ", 发布时间: " + scoreDetail.getAddtime() + ")");
             rank++;
         }
-        
+
         return sortedScores;
     }
 
@@ -287,46 +460,63 @@ public class PostRecommendationService {
      */
     private Map<Long, RecommendationScoreDetail> calculateColdStartScores(YonghuEntity userProfile, List<RecipeEntity> posts) {
         Map<Long, RecommendationScoreDetail> scores = new HashMap<>();
-        
+
+        // 计算帖子热度分数
+        Map<Long, Double> popularityScores = calculatePostPopularity(posts);
+
         // 遍历所有帖子
         for (RecipeEntity post : posts) {
             // 跳过用户自己发布的帖子
             if (post.getUserId() != null && post.getUserId().equals(userProfile.getId())) {
                 continue;
             }
-            
+
             // 计算健身目标匹配分数
             double fitnessGoalScore = calculateFitnessGoalScore(userProfile.getFitnessGoal(), post.getFitnessGoal());
-            
+
             // 计算营养标签匹配分数
             double nutritionTagScore = calculateNutritionTagScore(userProfile.getFitnessGoal(), post.getNutritionTag());
-            
-            // 加权计算总分
-            double totalScore = fitnessGoalScore * 0.6 + nutritionTagScore * 0.4;
-            
+
+            // 加权计算总分（冷启动用户权重调整为50%:50%）
+            double totalScore = fitnessGoalScore * 0.5 + nutritionTagScore * 0.5;
+
+            // 获取热度分数
+            double popularityScore = popularityScores.getOrDefault(post.getId(), 0.0);
+
+            // 获取发布时间
+            Long addtime = post.getAddtime() != null ? post.getAddtime().getTime() : 0L;
+
             // 保存详细的得分数据（冷启动没有协同相似度分数，设为0）
-            scores.put(post.getId(), new RecommendationScoreDetail(0.0, fitnessGoalScore, nutritionTagScore, totalScore));
+            scores.put(post.getId(), new RecommendationScoreDetail(0.0, fitnessGoalScore, nutritionTagScore, totalScore, popularityScore, addtime));
         }
-        
-        // 按分数排序
+
+        // 按分数排序（总分 > 热度 > 发布时间）
         Map<Long, RecommendationScoreDetail> sortedScores = new LinkedHashMap<>();
         scores.entrySet().stream()
-                .sorted((e1, e2) -> Double.compare(e2.getValue().getTotalScore(), e1.getValue().getTotalScore()))
+                .sorted((e1, e2) -> {
+                    double scoreDiff = Double.compare(e2.getValue().getTotalScore(), e1.getValue().getTotalScore());
+                    if (scoreDiff != 0) return (int) scoreDiff;
+                    double popularityDiff = Double.compare(e2.getValue().getPopularityScore(), e1.getValue().getPopularityScore());
+                    if (popularityDiff != 0) return (int) popularityDiff;
+                    return Long.compare(e2.getValue().getAddtime(), e1.getValue().getAddtime());
+                })
                 .forEach(entry -> sortedScores.put(entry.getKey(), entry.getValue()));
-        
+
         // 打印排序后的推荐顺序和得分
         System.out.println("=== 推荐排序结果 ===");
         int rank = 1;
         for (Map.Entry<Long, RecommendationScoreDetail> entry : sortedScores.entrySet()) {
             Long postId = entry.getKey();
             RecommendationScoreDetail scoreDetail = entry.getValue();
-            System.out.println("排名 " + rank + ": 帖子ID " + postId + "，总得分: " + scoreDetail.getTotalScore() + 
-                    " (协同相似度: " + scoreDetail.getCollaborativeScore() + 
-                    ", 健身目标匹配: " + scoreDetail.getFitnessGoalScore() + 
-                    ", 营养标签匹配: " + scoreDetail.getNutritionTagScore() + ")");
+            System.out.println("排名 " + rank + ": 帖子ID " + postId + "，总得分: " + scoreDetail.getTotalScore() +
+                    " (协同相似度: " + scoreDetail.getCollaborativeScore() +
+                    ", 健身目标匹配: " + scoreDetail.getFitnessGoalScore() +
+                    ", 营养标签匹配: " + scoreDetail.getNutritionTagScore() +
+                    ", 热度: " + scoreDetail.getPopularityScore() +
+                    ", 发布时间: " + scoreDetail.getAddtime() + ")");
             rank++;
         }
-        
+
         return sortedScores;
     }
 
@@ -842,7 +1032,7 @@ public class PostRecommendationService {
         try {
             // 查询总帖子数
             total = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM recipe WHERE status = '已发布'",
+                "SELECT COUNT(*) FROM recipe WHERE status = 'approved'",
                 Integer.class
             );
         } catch (Exception e) {
@@ -853,7 +1043,7 @@ public class PostRecommendationService {
         try {
             // 查询帖子列表，按发布时间倒序
             List<Long> postIds = jdbcTemplate.queryForList(
-                "SELECT id FROM recipe WHERE status = '已发布' ORDER BY addtime DESC LIMIT ? OFFSET ?",
+                "SELECT id FROM recipe WHERE status = 'approved' ORDER BY addtime DESC LIMIT ? OFFSET ?",
                 Long.class, limit, offset
             );
             
@@ -904,7 +1094,7 @@ public class PostRecommendationService {
         try {
             // 查询总帖子数
             total = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM recipe WHERE status = '已发布' AND (title LIKE CONCAT('%', ?, '%') OR description LIKE CONCAT('%', ?, '%'))",
+                "SELECT COUNT(*) FROM recipe WHERE status = 'approved' AND (title LIKE CONCAT('%', ?, '%') OR description LIKE CONCAT('%', ?, '%'))",
                 Integer.class, keyword, keyword
             );
         } catch (Exception e) {
@@ -915,7 +1105,7 @@ public class PostRecommendationService {
         try {
             // 查询帖子列表，按发布时间倒序
             List<Long> postIds = jdbcTemplate.queryForList(
-                "SELECT id FROM recipe WHERE status = '已发布' AND (title LIKE CONCAT('%', ?, '%') OR description LIKE CONCAT('%', ?, '%')) ORDER BY addtime DESC LIMIT ? OFFSET ?",
+                "SELECT id FROM recipe WHERE status = 'approved' AND (title LIKE CONCAT('%', ?, '%') OR description LIKE CONCAT('%', ?, '%')) ORDER BY addtime DESC LIMIT ? OFFSET ?",
                 Long.class, keyword, keyword, limit, offset
             );
             

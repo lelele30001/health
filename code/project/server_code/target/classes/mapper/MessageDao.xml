@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cl.dao.MessageDao">
+
+    <select id="getUnreadCount" resultType="java.lang.Integer">
+        SELECT COUNT(*) FROM message WHERE user_id = #{userId} AND status = 0
+    </select>
+
+    <select id="getMessageList" resultType="com.cl.entity.MessageEntity">
+        SELECT * FROM message WHERE user_id = #{userId} ORDER BY create_time DESC LIMIT #{offset}, #{limit}
+    </select>
+
+    <update id="markAsRead">
+        UPDATE message SET status = 1 WHERE id = #{messageId}
+    </update>
+
+    <update id="markAllAsRead">
+        UPDATE message SET status = 1 WHERE user_id = #{userId}
+    </update>
+
+</mapper>

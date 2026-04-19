@@ -150,7 +150,9 @@ const fileUrlsChange = (list) => {
     var file = {
       name: name,
       // 对DiceBear的URL不添加token参数
-      url: fileUrl.includes("api.dicebear.com") ? fileUrl : fileUrl + (fileUrl.includes("?") ? "&" : "?") + "token=" + token,
+      url: fileUrl.includes("api.dicebear.com")
+        ? fileUrl
+        : fileUrl + (fileUrl.includes("?") ? "&" : "?") + "token=" + token,
       uid: index + 1,
     };
     list1.push(file);

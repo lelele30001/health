@@ -33,6 +33,26 @@
         <el-button class="nav-button" @click="navigateToPosts"
           >帖子管理</el-button
         >
+        <el-dropdown
+          class="nav-button dropdown-button"
+          @command="handleAuditCommand"
+        >
+          <span class="el-dropdown-link">
+            审核
+            <el-icon class="el-icon-arrow-down">
+              <arrow-down />
+            </el-icon>
+          </span>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item command="recipe">食谱审核</el-dropdown-item>
+              <el-dropdown-item command="comment">评论审核</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+        <el-button class="nav-button" @click="navigateToFoods"
+          >食材管理</el-button
+        >
         <el-button class="nav-button" @click="navigateToStats">统计</el-button>
       </div>
     </div>
@@ -121,6 +141,20 @@ const navigateToPosts = () => {
 // 导航到统计页面
 const navigateToStats = () => {
   router.push("/stats");
+};
+
+// 导航到食材管理页面
+const navigateToFoods = () => {
+  router.push("/foods");
+};
+
+// 处理审核下拉菜单
+const handleAuditCommand = (command) => {
+  if (command === "recipe") {
+    router.push("/audit/recipe");
+  } else if (command === "comment") {
+    router.push("/audit/comment");
+  }
 };
 
 // 退出登录
@@ -262,6 +296,37 @@ const updatepasswordClick = () => {
 
   &:hover::after {
     transform: scaleX(1);
+  }
+}
+
+.top_view .nav-buttons .dropdown-button {
+  padding: 0 var(--spacing-lg);
+  height: 60px;
+  line-height: 60px;
+
+  .el-dropdown-link {
+    color: #fff;
+    font-size: 16px;
+    cursor: pointer;
+
+    &:hover {
+      color: var(--primary-color);
+    }
+  }
+
+  .el-icon-arrow-down {
+    color: #fff;
+    margin-left: 4px;
+  }
+
+  &:hover {
+    .el-dropdown-link {
+      color: var(--primary-color);
+    }
+
+    .el-icon-arrow-down {
+      color: var(--primary-color);
+    }
   }
 }
 
