@@ -3,6 +3,7 @@ package com.cl.controller;
 import com.cl.annotation.IgnoreAuth;
 import com.cl.entity.dto.ChatRequestDTO;
 import com.cl.service.AIChatService;
+import com.cl.service.PostRecommendationService;
 import com.cl.utils.R;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +26,9 @@ public class AIChatController {
 
     @Autowired
     private AIChatService aiChatService;
+    
+    @Autowired
+    private PostRecommendationService postRecommendationService;
 
     /**
      * AI聊天接口
@@ -171,6 +175,32 @@ public class AIChatController {
         } catch (Exception e) {
             e.printStackTrace();
             return R.error("AI服务调用失败：" + e.getMessage());
+        }
+    }
+
+    /**
+     * 保存AI问题到数据库
+     * @param params 包含用户ID和问题内容
+     * @return 保存结果
+     */
+    @IgnoreAuth
+    @PostMapping(value = "/save-question", produces = "application/json;charset=UTF-8")
+    public R saveQuestion(@RequestBody Map<String, Object> params) {
+        try {
+            Long userId = ((Number) params.get("userId")).longValue();
+            String question = (String) params.get("question");
+            
+            if (userId == null || question == null || question.trim().isEmpty()) {
+                return R.error("参数不能为空");
+            }
+            
+            // 保存问题到数据库
+            postRecommendationService.saveUserQuestion(userId, question);
+            
+            return R.ok().put("message", "问题保存成功");
+        } catch (Exception e) {
+            e.printStackTrace();
+            return R.error("保存失败：" + e.getMessage());
         }
     }
 }

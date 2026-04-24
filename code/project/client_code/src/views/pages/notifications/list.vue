@@ -23,30 +23,32 @@
           <el-skeleton-item variant="p"></el-skeleton-item>
         </template>
       </el-skeleton>
-      <div
-        v-for="(notification, index) in filteredNotifications"
-        :key="notification.id"
-        class="notification-item"
-        :class="{ unread: !notification.read }"
-        @click="markAsRead(notification.id)"
-      >
-        <div class="notification-content">
-          <div class="notification-header">
-            <h3 class="notification-title">{{ notification.title }}</h3>
-            <span class="notification-time">{{
-              formatTime(notification.createTime)
-            }}</span>
+      <div v-else>
+        <div
+          v-for="(notification, index) in filteredNotifications"
+          :key="notification.id"
+          class="notification-item"
+          :class="{ unread: !notification.read }"
+          @click="markAsRead(notification.id)"
+        >
+          <div class="notification-content">
+            <div class="notification-header">
+              <h3 class="notification-title">{{ notification.title }}</h3>
+              <span class="notification-time">{{
+                formatTime(notification.createTime)
+              }}</span>
+            </div>
+            <p class="notification-body">{{ notification.content }}</p>
           </div>
-          <p class="notification-body">{{ notification.content }}</p>
+          <div class="notification-actions">
+            <el-button size="small" @click.stop="navigateToRelated(notification)">
+              查看详情
+            </el-button>
+          </div>
         </div>
-        <div class="notification-actions">
-          <el-button size="small" @click.stop="navigateToRelated(notification)">
-            查看详情
-          </el-button>
+        <div v-if="filteredNotifications.length === 0" class="empty-state">
+          <el-empty description="暂无消息"></el-empty>
         </div>
-      </div>
-      <div v-else-if="filteredNotifications.length === 0" class="empty-state">
-        <el-empty description="暂无消息"></el-empty>
       </div>
     </div>
   </div>

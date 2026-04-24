@@ -168,10 +168,110 @@ const sendMessage = async () => {
   loading.value = true;
   scrollToBottom();
 
-  // 构建历史记录，只包含真实的用户和AI对话，不包含系统欢迎消息
+  // 保存AI问题到数据库
+  try {
+    // 检查用户ID是否存在
+    let userId = null;
+    console.log("=== 获取用户ID ===");
+
+    // 检查store状态
+    console.log("检查store状态:", context.$store);
+    if (context.$store && context.$store.state) {
+      console.log("store.state:", context.$store.state);
+      if (context.$store.state.user) {
+        console.log("store.state.user:", context.$store.state.user);
+        // 检查session中的用户ID
+        if (
+          context.$store.state.user.session &&
+          context.$store.state.user.session.id
+        ) {
+          userId = context.$store.state.user.session.id;
+          console.log("从store.session获取的userId:", userId);
+        } else if (context.$store.state.user.id) {
+          userId = context.$store.state.user.id;
+          console.log("从store.user获取的userId:", userId);
+        }
+      }
+    }
+
+    // 如果还是获取不到，尝试从localStorage获取
+    if (!userId) {
+      console.log("从localStorage获取用户信息");
+      const userInfo = localStorage.getItem("userInfo");
+      console.log("localStorage中的userInfo:", userInfo);
+      if (userInfo) {
+        try {
+          const parsedUserInfo = JSON.parse(userInfo);
+          console.log("解析后的userInfo:", parsedUserInfo);
+          userId = parsedUserInfo.id;
+          console.log("从localStorage获取的userId:", userId);
+        } catch (e) {
+          console.error("解析用户信息失败:", e);
+        }
+      }
+    }
+
+    // 检查sessionStorage
+    if (!userId) {
+      console.log("从sessionStorage获取用户信息");
+      const userInfo = sessionStorage.getItem("userInfo");
+      console.log("sessionStorage中的userInfo:", userInfo);
+      if (userInfo) {
+        try {
+          const parsedUserInfo = JSON.parse(userInfo);
+          console.log("解析后的userInfo:", parsedUserInfo);
+          userId = parsedUserInfo.id;
+          console.log("从sessionStorage获取的userId:", userId);
+        } catch (e) {
+          console.error("解析用户信息失败:", e);
+        }
+      }
+    }
+
+    // 检查userProfile prop
+    if (!userId && props.userProfile) {
+      console.log("从userProfile获取用户信息");
+      console.log("props.userProfile:", props.userProfile);
+      userId = props.userProfile.id;
+      console.log("从userProfile获取的userId:", userId);
+    }
+
+    // 最后使用默认值
+    userId = userId || 1;
+    console.log("最终使用的userId:", userId);
+
+    const saveQuestionData = {
+      userId: userId,
+      question: message,
+    };
+    console.log("发送的saveQuestionData:", saveQuestionData);
+
+    const saveRes = await axios.post(
+      "/project/ai/save-question",
+      saveQuestionData,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      },
+    );
+    console.log("Save question response:", saveRes);
+  } catch (error) {
+    console.error("保存AI问题失败:", error);
+    // 保存失败不影响聊天功能
+  }
+
+  // 构建历史记录，只包含真实的用户和AI对话，不包含系统欢迎消息和错误信息
   const history = messages.value
     .slice(0, -1) // 排除最后一条（刚添加的用户消息）
-    .filter((msg) => !msg.isSystem) // 过滤掉系统欢迎消息
+    .filter(
+      (msg) =>
+        !msg.isSystem &&
+        !msg.content.includes("AI服务调用失败") &&
+        !msg.content.includes("网络连接失败") &&
+        !msg.content.includes("AI 服务") &&
+        !msg.content.includes("HTTP错误"),
+    ) // 过滤掉系统欢迎消息和错误信息
     .map((msg) => ({
       role: msg.role === "user" ? "user" : "assistant",
       content: msg.content,
